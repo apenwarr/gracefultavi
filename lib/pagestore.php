@@ -460,18 +460,18 @@ return array();
     // Find one page in the database.
     function findOne($page)
     {
-        global $PgTbl;
+        global $LeTbl;
 
         // case sensitive search
-        $qid = $this->dbh->query("SELECT distinct title FROM $PgTbl " .
-                                 "WHERE title='$page'");
+        $qid = $this->dbh->query("SELECT distinct page FROM $LeTbl " .
+                                 "WHERE page='$page'");
         if (mysql_num_rows($qid) == 1)
             return $page;
 
         // case insensitive search
         $pageLower = strtolower($page);
-        $qid = $this->dbh->query("SELECT distinct title FROM $PgTbl " .
-                                 "WHERE lower(title)='$pageLower'");
+        $qid = $this->dbh->query("SELECT distinct page FROM $LeTbl " .
+                                 "WHERE lower(page)='$pageLower'");
         if (mysql_num_rows($qid) == 1)
         {
             $result = $this->dbh->result($qid);
@@ -479,9 +479,9 @@ return array();
         }
 
         // beginning with search
-        $qid = $this->dbh->query("SELECT distinct title FROM $PgTbl " .
-                                 "WHERE lower(title) like '$pageLower%' " .
-                                 "ORDER BY lower(title)");
+        $qid = $this->dbh->query("SELECT distinct page FROM $LeTbl " .
+                                 "WHERE lower(page) like '$pageLower%' " .
+                                 "ORDER BY lower(page)");
         if (mysql_num_rows($qid) > 0)
         {
             $result = $this->dbh->result($qid);
