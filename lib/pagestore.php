@@ -761,7 +761,11 @@ class PageStore
     {
         global $CoTbl, $PgTbl, $DayLimit, $MinEntries;
 
-        $from_time = date('YmdHis', time() - ($DayLimit * 24 * 60 * 60));
+        if ($DayLimit) {
+            $from_time = date('YmdHis', time() - ($DayLimit * 24 * 60 * 60));
+        } else {
+            $from_time = 0;
+        }
 
         $base_qry = "SELECT p.title, c.version, c.author, " .
                     "c.time, c.username, p.bodylength, " .
