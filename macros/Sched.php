@@ -1005,6 +1005,45 @@ function sch_has_inc_bug($milestone)
 }
 
 
+// Given a list of bugs, go through it and output the HTML for them.  msname
+// is the name of the current milestone, and extra_due is an array of extra
+// due dates that should be listed as they occur while the bugs are output.
+// extra_due will have any output extra due dates removed from it.
+function sch_output_buglist($buglist, $msname, $extra_due, $done)
+{
+    global $sch_did_all_done, $sch_need_extraline;
+    global $sch_curday;
+
+    if (is_array($buglist))
+    {
+        $next_fixfor = array_shift($extra_due);
+        $fixfor_day = sch_parse_day($next_fixfor);
+        foreach($buglist as $bug)
+        {
+            $bug_line = sch_bug($bug[0], $bug[1], $bug[2], $bug[3], $bug[4], $done);
+            while ($sch_curday > $fixfor_day && !is_null($next_fixfor))
+            {
+                $ret .= sch_milestone("ZeroBugBounce", $msname, $next_fixfor);
+                $next_fixfor = array_shift($extra_due);
+                if (!is_null($next_fixfor))
+                    $fixfor_day = sch_parse_day($next_fixfor);
+            }
+            if ($sch_need_extraline)
+            {
+                $ret .= sch_fullline('&nbsp;');
+                $sch_need_extraline = 0;
+            }
+            $ret .= $bug_line;
+        }
+
+        if (!is_null($next_fixfor))
+            array_unshift($extra_due, $next_fixfor);
+    }
+
+    return $ret;
+}
+
+
 // Output the HTML for all the bugs in the given milestone.  $buglists is an
 // array containing two subarrays, $buglists["incomplete"] and
 // $buglists["complete"]
@@ -1016,75 +1055,34 @@ function sch_output_milestone($user, $milestone, $msname, $msdue)
 
     $buglists = $sch_bug_lists[$milestone];
 
-    $num_incomplete = count($buglists["incomplete"]);
+    //$num_incomplete = count($buglists["incomplete"]);
     // $ret .= sch_fullline("Processing $num_incomplete incomplete bugs for milestone $milestone");
     
     $extra_due = bug_get_milestones($msname);
-    $num_extra = count($extra_due);
-    $next_fixfor = 0;
 
+    $has_incomplete = sch_has_inc_bug($milestone);
     // If we have an incomplete bug, make sure to list all completed bugs
-    if (!$sch_did_all_done && sch_has_inc_bug($milestone))
+    if (!$sch_did_all_done && $has_incomplete)
     {
 	// $ret .= sch_fullline("Found incomplete bug, adding all completed ".
 	//                     "bugs first");
         $ret .= sch_all_done($user);
     }
 
-    // FIXME: This loop has become big, and identical to the one below.
-    // $ret .= sch_fullline("List of ".count($buglists["complete"])." completed bugs for $milestone<br>\n");
     if (!$sch_did_all_done && is_array($buglists["complete"]))
-    {
-        $fixfor_day = sch_parse_day($extra_due[$next_fixfor]);
-        foreach($buglists["complete"] as $bug)
-        {
-            $bug_line = sch_bug($bug[0], $bug[1], $bug[2], $bug[3], $bug[4], 0);
-            while ($sch_curday > $fixfor_day && $next_fixfor < $num_extra)
-            {
-                $ret .= sch_milestone("ZeroBugBounce", $msname, $extra_due[$next_fixfor]);
-                $next_fixfor++;
-                if ($next_fixfor < $num_extra)
-                    $fixfor_day = sch_parse_day($extra_due[$next_fixfor]);
-            }
-            if ($sch_need_extraline)
-            {
-                $ret .= sch_fullline('&nbsp;');
-                $sch_need_extraline = 0;
-            }
-            $ret .= $bug_line;
-        }
-    }
+        $ret .= sch_output_buglist($buglists["complete"], $msname, $extra_due, 0);
 
-    // $ret .= sch_fullline("List of $num_incomplete incomplete bugs for $milestone<br>\n");
-    if (is_array($buglists["incomplete"]))
-    {
-        $fixfor_day = sch_parse_day($extra_due[$next_fixfor]);
-        foreach($buglists["incomplete"] as $bug)
-        {
-            $bug_line = sch_bug($bug[0], $bug[1], $bug[2], $bug[3], $bug[4], -1);
-            while ($sch_curday > $fixfor_day && $next_fixfor < $num_extra)
-            {
-                $ret .= sch_milestone("ZeroBugBounce", $msname, $extra_due[$next_fixfor]);
-                $next_fixfor++;
-                $fixfor_day = sch_parse_day($extra_due[$next_fixfor]);
-            }
-            if ($sch_need_extraline)
-            {
-                $ret .= sch_fullline('&nbsp;');
-                $sch_need_extraline = 0;
-            }
-            $ret .= $bug_line;
-        }
-    }
+    if ($has_incomplete && is_array($buglists["incomplete"]))
+        $ret .= sch_output_buglist($buglists["incomplete"], $msname, $extra_due, -1);
 
     // Clear out bugs we've already listed, so we can find all unlisted
     // bugs later.
     $sch_bug_lists[$milestone]["complete"] = array();
     $sch_bug_lists[$milestone]["incomplete"] = array();
 
-    while ($next_fixfor < $num_extra)
+    foreach ($extra_due as $next_fixfor)
     {
-        $ret .= sch_milestone("ZeroBugBounce", $msname, $extra_due[$next_fixfor]);
+        $ret .= sch_milestone("ZeroBugBounce", $msname, $next_fixfor);
         $next_fixfor++;
     }
 
