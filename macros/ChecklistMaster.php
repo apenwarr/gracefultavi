@@ -602,8 +602,8 @@ TOOLTIP_JAVASCRIPT;
                 var today = new Date();
                 var year = today.getYear();
                 if (year < 1900) { year += 1900; }
-                var month = d.getMonth() + 1;
-                var day = d.getDate();
+                var month = today.getMonth() + 1;
+                var day = today.getDate();
 
                 target.value = year + '-' +
                     ((month<10)?'0':'') + month + '-' +
