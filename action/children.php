@@ -13,8 +13,6 @@ function action_children()
     $pg->read();
     gen_headers($pg->time);
 
-    $children = $pagestore->getChildren($page);
-
     template_children(array('page'     => $page,
                             'children' => $pagestore->getChildren($page)));
 }

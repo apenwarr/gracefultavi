@@ -27,7 +27,11 @@ function template_backlinks($args) {
 
 <h2>Backlinks and Nesting Information</h2>
 
-<p>See <a href="<?=childrenURL($page)?>">children</a> of <?=$page?>.
+<?php if ($args['haschildren']) : ?>
+    <p>See <a href="<?=childrenURL($page)?>">children</a> of <?=$page?>.
+<?php else : ?>
+    <p>No children exist for <?=$page?>.
+<?php endif; ?>
 
 <form name="reparentForm" action="<?php print reparentURL($page); ?>" method="POST">
 

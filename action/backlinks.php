@@ -16,6 +16,7 @@ function action_backlinks()
 
     template_backlinks(array('page'      => $page,
                              'backlinks' => $pagestore->getBacklinks($page),
+                             'haschildren' => $pagestore->getChildren($page) ? 1 : 0,
                              'parents'   => $pagestore->getParents($page) ));
 }
 ?>
