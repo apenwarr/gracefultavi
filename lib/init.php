@@ -97,7 +97,7 @@ if($Charset != '')
 $ViewMacroEngine=array();
 //$SaveMacroEngine=array();
 
-if($dir=opendir("macros"))
+if($dir=opendir("$WorkingDirectory/macros"))
 {
     while($file=readdir($dir))
     {
