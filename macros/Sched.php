@@ -1248,9 +1248,9 @@ function sch_summary($fixfor)
     }
     
     $query = "select dtDue, sPerson, sTask, sSubTask, " .
-             "    fDone, fResolved, ixPriority " . 
+             "    fResolved, ixPriority " . 
              "  from schedulator.Task " .
-             "  where fValid=1 and sFixFor='$fixfor' and fDone = 0 " .
+             "  where fValid=1 and sFixFor='$fixfor' and fDone=0 " .
              "  order by dtDue, ixPriority, sTask, sSubTask ";
     $result = mysql_query($query, $bug_h);
 
@@ -1263,9 +1263,8 @@ function sch_summary($fixfor)
 	$person = $row[1];
 	$task = $row[2];
         $subtask = $row[3];
-	$done = $row[4];
-	$resolved = $row[5];
-	$priority = $row[6];
+	$resolved = $row[4];
+	$priority = $row[5];
 	
 	# $nicedue = ereg_replace("-", " ", $due);
 	$nicedue = ereg_replace("(....)-(..)-(..)", "\\3", $due);
@@ -1275,7 +1274,6 @@ function sch_summary($fixfor)
 	$bugs[$person][$due][] = array
 	  ("task" => $task, 
 	   "subtask" => $subtask,
-	   "done" => $done,
 	   "resolved" => $resolved,
 	   "priority" => $priority);
 	unset($allpeople[$person]);
@@ -1322,20 +1320,27 @@ function sch_summary($fixfor)
 	background: #f0f0c0
     }
     
-    /* bug text styles */
+    /* normal vs. late vs. super-late bugs */
+    table.schedsum a {
+	text-decoration: none;
+    }
     table.schedsum a.superlate:link,a.superlate:visited {
 	color: yellow; background: #aa0000
     }
     table.schedsum a.late:link,a.late:visited {
 	color: red; background: yellow
     }
+    
+    /* resolved vs. unresolved bugs */
     table.schedsum a.resolved:link,a.resolved:visited {
 	font-style: italic;
     }
     table.schedsum a.unresolved:link,a.unresolved:visited {
 	border-style: solid; border-width: 1px;
     }
-    table.schedsum a:hover {
+    
+    /* mouseovers on bugs */
+    table.schedsum a:hover:link,a:hover:visited {
 	color: white; background: green;
     }
 </style>
