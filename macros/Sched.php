@@ -62,25 +62,14 @@ function bug_duedate($fixfor)
 }
 
 
-// return a list of all bugs for the given user, due on or before the given
-// fixfor, finished after the given startdate or still unfinished, and only
-// if the fixfor date is before the given enddate.
-//
-// All parameters are optional.  If not given, they don't restrict the
-// result set.
-//
-// Use bug_unfinished_list() or bug_finished_list() instead, since they
-// figure out $userquery for you.
-//
-// Returns a mysql result set: (bugid,title,OrigEst,CurrEst,Elapsed,FixForDate)
-function _bug_list($userquery, $fixfor, $startdate, $enddate)
+// figure out what we need to append to the "where" clause of an sql query
+// in order to find all bugs due on or before the given fixfor and/or end
+// date.
+function bug_fixfor_query($fixfor, $enddate)
 {
-    global $bug_h;
-    bug_init();
-
-    $ffquery = '';
-    $endquery = '';
-
+    $ffquery = "";
+    $endquery = "";
+    
     if ($fixfor and $enddate)
         $ffquery = "  and (f.sFixFor = '$fixfor' or " .
                    "(f.dt is not null and f.dt <= '$enddate')) ";
@@ -94,15 +83,43 @@ function _bug_list($userquery, $fixfor, $startdate, $enddate)
     if ($enddate)
         $endquery = "  and b.dtOpened < '$enddate' ";
 
-    $query = "select distinct " .
-             "b.ixBug,sTitle,hrsOrigEst,hrsCurrEst,hrsElapsed, " .
+    return $ffquery . $endquery;
+}
+
+
+// return a list of all bugs for the given user, due on or before the given
+// fixfor, finished after the given startdate or still unfinished, and only
+// if the fixfor date is before the given enddate.
+//
+// All parameters are optional.  If not given, they don't restrict the
+// result set.
+//
+// Use bug_unfinished_list() or bug_finished_list() instead, since they
+// figure out $userquery for you.
+//
+// Returns a mysql result set: (bugid,title,OrigEst,CurrEst,Elapsed,FixForDate)
+function _bug_list($userquery, $fixfor, $startdate, $enddate)
+{
+}
+
+
+// return a list of all ACTIVE bugs due by the given fixfor/enddate.
+//
+// Returns a mysql result set:
+//       (bugid,title,OrigEst,CurrEst,Elapsed,FixForDate)
+function bug_unfinished_list($user, $fixfor, $enddate)
+{
+    global $bug_h;
+    bug_init();
+
+    $personid = bug_person($user);
+    $ffquery = bug_fixfor_query($fixfor, $enddate);
+    
+    $query = "select b.ixBug,sTitle,hrsOrigEst,hrsCurrEst,hrsElapsed, " .
              "  ifnull(f.dt, '2099/9/9') as sortdate " .
-             "from Bug as b, BugEvent as e, FixFor as f, Status as s " .
-             "where e.ixBug=b.ixBug " .
-             "  and f.ixFixFor=b.ixFixFor " .
-             "  and s.ixStatus=b.ixStatus " .
-             $endquery .
-             $userquery .
+             "from Bug as b, FixFor as f " .
+             "where b.ixFixFor=f.ixFixFor " .
+             "  and b.ixPersonAssignedTo=$personid and b.ixStatus=1 " .
              $ffquery .
              "  order by sortdate, sFixFor, ixPriority, ixBug ";
     //print "(($query))<p>";
@@ -110,59 +127,70 @@ function _bug_list($userquery, $fixfor, $startdate, $enddate)
     if (!$result)
         print mysql_error($bug_h);
 
-    return $result;
-}
-
-
-function bug_unfinished_list($user, $fixfor, $startdate, $enddate)
-{
-    $userquery = '';
-
-    // We want to get only ACTIVE bugs currently assigned to the user.
-    if ($user)
-    {
-        $personid = bug_person($user);
-        $userquery = "  and (" .
-                     " b.ixPersonAssignedTo=$personid and sStatus='ACTIVE' " .
-                     ") ";
-    }
-
-    $result = _bug_list($userquery, $fixfor, $startdate, $enddate);
-
     $a = array();
     while ($row = mysql_fetch_row($result))
     {
         $bug = array_shift($row);
         $a[$bug] = $row;
     }
-
+    
     return $a;
 }
 
 
 function bug_finished_list($user, $fixfor, $startdate, $enddate)
 {
-    $userquery = '';
+    global $bug_h;
+    bug_init();
 
     // We want to get all bugs *resolved by* the user after the given start
     // date.  The bugs are probably no longer assigned to that user.
-    if ($user)
-    {
-        $personid = bug_person($user);
-        $userquery = "  and (" .
-                     " sStatus<>'ACTIVE' and e.ixPerson=$personid " .
-                     "        and e.sVerb like 'RESOLVED%' " .
-                     "     and e.dt >= '$startdate'" .
-                     ") ";
-    }
+    $personid = bug_person($user);
 
-    $result = _bug_list($userquery, $fixfor, $startdate, $enddate);
+    $ffquery = bug_fixfor_query($fixfor, $enddate);
 
+    $query = "select distinct " .
+             "b.ixBug,sTitle,hrsOrigEst,hrsCurrEst,hrsElapsed, " .
+             "  e.ixPerson, e.ixBugEvent, " .
+             "  ifnull(f.dt, '2099/9/9') as sortdate " .
+             "from Bug as b, BugEvent as e, FixFor as f " .
+             "where e.ixBug=b.ixBug " .
+             "  and f.ixFixFor=b.ixFixFor " .
+             "  and e.dt >= '$startdate' " .
+             $ffquery .
+             "  and b.ixStatus > 1 " .
+             "  and e.sVerb like 'RESOLVED%' " .
+             "  and e.sVerb != 'Resolved (Again)' " .
+             "  order by sortdate, sFixFor, ixPriority, ixBug, ixBugEvent desc";
+    //print "(($query))<p>";
+    $result = mysql_query($query, $bug_h);
+    if (!$result)
+        print mysql_error($bug_h);
+
+    $done = array();
     $a = array();
     while ($row = mysql_fetch_row($result))
     {
         $bug = array_shift($row);
-        //$status = array_shift($row);
+	$byperson = $row[4];
+	if ($byperson != $personid)
+	{
+	    $done[$bug] = 1;
+	    continue;
+	}
+	
+	if ($a[$bug])
+	{
+	    // I own this bug already
+	    continue;
+	}
+	
+	if ($done[$bug])
+	{
+	    // someone resolved this bug *after* I did - don't lose it
+	    $row[0] = "STOLEN: $row[0]";
+	    $row[2] = $row[3] = 0.1;
+	}
 
         // the bug is done, so don't give it any more time remaining
         if (!$row[2])
@@ -170,7 +198,8 @@ function bug_finished_list($user, $fixfor, $startdate, $enddate)
         
         $row[3] = $row[2]; // elapsed = estimate; bug is done!
 
-        $a[$bug] = $row;
+	if (!$a[$bug])
+	  $a[$bug] = $row;
     }
 
     return $a;
@@ -627,6 +656,8 @@ function sch_extrabugs($user, $fixfor, $enddate, $only_done)
 {
     global $sch_got_bug, $sch_start, $sch_did_all_done, $sch_elapsed_subtract;
 
+    // $ret .= sch_warning("Extrabugs for $fixfor ($enddate) ($only_done)");
+    
     $start = sch_format_day($sch_start);
     $today = sch_today();
     $fixfor_in_past = ($enddate && sch_parse_day($enddate) < $today);
@@ -634,7 +665,7 @@ function sch_extrabugs($user, $fixfor, $enddate, $only_done)
     $bugs1 = array();
     $bugs2 = array();
 
-    $ua = bug_unfinished_list($user, $fixfor, $start, $enddate);
+    $ua = bug_unfinished_list($user, $fixfor, $enddate);
     if (count($ua))  // there are unfinished bugs for this release!
     {
         if ($sch_did_all_done)
@@ -677,7 +708,7 @@ function sch_extrabugs($user, $fixfor, $enddate, $only_done)
         $elapsed = 0;
         $sch_elapsed_subtract = array();
 
-        $a = bug_unfinished_list($user, '', '', '');
+        $a = bug_unfinished_list($user, '', '');
         foreach ($a as $bugid => $bug)
         {
             $elapsed += $bug[3];
