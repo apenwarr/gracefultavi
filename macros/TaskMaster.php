@@ -435,38 +435,34 @@ class Macro_TaskMaster
 	else
 	{
 	    $this->push();
-	    if ($coltype == "currest")
-	      $this->form_hidden("hasest-$isbug-$taskid", 1);
+	    $this->form_hidden("old$coltype-$isbug-$taskid", $value);
 	    $this->form_input("$coltype-$isbug-$taskid", $value, 5);
 	    $this->col(0, $this->pop());
 	}
     }
     
     
-    function estimate_rows($prefix, $isbug, $res)
+    function estimate_rows($fixfor)
     {
-	while ($row = mysql_fetch_row($res))
+	foreach ($this->db->estimate->a as $e)
 	{
-	    $taskid  = array_shift($row);
-	    $task    = array_shift($row);
-	    $subtask = array_shift($row);
-	    $fixfor  = array_shift($row);
-	    $origest = array_shift($row);
-	    $currest = array_shift($row);
-	    $elapsed = array_shift($row);
-	    $done    = array_shift($row);
-	    if ($currest!='' && $currest == $elapsed)
-	      $done = 1;
+	    if ($e->task->fixfor->ix != $fixfor)
+	      continue;
+	    
+	    $done = $e->isdone();
+	    $isbug = $e->isbug;
+	    $taskid = $e->task->ix;
+	    
 	    $doneclass = $done ? "done" : "notdone";
 	    $this->out("<tr class='$doneclass'>");
-	    $this->col(1, "$prefix#$isbug-$taskid");
-	    $this->col(0, $task);
-	    $this->col(0, $subtask);
-	    $this->col(0, $fixfor);
-	    $this->estimcol($isbug, $taskid, "origest", $origest, 1);
-	    $this->estimcol($isbug, $taskid, "currest", $currest, $done);
-	    $this->estimcol($isbug, $taskid, "elapsed", $elapsed, $done);
-	    $this->estimcol($isbug, $taskid, "remain", $currest-$elapsed, 1);
+	    $this->col(1, $e->id);
+	    $this->col(0, $e->task->hyperlink());
+	    $this->col(0, $e->task->name);
+	    $this->col(0, $e->task->fixfor->name);
+	    $this->estimcol($isbug, $taskid, "origest", $e->est_orig(), 1);
+	    $this->estimcol($isbug, $taskid, "currest", $e->est_curr(), $done);
+	    $this->estimcol($isbug, $taskid, "elapsed", $e->est_elapsed(), $done);
+	    $this->estimcol($isbug, $taskid, "remain", $e->est_remain(), 1);
 	    $this->push();
 	    if (!$done)
 	      $this->form_button("done-$isbug-$taskid", "Done");
@@ -488,56 +484,45 @@ class Macro_TaskMaster
 	if ($user > 0)
 	{
 	    $this->out("<b>");
-	    $res = $this->query
-	      ("select fIsBug,ixTask from schedulator.Estimate " .
-	       "   where ixPerson=$user");
-	    while ($row = mysql_fetch_row($res))
+	    
+	    // this changes the contents of the array, we we need a special
+	    // construct here rather than the usual foreach().  foreach()
+	    // makes a *copy* of the array, so changes aren't permanent!
+	    foreach (array_keys($this->db->estimate->a) as $ekey)
 	    {
-		if ($_REQUEST["hasest-$row[0]-$row[1]"]!='')
+		$e = &$this->db->estimate->a[$ekey];
+		
+		$tag = $e->isbug . "-" . $e->task->ix;
+		if ($_REQUEST["oldcurrest-$tag"] != $_REQUEST["currest-$tag"]
+		 || $_REQUEST["oldelapsed-$tag"] != $_REQUEST["elapsed-$tag"])
 		{
-		    $cur = $_REQUEST["currest-$row[0]-$row[1]"] + 0;
-		    if ($cur == 0)
-		      $cur = 0;
-		    $elapsed = $_REQUEST["elapsed-$row[0]-$row[1]"] + 0;
-		    if ($elapsed == 0)
-		      $elapsed = 0;
-		    $this->out("Estimating task $row[0]-$row[1].<br>");
-		    $this->query
-		      ("update schedulator.Estimate " .
-		       "  set hrsCurrEst=$cur, hrsElapsed=$elapsed " .
-		       "  where fIsBug=$row[0] and ixTask=$row[1] and " .
-		       "        ixPerson=$user ");
+		    $this->out("Estimating task $tag.<br>");
+		    $e->update($_REQUEST["currest-$tag"] + 0,
+			       $_REQUEST["elapsed-$tag"] + 0);
+		    
+		    $cur = $this->db->estimate->a[$ekey]->currest;
+		    print "(update:$ekey:$cur)";
 		}
 		
-		if ($_REQUEST["done-$row[0]-$row[1]"])
+		if ($_REQUEST["done-$tag"])
 		{
-		    $this->out("Closing task $row[0]-$row[1].<br>");
-		    $this->query
-		      ("update schedulator.Estimate " .
-		       "  set hrsCurrEst=if(hrsCurrEst is not null," .
-		       "                    hrsCurrEst,0), " .
-		       "      hrsElapsed=hrsCurrEst " .
-		       "  where fIsBug=$row[0] and ixTask=$row[1] and " .
-		       "        ixPerson=$user ");
+		    $this->out("Closing task $tag.<br>");
+		    $e->update($e->est_curr(), $e->est_curr());
 		}
-		else if ($_REQUEST["reopen-$row[0]-$row[1]"])
+		else if ($_REQUEST["reopen-$tag"])
 		{
-		    $this->out("Reopening task $row[0]-$row[1].<br>");
-		    $this->query
-		      ("update schedulator.Estimate " .
-		       "  set hrsCurrEst=if(hrsCurrEst is not null," .
-		       "                    hrsCurrEst,0), " .
-		       "      hrsElapsed=hrsCurrEst-0.1 " .
-		       "  where fIsBug=$row[0] and ixTask=$row[1] and " .
-		       "        ixPerson=$user ");
+		    $this->out("Reopening task $tag.<br>");
+		    $e->update($e->est_curr(), $e->est_curr()-0.1);
 		}
 	    }
 	    $this->out("</b>");
 	    
+	    $this->db->estimate->do_sort();
+	    
 	    $this->table("table");
 	    $this->row(8, "Source", "Task", "Subtask", "FixFor",
 		       "OrigEst", "CurrEst", "Elapsed", "Remain");
-	    
+/*	    
 	    $this->query
 	      ("insert into schedulator.Estimate (ixPerson, fIsBug, ixTask) " .
 	       "  select $user,0,ixXTask from schedulator.XTask " .
@@ -547,31 +532,8 @@ class Macro_TaskMaster
 	      ("insert into schedulator.Estimate (ixPerson, fIsBug, ixTask) " .
 	       "  select $user,1,ixBug from Bug " .
 	       "    where ixPersonAssignedTo=$user");
-	    
-	    $res = $this->query
-	      ("select ixTask, " .
-	       "       sTask, sSubTask, sFixFor, " .
-	       "       hrsOrigEst, hrsCurrEst, hrsElapsed, " .
-	       "       if(x.ixPersonAssignedTo=$user,0,1) as fMeDone " .
-	       "  from schedulator.XTask x, schedulator.Estimate e, " .
-	       "       FixFor f " .
-	       "  where fIsBug=0 and e.ixTask=x.ixXTask " .
-	       "    and f.ixFixFor=x.ixFixFor " .
-	       "    and e.ixPerson=$user ");
-	    $this->estimate_rows("TM", 0, $res);
-	    
-	    $res = $this->query
-	      ("select ixTask, " .
-	       "   ixBug, sTitle, sFixFor, " .
-	       "   if(e.hrsOrigEst is not null,e.hrsOrigEst,b.hrsOrigEst), " .
-	       "   if(e.hrsCurrEst is not null,e.hrsCurrEst,b.hrsCurrEst), " .
-	       "   if(e.hrsElapsed is not null,e.hrsElapsed,b.hrsElapsed), " .
-	       "       if(b.ixPersonAssignedTo=$user,0,1) as fMeDone " .
-	       "  from Bug b, schedulator.Estimate e, FixFor f " .
-	       "  where fIsBug=1 and e.ixTask=b.ixBug " .
-	       "    and f.ixFixFor=b.ixFixFor " .
-	       "    and e.ixPerson=$user ");
-	    $this->estimate_rows("Bug", 1, $res);
+*/
+	    $this->estimate_rows($_REQUEST["filter-fixfor"]);
 	    
 	    $this->table_end();
 	    $this->form_button("Save", "Save");

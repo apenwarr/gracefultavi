@@ -227,6 +227,31 @@ class Bug
     function isdone()
         { return $this->isresolved() 
 	         && $this->my_user->ix != $this->assignto->ix; }
+    
+    function get_priority()
+        { return $this->priority; }
+    
+    function hyperlink()
+    {
+	$title = htmlentities($this->name, ENT_QUOTES);
+	return "<a href=\"http://nits/fogbugz3/?$this->ix\" " .
+	  "title=\"Bug #$this->ix: $title\">$this->ix</a>";
+    }
+    
+    function finish()
+    {
+	// FIXME: for safety, I don't want to modify the fogbugz database
+	// from inside the ever-changing unstable schedulator code.  So you
+	// can't *actually* ask this to finish a fogbugz case.  However,
+	// this function is here so that you can go estimate->task->finish()
+	// and not get an error regardless of whether the task is a Bug or
+	// and XTask.
+    }
+    
+    function assign($personix)
+    {
+	// see finish()
+    }
 }
 
 
@@ -242,8 +267,8 @@ function bug_compare($a, $b)
       return strcmp($ares, $bres);
     else if ($fixcmp)
       return $fixcmp;
-    else if ($a->priority != $b->priority)
-      return $a->priority - $b->priority;
+    else if ($a->get_priority() != $b->get_priority())
+      return $a->get_priority() - $b->get_priority();
     else
       return $a->ix - $b->ix;
 }
@@ -296,6 +321,25 @@ class XTask
     
     function isdone()
         { return $this->my_user != $this->assignto; }
+    
+    function get_priority()
+        { return 7; } // currently XTask is always low-priority
+    
+    function hyperlink()
+        { return "TM#$this->ix"; }
+    
+    function assign($personix)
+    {
+	bug_query
+	  ("update schedulator.XTask " .
+	   "  set ixPersonAssignedTo=$personix " .
+	   "  where ixXTask=$this->ix");
+    }
+    
+    function finish()
+    {
+	$this->assign(1);
+    }
 }
 
 
@@ -402,6 +446,44 @@ class Estimate
     {
 	return $this->be_done;
     }
+    
+    function update($currest, $elapsed)
+    {
+	// make sure they're valid numbers
+	if ($currest == 0)
+	  $currest = 0;
+	if ($elapsed == 0)
+	  $elapsed = 0;
+	
+	$userix = $this->assignto->ix;
+	$taskix = $this->task->ix;
+	
+	$u = $this->assignto;
+	bug_query
+	  ("insert ignore into schedulator.Estimate " .
+	   "   (ixPerson, fIsBug, ixTask) " .
+	   "   values ($userix, $this->isbug, $taskix)");
+	
+	if (!$this->origest)
+	  $this->origest = $currest;
+	$this->currest = $currest;
+	$this->elapsed = $elapsed;
+	$this->be_done = ($this->currest == $this->elapsed);
+	if ($this->be_done && $this->task->assignto->ix == $this->my_user->ix)
+	  $this->task->finish();
+	else
+	  $this->task->assign($this->my_user->ix);
+	
+	$resolv = $this->est_remain() 
+	  ? "dtResolved=null, " : "dtResolved=now(), ";
+	bug_query
+	  ("update schedulator.Estimate " .
+	   "  set $resolv " .
+	   "      hrsOrigEst=$this->origest, hrsCurrEst=$this->currest, " .
+	   "      hrsElapsed=$this->elapsed " .
+	   "  where fIsBug=$this->isbug and ixTask=$taskix and " .
+	   "        ixPerson=$userix ");
+    }
 }
 
 
@@ -411,12 +493,8 @@ function estimate_compare($a, $b)
       return $b->isdone() - $a->isdone(); // done before not done
     else if ($a->isdone() && $a->get_resolvedate() != $b->get_resolvedate())
       return strcmp($a->get_resolvedate(), $b->get_resolvedate());
-    else if ($a->isbug != $b->isbug)
-      return $b->isbug - $a->isbug; // bugs come before taskmaster stuff
-    else if ($a->isbug)
-      return bug_compare($a->task, $b->task);
     else
-      return $a->fixfor - $b->fixfor;
+      return bug_compare($a->task, $b->task);
 }
 
 
@@ -427,6 +505,7 @@ class EstimateTable extends FogTable
 	$p = array();
 	$did_bug = array();
 	$did_xtask = array();
+	$me = $persons->a[$my_userix];
 	
 	$res = bug_query
 	  ("select ixEstimate, ixPerson, fIsBug, ixTask, " .
@@ -435,42 +514,52 @@ class EstimateTable extends FogTable
 	   "  $where ");
 	while ($r = mysql_fetch_row($res))
 	{
-	    $bug = $r[2] ? $bugs->a[$r[3]] : $xtasks->a[$r[3]];
-	    $e = new Estimate(0, // not fake
-			      $r[5] == $r[6],
+	    $isbug = $r[2];
+	    $bug = $isbug ? $bugs->a[$r[3]] : $xtasks->a[$r[3]];
+	    $done = $r[5] == $r[6] && $bug->assignto->ix != $my_userix;
+	    $e = &new Estimate(0, // not fake
+			      $done,
 			      $r[0], $persons->a[$r[1]], $r[2],
 			      $bug,
 			      $r[4], $r[5], $r[6], $r[7],
-			      $persons->a[$my_userix]);
+			      $me);
 	    $p[$r[0]] = $e;
-	    if ($e->isbug)
-	      $did_bug[$bug->ix] = ($e->isdone() == $bug->isdone());
-	    else
-	      $did_xtask[$bug->ix] = ($e->isdone() == $bug->isdone());
+	    if (!$e->isdone() || ($e->isdone() && $bug->isdone()))
+	    {
+		if ($e->isbug)
+		  $did_bug[$bug->ix] = 1;
+		else
+		  $did_xtask[$bug->ix] = 1;
+	    }
 	}
 	
 	foreach ($bugs->a as $bug)
 	{
 	    if (!$did_bug[$bug->ix])
-	      $p[] = new Estimate(1, // fake (not in database)
+	      $p[] = &new Estimate(1, // fake (not in database)
 				  $bug->isdone(),
-				  "", $bug->assignto, 1,
+				  "", $me, 1,
 				  $bug, "", "", "", $bug->resolvedate,
-				  $persons->a[$my_userix]);
+				  $me);
 	}
 	
 	foreach ($xtasks->a as $task)
 	{
 	    if (!$did_xtask[$task->ix])
-	      $p[] = new Estimate(1, // fake (not in database)
+	      $p[] = &new Estimate(1, // fake (not in database)
 				  $task->isdone(),
-				  "", $task->assignto, 0, 
+				  "", $me, 0, 
 				  $task, "", "", "", "",
-				  $persons->a[$my_userix]);
+				  $me);
 	}
 	
-	uasort($p, estimate_compare);
 	$this->FogTable($p);
+	$this->do_sort();
+    }
+    
+    function do_sort()
+    {
+	uasort($this->a, "estimate_compare");
     }
 }
 
