@@ -1726,8 +1726,12 @@ CALENDAR_JAVASCRIPT;
         $this->form_input('category'.$row['id'], $row['category'], 35, true);
         if ($row['id'] == '')
         {
+            $categories = $this->list_categories($checklist_id);
+            foreach ($categories as $key => $value)
+                if (strlen($value) > 28)
+                    $categories[$key] = substr($value, 0, 28) . '...';
             $this->form_select('categorylist', $row['category'], '',
-                               $this->list_categories($checklist_id));
+                               $categories, true);
         }
         $this->out('</td><td>');
         $this->form_input('description'.$row['id'], $row['description'], 60,
