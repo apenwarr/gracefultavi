@@ -8,13 +8,12 @@ require('parse/save.php');
 // Commit an edit to the database.
 function action_save()
 {
-    global $archive, $categories, $document, $ErrorPageLocked, $HTTP_POST_VARS;
-    global $MaxPostLen, $minoredit, $nextver, $page, $pagefrom, $pagestore;
-    global $REMOTE_ADDR, $Save, $SaveMacroEngine, $UserName;
+    global $archive, $categories, $comment, $document, $ErrorPageLocked;
+    global $HTTP_POST_VARS, $MaxPostLen, $minoredit, $nextver, $page, $pagefrom;
+    global $pagestore, $REMOTE_ADDR, $Save, $SaveMacroEngine, $UserName;
 
     if(isset($HTTP_POST_VARS['quickadd'])) $quickadd = $HTTP_POST_VARS['quickadd'];
     if(isset($HTTP_POST_VARS['appending'])) $appending = $HTTP_POST_VARS['appending'];
-    if(isset($HTTP_POST_VARS['comment'])) $comment = $HTTP_POST_VARS['comment'];
 
     // added for "Add a Quote" feature for AnnoyingQuote page
     if(isset($HTTP_POST_VARS['quoteAuthor'])) $quoteAuthor = $HTTP_POST_VARS['quoteAuthor'];
