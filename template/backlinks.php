@@ -27,10 +27,13 @@ function template_backlinks($args) {
 
 <h2>Backlinks and Nesting Information</h2>
 
+<p>See <a href="<?=childrenURL($page)?>">children</a> of <?=$page?>.
+
 <form name="reparentForm" action="<?php print reparentURL($page); ?>" method="POST">
 
 <div class="form">
 
+<p>
 <?php print html_ref($page, $page); ?> is linked on the following pages:
 
 <p>

@@ -38,6 +38,8 @@ if(!isset($PageSubscribeBase))
   { $PageSubscribeBase = $ScriptBase . '?action=subscribe&amp;page='; }
 if(!isset($SubscriptionsScript))
   { $SubscriptionsScript = $ScriptBase . '?action=subscriptions'; }
+if(!isset($ChildrenBase))
+  { $ChildrenBase = $ScriptBase . '?action=children&amp;page='; }
 
 if(!function_exists('viewURL'))
 {
@@ -131,6 +133,16 @@ function pageSubscribeURL($page)
   global $PageSubscribeBase;
 
   return $PageSubscribeBase . urlencode($page);
+}
+}
+
+if(!function_exists('childrenURL'))
+{
+function childrenURL($page)
+{
+  global $ChildrenBase;
+
+  return $ChildrenBase . urlencode($page);
 }
 }
 

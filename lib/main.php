@@ -67,6 +67,7 @@ $ActionList = array(
                 'rss'     => array('action/rss.php', 'action_rss', 'view'),
                 'style'   => array('action/style.php', 'action_style', ''),
                 'backlinks' => array('action/backlinks.php', 'action_backlinks', 'view'),
+                'children' => array('action/children.php', 'action_children', 'view'),
                 'reparent' => array('action/reparent.php', 'action_reparent', 'edit'),
                 'content' => array('action/content.php', 'action_content', 'edit'),
                 'subscribe' => array('action/subscribe.php', 'action_subscribe', 'edit'),
