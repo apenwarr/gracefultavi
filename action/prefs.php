@@ -18,6 +18,12 @@ function action_prefs()
         { die($ErrorNameMatch); }
     }
 
+    // Read username from htaccess login
+    if(isset($_SERVER["PHP_AUTH_USER"]))
+        $UserName = $_SERVER["PHP_AUTH_USER"];
+    else if(isset($_SERVER["REMOTE_USER"]))
+        $UserName = $_SERVER["REMOTE_USER"];
+
     ereg("([[:digit:]]*)", $rows, $result);
     if(($rows = $result[1]) <= 0)
       { $rows = 20; }
@@ -31,7 +37,7 @@ function action_prefs()
     $hotpages = (strcmp($hotpages, "") != 0) ? 1 : 0;
     $value = "rows=$rows&amp;cols=$cols&amp;auth=$auth&amp;hotpages=$hotpages";
 //    if(strcmp($user, "") != 0)
-      { $value = $value . "&amp;user=" . $PHP_AUTH_USER; }
+      { $value = $value . "&amp;user=" . $UserName; }
     if(strcmp($days, "") != 0)
       { $value = $value . "&amp;days=$days"; }
     if(strcmp($min, "") != 0)

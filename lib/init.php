@@ -43,7 +43,11 @@ if(get_magic_quotes_gpc())
 }
 
 // Read username from htaccess login
-if(isset($_SERVER["PHP_AUTH_USER"])) $UserName = $_SERVER["PHP_AUTH_USER"];
+if(isset($_SERVER["PHP_AUTH_USER"]))
+    $UserName = $_SERVER["PHP_AUTH_USER"];
+else if(isset($_SERVER["REMOTE_USER"]))
+    $UserName = $_SERVER["REMOTE_USER"];
+
 /*
 $userinfo = posix_getpwnam($UserName);
 
