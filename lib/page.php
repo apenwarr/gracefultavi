@@ -127,7 +127,7 @@ class WikiPage
     function isWatched($userName)
     {
         global $PwTbl;
-
+        
         $query = "SELECT count(*) " .
                  "FROM $PwTbl " .
                  "WHERE page='{$this->name}' " .
@@ -147,7 +147,7 @@ class WikiPage
     function toggleWatch($userName)
     {
         global $PwTbl;
-
+        
         if ($userName != '')
         {
             if ($this->isWatched($userName))

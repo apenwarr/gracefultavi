@@ -13,7 +13,7 @@ function action_edit()
   $pg = $pagestore->page($page);
   $pg->read();
 
-  if(!$pg->mutable)
+  if(!$UserName || !$pg->mutable)
     { die($ErrorPageLocked); }
 
   $archive = 0;

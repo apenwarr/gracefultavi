@@ -42,6 +42,7 @@ if(get_magic_quotes_gpc())
 
 // Read username from htaccess login
 $UserName = $_SERVER["PHP_AUTH_USER"];
+/*
 $userinfo = posix_getpwnam($UserName);
 
 //$gecos = $userinfo['gecos'];
@@ -49,6 +50,7 @@ $userinfo = posix_getpwnam($UserName);
 //list($UserName) = split(',', $UserName); // to eliminate any trailing commas
 $UserName = $userinfo['name'];
 $UserName = str_replace(" ", "", $UserName);
+*/
 
 // Read user preferences from cookie.
 

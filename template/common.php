@@ -68,7 +68,22 @@ if($args['headlink'] != '')
         print $args['headlink'];
     print '</a>';
 }
+
+global $pagestore;
+if(count($twin = $pagestore->twinpages($args['headlink'])))
+{
+    // point at the sisterwiki's version
+    //print "See also:";
+    print "<sup>";
+    foreach($twin as $site)
+      { print " " . html_twin($site[0], $site[1]); }
+    print "</sup>";
+}   
+
 print $args['headsufx'] . '</h1>';
+
+                                                                                                    
+
 ?>
 
 <br>
@@ -186,7 +201,12 @@ function template_common_epilogue($args)
 </tr>
 </table>
 
-<small>Logged in as <?php print html_ref($UserName, $UserName) ?></small>
+<small><?php 
+  if ($UserName)
+      print("Logged in as " . html_ref($UserName, $UserName));
+  else
+      print("Not <a href=\"login/?$page\">logged in</a>.");
+?></small>
 
 <?php
 if ($UserName != '' && $args['watch'] != '' && $page != 'FrontPage' && $page != 'RecentChanges')
@@ -249,7 +269,7 @@ if ($page != 'RecentChanges')
         if ($args['editver'] == 0)
             print '<td align="right"><b><a href="' . editURL($args['edit']) . '">Edit this page</a></b></td>';
         else if($args['editver'] == -1)
-            print 'This document cannot be edited';
+            ; //print 'This document cannot be edited';
         else
         {
             print '<td align="left"><a href="' . editURL($args['edit'], $args['editver']) . '">';
@@ -325,7 +345,12 @@ if ($page != 'FrontPage' && $page != 'RecentChanges')
                 // Standard Add a Comment
                 print '<input type="hidden" name="comment" value="Comment">';
                 print '<textarea name="quickadd" rows="4" cols="20">';
-                print "<hr><b>[$UserName] (" . date('Y/m/d') . ")</b>: ";
+                print "<hr><b>";
+                if ($UserName)
+                    print "[$UserName]";
+                else
+                    print "Anonymous@" . $_SERVER["REMOTE_ADDR"];
+                print " (" . date('Y/m/d') . ")</b>: ";
                 print '</textarea>';
                 print '<input type="submit" name="append" value="Add a Comment" onClick="return epilogue_quickadd_validate(this.form)">';
             }

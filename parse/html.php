@@ -135,7 +135,7 @@ function html_url($url, $text)
 
 function html_ref($refPage, $appearance, $hover = '', $anchor = '', $anchor_appearance = '')
 {
-    global $db, $SeparateLinkWords, $page;
+    global $db, $SeparateLinkWords, $page, $pagestore;
 
     if($hover != '')
     {
@@ -144,6 +144,15 @@ function html_ref($refPage, $appearance, $hover = '', $anchor = '', $anchor_appe
 
     $p = new WikiPage($db, $refPage);
 
+    $twintext = "";
+    if(count($twin = $pagestore->twinpages($refPage)))
+    {
+    	// point at the sisterwiki's version
+        foreach($twin as $site)
+          { $twintext = $twintext . html_twin($site[0], $site[1]); }
+        $twintext = '<sup>' . $twintext . '</sup>';
+    }
+    
     if($p->exists())
     {
         if($SeparateLinkWords && $refPage == $appearance)
@@ -151,7 +160,7 @@ function html_ref($refPage, $appearance, $hover = '', $anchor = '', $anchor_appe
             $appearance = html_split_name($refPage);
         }
 
-        return '<a href="' . viewURL($refPage) . $anchor . '"' . $hover . '>'
+        $result = '<a href="' . viewURL($refPage) . $anchor . '"' . $hover . '>'
                . $appearance . $anchor_appearance . '</a>';
     }
     else
@@ -159,7 +168,8 @@ function html_ref($refPage, $appearance, $hover = '', $anchor = '', $anchor_appe
         if(validate_page($refPage) == 1       // Normal WikiName
             && $appearance == $refPage)       // ... and is what it appears
         {
-            return $refPage . '<a href="' . editURL($refPage, '', $page) . '"' . $hover . '>?</a>';
+            $result = $refPage . '<a href="' . editURL($refPage, '', $page) . '"' . $hover . '>?</a>'
+                               . $twintext;
         }
         else                                  // Free link.
         {
@@ -169,9 +179,11 @@ function html_ref($refPage, $appearance, $hover = '', $anchor = '', $anchor_appe
             else
                 $tempAppearance = "($appearance)";
 
-            return $tempAppearance . '<a href="' . editURL($refPage, '', $page) . '"' . $hover . '>?</a>';
+            $result = $tempAppearance . '<a href="' . editURL($refPage, '', $page) . '"' . $hover . '>?</a>'
+                                      . $twintext;
         }
     }
+    return $result;
 }
 
 function html_interwiki($url, $text)

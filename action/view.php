@@ -26,7 +26,7 @@ function action_view()
 
     template_view(array('page'      => $page,
                         'html'      => parseText($pg->text, $ParseEngine, $page),
-                        'editable'  => $pg->mutable,
+                        'editable'  => $UserName && $pg->mutable,
                         'timestamp' => $pg->time,
                         'archive'   => $version != '',
                         'version'   => $pg->version,
