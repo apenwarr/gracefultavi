@@ -795,7 +795,7 @@ class Macro_Sched
 
         $ret = "";
 
-        if (!preg_match_all('/"[^"]*"|[^     ]+/', $args, $words))
+        if (!preg_match_all('/"[^"]*"|[^ \t]+/', $args, $words))
             return "regmatch failed!\n";
         $words = $words[0]; // don't know why I have to do this, exactly...
 
