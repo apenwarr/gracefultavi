@@ -83,6 +83,9 @@ class PageStore
     {
         global $PgTbl, $LeTbl;
 
+# new icon temporarily removed
+return array();
+
 /*
         $qid = $this->dbh->query("select p1.title " .
                                  "from $PgTbl p1, $PgTbl p2 " .
@@ -673,7 +676,7 @@ class PageStore
 
   // Retrieve a list of all of the pages in the wiki except the ones with an
   // empty body. This ignores the minor edits.
-  function allpages()
+  function allpages($with_page_size = false)
   {
         global $PgTbl, $LeTbl;
 
@@ -703,17 +706,23 @@ class PageStore
         }
 */
 
+        $page_size_column = $with_page_size ? 'LENGTH(p.body)' : '2';
+
         $qid = $this->dbh->query("SELECT p.title, p.version, p.author, p.time, p.username, " .
-                                 "LENGTH(p.body), p.comment, p.mutable " .
+                                 "$page_size_column, p.comment, p.mutable, p.minoredit " .
                                  "FROM $PgTbl p, $LeTbl l " .
                                  "WHERE p.title = l.page " .
-                                 "AND p.version = l.version " .
-                                 "AND LENGTH(p.body) > 1 " .
-                                 "AND p.minoredit = 0");
+                                 "AND p.version = l.version "
+                                 #. "AND length(substring(p.body, 2, 1)) > 0 "
+                                 #. "AND p.minoredit = 0"
+                                 );
 
-        while ($result = $this->dbh->result($qid))
-            $list[] = array($result[3], $result[0], $result[2], $result[4], $result[5],
-                            $result[6], $result[7] == 'on', $result[1]);
+        while ($result = $this->dbh->result($qid)) {
+            if ($result[8] == 0) {
+                $list[] = array($result[3], $result[0], $result[2], $result[4], $result[5],
+                                $result[6], $result[7] == 'on', $result[1]);
+            }
+        }
 
         return $list;
   }

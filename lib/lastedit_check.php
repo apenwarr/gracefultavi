@@ -2,6 +2,8 @@
 
 function lastedit_check()
 {
+    return;
+
     global $pagestore;
     global $PgTbl, $LeTbl;
 

@@ -63,7 +63,7 @@ function view_macro_pagesize()
   global $pagestore;
 
   $first = 1;
-  $list = $pagestore->allpages();
+  $list = $pagestore->allpages(true);
 
   usort($list, 'sizeSort');
 

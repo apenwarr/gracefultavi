@@ -60,14 +60,20 @@ class WikiPage
     {
         global $PgTbl;
 
+        if ($this->version != -1) {
+            $qry_version = $this->version;
+        } else {
+            $query = "SELECT max(version) FROM $PgTbl WHERE title='$this->dbname'";
+            $qid = $this->db->query($query);
+            $result = $this->db->result($qid);
+            if (!$qry_version = $result[0]) { die("Error getting page content"); }
+        }
+
         $query = "SELECT title, time, author, body, mutable, version, " .
                  "username, comment " .
-                 "FROM $PgTbl WHERE title='$this->dbname' ";
-
-        if($this->version != -1)
-            $query = $query . "AND version = '$this->version'";
-        else
-            $query = $query . "ORDER BY version DESC";
+                 "FROM $PgTbl " .
+                 "WHERE title='$this->dbname' " .
+                 "AND version=$qry_version";
 
         $qid = $this->db->query($query);
 
