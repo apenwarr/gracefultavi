@@ -1,5 +1,5 @@
 <?php
-// $Id: save.php,v 1.7 2002/01/07 16:28:32 smoonen Exp $
+// $Id: content.php,v 1.1.1.1 2003/03/15 03:53:58 apenwarr Exp $
 
 require_once('template/tree.php');
 require('parse/html.php');
@@ -26,7 +26,7 @@ function action_content()
     global $page, $pagestore;
 
     // get all branches
-    $tree = $pagestore->getTreeFromLeafs('FrontPage');
+    $tree = $pagestore->getTreeFromLeaves('FrontPage');
 
     // get other nodes that could not fit in a branch
     $allPages = $pagestore->getAllPageNames();

@@ -1,5 +1,5 @@
 <?php
-// $Id: pagestore.php,v 1.1.1.2 2003/03/15 03:54:58 apenwarr Exp $
+// $Id: pagestore.php,v 1.2 2003/04/01 01:11:33 mich Exp $
 
 require('lib/db.php');
 require('lib/page.php');
@@ -259,11 +259,11 @@ class PageStore
         }
     }
 
-    // Return a tree starting by the leafs, going up until rootPage, no parents
-    // or a cycle. If no leafs are provided, starts from all leafs,
-    // i.e. all pages without children. initialLeafs can be a single value or
+    // Return a tree starting by the leaves, going up until rootPage, no parents
+    // or a cycle. If no leaves are provided, starts from all leaves,
+    // i.e. all pages without children. initialLeaves can be a single value or
     // and array.
-    function getTreeFromLeafs($rootPage = '', $initialLeafs = '', $breadcrumb = '', $i = 0)
+    function getTreeFromLeaves($rootPage = '', $initialLeaves = '', $breadcrumb = '', $i = 0)
     {
         global $PgTbl, $PaTbl;
         static $branches;
@@ -273,7 +273,7 @@ class PageStore
             // first time in, initialize the search
             $branches = array();
 
-            if (!$initialLeafs)
+            if (!$initialLeaves)
             {
                 // get all pages
                 $qid = $this->dbh->query("SELECT distinct title FROM $PgTbl order by lower(title)");
@@ -288,14 +288,14 @@ class PageStore
                     $parents[] = $result[0];
 
                 // get all pages without children
-                $initialLeafs = array_diff($pages, $parents);
+                $initialLeaves = array_diff($pages, $parents);
             }
 
-            if (!is_array($initialLeafs))
-                $initialLeafs = array($initialLeafs);
+            if (!is_array($initialLeaves))
+                $initialLeaves = array($initialLeaves);
 
-            foreach ($initialLeafs as $leaf)
-                $this->getTreeFromLeafs($rootPage, '', $leaf, $i+1);
+            foreach ($initialLeaves as $leaf)
+                $this->getTreeFromLeaves($rootPage, '', $leaf, $i+1);
 
             natcasesort($branches);
 
@@ -321,7 +321,7 @@ class PageStore
                         $branches[] = $breadcrumb;
                     else
                         foreach ($parents as $parent)
-                            $this->getTreeFromLeafs($rootPage, '', "$parent/$breadcrumb", $i + 1);
+                            $this->getTreeFromLeaves($rootPage, '', "$parent/$breadcrumb", $i + 1);
                 }
         }
     }

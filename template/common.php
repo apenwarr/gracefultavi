@@ -1,5 +1,5 @@
 <?php
-// $Id: common.php,v 1.5 2003/03/28 23:24:44 mich Exp $
+// $Id: common.php,v 1.6 2003/04/01 01:11:33 mich Exp $
 
 // This function generates the common prologue and header
 // for the various templates.
@@ -166,7 +166,7 @@ if($args['tree'])
 {
     global $pagestore;
 
-    $tree = $pagestore->getTreeFromLeafs('FrontPage', $args['headlink']);
+    $tree = $pagestore->getTreeFromLeaves('FrontPage', $args['headlink']);
 
     if ($tree['FrontPage'] && count($tree['FrontPage']) > 0)
     {
