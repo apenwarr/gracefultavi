@@ -81,7 +81,7 @@ foreach($parents as $parent)
 
 if ($tempText)
 {
-    print html_ref($page, $page) . ' is NOT linked on the following pages but is still refeering to them as parents:';
+    print html_ref($page, $page) . ' is NOT linked on the following pages but is still referring to them as parents:';
     print '<p>';
     print '<table cellspacing="0" cellpadding="0" border="0">';
     print '<tr class="notBacklinksHeader">';
