@@ -647,7 +647,7 @@ function view_macro_schedulator($text)
     else if ($words[0] == "LOADFACTOR")
     {
 	$loadtmp = $words[1] + 0.0;
-	if ($loadtmp < 1.0)
+	if ($loadtmp < 0.1)
 	  $ret .= "(INVALID LOAD FACTOR:'$words[1]')";
 	else
 	  $sch_load = $loadtmp;
