@@ -10,6 +10,8 @@ class Macro_CategoryCmds
         global $pagestore, $MinEntries, $DayLimit, $full, $page, $Entity;
         global $FlgChr, $UserName, $UseHotPages;
 
+        list($args, $ignoreRegExp) = explode(' ', $args, 2);
+
         $text = '';
         if (strstr($args, '*'))                // Category containing all pages.
         {
@@ -50,6 +52,12 @@ class Macro_CategoryCmds
         $now = time();
         for ($i = 0; $i < count($list); $i++)
         {
+            if ($ignoreRegExp) {
+                if (@preg_match($ignoreRegExp, $list[$i][1])) {
+                    continue;
+                }
+            }
+
             $editTime = mktime(substr($list[$i][0], 8, 2), substr($list[$i][0], 10, 2),
                                substr($list[$i][0], 12, 2), substr($list[$i][0], 4, 2),
                                substr($list[$i][0], 6, 2), substr($list[$i][0], 0, 4));
