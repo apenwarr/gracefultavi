@@ -5,6 +5,7 @@ global $sch_start;
 global $sch_load;
 global $sch_bugs;
 global $sch_curday;
+global $sch_elapsed_curday;
 global $sch_got_bug;
 global $sch_unknown_fixfor;
 global $bug_h;
@@ -398,6 +399,13 @@ function sch_fullline($text)
     return "<tr><td colspan=7>$text</td></tr>";
 }
 
+function sch_warning($text)
+{
+    return sch_fullline("<font color=red>&nbsp;&nbsp;"
+			. "** WARNING: $text **" 
+			. "</font>");
+}
+
 function sch_genline($feat, $task, $orig, $curr, $elapsed, $left, $due)
 {
     $ret = "<tr>";
@@ -422,7 +430,7 @@ function sch_genline($feat, $task, $orig, $curr, $elapsed, $left, $due)
 function sch_line($feat, $task, $orig, $curr, $elapsed, $remain, $done,
 		  $allow_red)
 {
-    global $sch_curday, $sch_bugs, $sch_got_bug;
+    global $sch_curday, $sch_elapsed_curday, $sch_bugs, $sch_got_bug;
     
     if ($done)
       $sremain = 'done';
@@ -431,16 +439,28 @@ function sch_line($feat, $task, $orig, $curr, $elapsed, $remain, $done,
     else
       $sremain = sch_period($remain);
     
+    $today = sch_today();
+    $was_over_elapsed = ($sch_elapsed_curday > $today);
+    
     $sch_curday = sch_add_hours($sch_curday, $curr);
+    $sch_elapsed_curday = sch_add_hours($sch_elapsed_curday, $elapsed*0.75);
     $due = sch_format_day($sch_curday);
     if ($allow_red && (!$curr || $remain) && !$done 
-	&& floor($sch_curday) < floor(sch_today()))
+	&& floor($sch_curday) < floor($today))
       $due = "<font color=red>$due</font>";
     
-    return sch_genline($feat, $task,
+    $ret = sch_genline($feat, $task,
 		       sch_period($orig), sch_period($curr),
 		       sch_period($elapsed), $sremain,
 		       $due);
+    #$ret .= sch_fullline("gork: $was_over_elapsed $sch_elapsed_curday $sch_curday $today");
+    if (!$was_over_elapsed && $sch_elapsed_curday > $today)
+      $ret .= sch_warning("The START time, plus the time so far in your " .
+			  "ELAPSED column, puts you into the future!  " .
+			  "Either your START date is wrong, or some of " .
+			  "your elapsed hours are wrong, or you're working " .
+			  "too hard.");
+    return $ret;
 }
 
 function sch_bug($feat, $task, $_orig, $_curr, $_elapsed, $done)
@@ -480,6 +500,14 @@ function sch_bug($feat, $task, $_orig, $_curr, $_elapsed, $done)
 
     $ret .= sch_line($xfeat, $task, $orig, $curr, $elapsed, $remain, $done,
 		     true);
+    if ($done && $curr != $elapsed)
+      $ret .= sch_warning("This bug is done, but elapsed time is different " .
+			  "from the current estimate.  You know " .
+			  "how long it really took, so make your estimate " .
+			  "accurate.");
+    else if ($curr < $elapsed)
+      $ret .= sch_warning("This bug's current estimate is less than the " .
+			  "elapsed time so far.  Update your estimate!");
     $buga = array($feat, $task, $orig, $curr, $elapsed, 
 		  sch_format_day($sch_curday), $done);
     if ($fixfor)
@@ -545,7 +573,8 @@ function sch_milestone($descr, $name, $due)
 
 function view_macro_schedulator($text)
 {
-    global $sch_start, $sch_curday, $sch_user, $sch_load, $sch_got_bug;
+    global $sch_start, $sch_curday, $sch_elapsed_curday;
+    global $sch_user, $sch_load, $sch_got_bug;
     global $sch_unknown_fixfor;
     
     $ret = "";
@@ -576,10 +605,13 @@ function view_macro_schedulator($text)
 				  "Done", "Left", "Due")) .
 	  "</th></tr>\n";
 	$sch_user = $words[1];
-	$sch_start = $sch_curday = sch_parse_day($words[2]);
+	$sch_start = $sch_curday = $sch_elapsed_curday 
+	  = sch_parse_day($words[2]);
 	$sch_unknown_fixfor = array();
 	$sch_load = 1.0;
 	$ret .= sch_line("START", "", 0,0,0,0, 0, false);
+	if ($sch_start > sch_today())
+	  $ret .= sch_warning("START date is in the future!");
 	bug_start_user($sch_user);
     }
     else if ($words[0] == "LOADFACTOR")
