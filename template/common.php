@@ -357,7 +357,7 @@ if ($page != $HomePage && $page != 'RecentChanges')
             <input type="hidden" name="appending" value="1">
             <input type="hidden" name="page" value="<?php print $page ?>">
             <?php
-            if (!strcasecmp($page, 'annoyingquote'))
+            if (!strcasecmp($page, 'annoyingquote') || !strcasecmp($page, 'accumulatedwisdom'))
             {
                 // Tweaked "Add a Comment" for AnnoyingQuote page
             ?>
