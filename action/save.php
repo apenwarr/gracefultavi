@@ -150,7 +150,9 @@ function action_save()
                 mail($user . $EmailSuffix, "NitWiki: $page has changed",
                      "This is your friendly neighbourhood wiki letting you " .
                      "know that the page $page has changed!\n\n" .
-                     "http://nitwiki/?$page", "From: webmaster@nit.ca");
+                     "View page: http://nitwiki/?$page\n\n" .
+                     "History: http://nitwiki/?action=history&page=$page",
+                     "From: webmaster@nit.ca");
             }
         }
     }
