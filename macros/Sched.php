@@ -649,13 +649,15 @@ function sch_merge_cur_bugs($fixfor)
     foreach ($sch_cur_complete_bugs as $e)
     {
 	//print "Hello: (" .$e->task->name . ")<br>\n";
-        $e->task->fixfor = $f;
+        if (!isset($e->task->fixfor))
+            $e->task->fixfor = $f;
         $sch_db->estimate->a[] = $e;
     }
     foreach ($sch_cur_incomplete_bugs as $e)
     {
 	//print "Hello: (" .$e->task->name . ")<br>\n";
-        $e->task->fixfor = $f;
+        if (!isset($e->task->fixfor))
+            $e->task->fixfor = $f;
         $sch_db->estimate->a[] = $e;
     }
 
@@ -1108,7 +1110,6 @@ class Macro_Sched
 	    //print "($bugid)($task)<br>\n";
             if (preg_match('/^[0-9]+$/', $bugid))
             {
-                // FIXME: make_bug_object
                 $bug = bug_get($bugid);
 		$sch_db->estimate->remove_estimate($bugid);
                 
