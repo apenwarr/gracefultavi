@@ -41,14 +41,12 @@ function lastedit_check()
         while(($result = $pagestore->dbh->result($qid)))
             $list[$result[0]] = $result[1];
 
+        // Initialize the lastedit page.
         $pagestore->dbh->query("LOCK TABLES $LeTbl WRITE");
-
         $pagestore->dbh->query("DELETE FROM $LeTbl");
-
         foreach ($list as $key => $value)
             $pagestore->dbh->query("INSERT INTO $LeTbl (page, version) " .
                                    "VALUES ('$key', $value)");
-
         $pagestore->dbh->query("UNLOCK TABLES");
     }
 }
