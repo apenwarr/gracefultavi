@@ -557,7 +557,7 @@ class Estimate
 	  ("insert ignore into schedulator.Estimate " .
 	   "   (ixPerson, fIsBug, ixTask) " .
 	   "   values ($userix, $this->isbug, $taskix)");
-	
+
 	if (!$this->origest)
 	  $this->origest = $currest;
 	$this->currest = $currest;
@@ -782,7 +782,7 @@ class FogTables
 	}
 	else
 	    $and_user = $and_useras = $and_userrb = "";
-	$and_dtresolved = "and dtResolved>'$start_date'"; 
+	$and_dtresolved = "and (dtResolved>'$start_date' or ISNULL(dtResolved))"; 
  
 	$whichbugs = sql_simple("select ixTask from schedulator.Estimate " .
 				"    where 1 $and_user " .
