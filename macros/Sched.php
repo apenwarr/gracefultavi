@@ -168,7 +168,7 @@ function bug_get($bugid)
         return array($bugid, 0, 0, 0);
     else
         return array($b->name, $b->origest, $b->currest, $b->elapsed, 
-                $b->status, $b->fixfor);
+                $b->status, $b->fixfor->name);
 }
 
 
