@@ -1,5 +1,5 @@
 <?php
-// $Id: main.php,v 1.1.1.1 2003/03/15 03:53:58 apenwarr Exp $
+// $Id: main.php,v 1.2 2003/04/01 01:11:33 mich Exp $
 
 // If register_globals is off, we need to harvest the script parameters
 // at this point.
@@ -86,6 +86,15 @@ if(!empty($ActionList[$action]))
 
 // Expire old versions, etc.
 $pagestore->maintain();
+
+
+// experimental test, log page views
+/*
+global $logviewenabled;
+if ($logviewenabled && $action == 'view')
+    $pagestore->logview();
+*/
+
 
 /*
 if ($UserName == 'mich' && $page == 'mich')

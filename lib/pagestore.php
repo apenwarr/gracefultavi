@@ -1,5 +1,5 @@
 <?php
-// $Id: pagestore.php,v 1.2 2003/04/01 01:11:33 mich Exp $
+// $Id: pagestore.php,v 1.3 2003/04/01 18:32:36 mich Exp $
 
 require('lib/db.php');
 require('lib/page.php');
@@ -721,5 +721,20 @@ class PageStore
                           "AND TO_DAYS(NOW()) > TO_DAYS(time)");
     }
   }
+
+
+    function logview()
+    {
+        global $page, $UserName;
+
+        list($sec, $min, $hour, $mday, $month, $year, $wday, $yday, $isdst)
+            = localtime(time());
+
+        $qry = "insert ignore into wiki_viewlog (page, user, year, month, day) " .
+               "values ('$page', '$UserName', $year+1900, $month+1, $mday)";
+
+        $this->dbh->query($qry);
+
+    }
 }
 ?>
