@@ -492,6 +492,126 @@ function parse_raw_html($text)
 function parse_indents($text)
 {
     global $MaxNesting;
+    static $indentPrevLevel = -1;
+    static $indentPrefixString = '';
+    static $indentPrevLineIsBlank = 0;
+    static $indentStealLine = 0;
+
+    // Fix notation for ordered list, changes '[0-9].' to '#'
+    $text = preg_replace('/^(\s*)[0-9]{1,2}\.(.+\\n?$)/', '\\1#\\2', $text);
+
+    // Locate the indent prefix characters.
+    preg_match('/^(\s*)([:\\-\\*#])([^:\\-\\*#].*\\n?)$/', $text, $result);
+
+    $indentSpaces = $result[1];
+    $indentChar = $result[2];
+    $indentText = $result[3];
+
+    // No list on last line, no list on this line. Bail out:
+    if ($indentPrevLevel == -1 && !$indentChar && !$indentStealLine)
+        return $text; // Common case fast.
+
+    $isBlankLine = ((trim($text) == '') ? 1 : 0);
+
+    if (!$indentStealLine)
+    {
+        if ($indentChar)
+        {
+            $indentCurLevel = min($indentPrevLevel + 1, strlen($indentSpaces), $MaxNesting);
+
+            $fixup = '';
+
+            if ($indentCurLevel > $indentPrevLevel)
+                $fixup .= entity_list($indentChar, 'start');
+            else
+            {
+                // close previously openend levels, until current level
+                for ($i = $indentPrevLevel; $i > $indentCurLevel; $i--)
+                    $fixup .= entity_listitem($indentPrefixString[$i], 'end') .
+                            entity_list($indentPrefixString[$i], 'end');
+
+                // close previous list item
+                $fixup .= entity_listitem($indentPrefixString[$indentCurLevel], 'end');
+
+                // if the indent type ([:#-*]) is different from previous at same level
+                if ($indentPrefixString[$indentCurLevel] != $indentChar)
+                    $fixup .= entity_list($indentPrefixString[$indentCurLevel], 'end') .
+                            entity_list($indentChar, 'start');
+            }
+
+            // open new list item
+            $fixup .= entity_listitem($indentChar, 'start');
+
+            $text = $fixup . $indentText;
+
+            $indentPrevLevel = $indentCurLevel;
+            $indentPrefixString = substr($indentPrefixString, 0, $indentCurLevel) . $indentChar;
+        }
+        else
+        {
+            // Note: Every parsing functions is called at the end of the page with
+            // an empty string, i.e. without a carriage return, since some stateful
+            // parsers need to perform final processing. This is the case for
+            // indents and this is why $text is tested against ''.
+            if ($isBlankLine && $text != '')
+            {
+                $text = $indentPrevLineIsBlank ? '' : '<p>';
+            }
+            else if ($indentPrevLineIsBlank || $text == '')
+            {
+                // Check if there's leading spaces, telling to stay in the same
+                // list item but to start a new paragraph.
+                // If no leading spaces, the indents are completely closed.
+                $i = 0; // just in case...
+                if (preg_match('/^\s*/', $text, $leadingSpaces))
+                    $i = strlen($leadingSpaces[0]);
+
+                if ($i < strlen($indentPrefixString))
+                {
+                    // We're at a lower nesting level, end dangling lists up
+                    // to the nesting level specified by the leading spaces.
+                    for ($j = $i; $j <= strlen($indentPrefixString); $j++)
+                    {
+                        $text = entity_listitem($indentPrefixString[$j], 'end') .
+                                entity_list($indentPrefixString[$j], 'end') .
+                                $text;
+                    }
+                    $indentPrefixString = substr($indentPrefixString, 0, $i);
+                    $indentPrevLevel = $i - 1;
+                }
+                else
+                    // $text will be used as is
+                    // $indentChar is set here to keep the line stealing working
+                    $indentChar = ' ';
+            }
+            else
+            {
+                $text = ' ' . trim($text);
+                $indentChar = ' '; // same as above
+            }
+        }
+    }
+
+    $indentPrevLineIsBlank = $isBlankLine;
+
+    // Check if *we* have a trailing '\' to "steal" the next line.
+    if ($indentChar || $indentStealLine)
+    {
+        if (preg_match('/(^|[^\\\\])(\\\\\\\\)*\\\\$/', $text))
+        {
+            $text = preg_replace('/\\\\$/', "\n", $text);
+            $indentStealLine = 1;
+        }
+        else
+            $indentStealLine = 0;
+    }
+
+    return $text;
+}
+
+function parse_indents_old($text)
+{
+    global $MaxNesting;
     static $last_prefix = '';           // Last line's prefix.
     static $steal = '';                 // Stealing the next line?
     static $previousLineIsBlank = 0;    // Added by mich
