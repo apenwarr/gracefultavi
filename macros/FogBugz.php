@@ -744,7 +744,7 @@ class FogTables
 	$whichtasks = sql_simple("select ixTask from schedulator.Estimate " .
 				 "    where 1 $and_user " .
 				 "      and fIsBug=0");
-	$whichtasks = sql_simple("select ixXTask from schedulator.XTask " .
+	$whichtasks += sql_simple("select ixXTask from schedulator.XTask " .
 				  "    where 1 $and_useras " .
 				  "     $and_fixfor");
 	$bugwhere = count($whichbugs) 
