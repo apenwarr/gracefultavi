@@ -1086,8 +1086,8 @@ class Macro_Sched
         {
             $bugid = $words[0];
             $task = array_key_exists(1, $words) ? $words[1] : '';
-            $currest = array_key_exists(2, $words) ? $words[2] : '';
-            $elapsed = array_key_exists(3, $words) ? $words[3] : '';
+            $currest = array_key_exists(2, $words) ? sch_parse_period($words[2]) : '';
+            $elapsed = array_key_exists(3, $words) ? sch_parse_period($words[3]) : '';
 
             $done = ($currest && $currest==$elapsed);
 
