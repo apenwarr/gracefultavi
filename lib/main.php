@@ -66,7 +66,7 @@ $ActionList = array(
                 'backlinks' => array('action/backlinks.php', 'action_backlinks', 'view'),
                 'reparent' => array('action/reparent.php', 'action_reparent', 'edit'),
                 'content' => array('action/content.php', 'action_content', 'edit'),
-                'watch'   => array('action/watch.php', 'action_watch', 'edit'),
+                'subscribe' => array('action/subscribe.php', 'action_subscribe', 'edit'),
                 'lock'    => array('action/lock.php', 'action_lock', ''),
                 'js'      => array('action/js.php', 'action_js', '')
               );

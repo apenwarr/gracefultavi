@@ -37,7 +37,7 @@ print $args['html'];
 <a name="pageContentBottom">
 </div>
 <?php
-  template_common_epilogue(array('watch'     => $args['page'],
+  template_common_epilogue(array('subscribe' => $args['page'],
                                  'twin'      => $args['page'],
                                  'edit'      => $args['page'],
                                  'editver'   => !$args['editable'] ? -1

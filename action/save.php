@@ -5,12 +5,18 @@ require('template/save.php');
 require('lib/category.php');
 require('parse/save.php');
 
+function addSuffix(&$value, $key, $suffix)
+{
+   $value = $value . $suffix;
+}
+
 // Commit an edit to the database.
 function action_save()
 {
     global $archive, $categories, $comment, $document, $ErrorPageLocked;
     global $HTTP_POST_VARS, $MaxPostLen, $minoredit, $nextver, $page, $pagefrom;
     global $pagestore, $REMOTE_ADDR, $Save, $SaveMacroEngine, $UserName;
+    global $WorkingDirectory, $EnableSubscriptions, $EmailSuffix;
 
     if(isset($HTTP_POST_VARS['quickadd'])) $quickadd = $HTTP_POST_VARS['quickadd'];
     if(isset($HTTP_POST_VARS['appending'])) $appending = $HTTP_POST_VARS['appending'];
@@ -129,6 +135,20 @@ function action_save()
     if (!empty($categories))
         add_to_category($page, $categories);
 
+    // Process save macros (e.g., to define interwiki entries).
+    parseText($document, $SaveMacroEngine, $page);
+
+    $pagestore->unlock();               // End "transaction".
+
+    // Handles page subscriptions in background
+    if ($EnableSubscriptions && isset($EmailSuffix)) {
+        if ($subscribed_users = $pg->getSubscribedUsers($UserName)) {
+            array_walk($subscribed_users, 'addSuffix', $EmailSuffix);
+            $subscribed_users = implode(' ', $subscribed_users);
+            exec("$WorkingDirectory/lib/mailnotify.sh $page $subscribed_users");
+        }
+    }
+
     // Aligns the browser with an HTML anchor, showing the last added comment (or quote)
     // See: action/save.php, template/save.php, template/view.php
     if (isset($quickadd))
@@ -141,10 +161,5 @@ function action_save()
         // Standard save
         template_save(array('page' => $page, 'text' => $document));
     }
-
-    // Process save macros (e.g., to define interwiki entries).
-    parseText($document, $SaveMacroEngine, $page);
-
-    $pagestore->unlock();               // End "transaction".
 }
 ?>

@@ -242,7 +242,7 @@ function html_twin_x($whichwiki, $linktext, $ref)
          '<span class="twin"><em>' . $linktext . '</em></span></a>';
 }
 function html_category($time, $page, $host, $user, $comment, $version,
-                       $hotPages, $newPages, $modifiedWatchedPages)
+                       $hotPages, $newPages)
 {
   global $pagestore, $UserName, $UseHotPages;
 
@@ -264,9 +264,6 @@ function html_category($time, $page, $host, $user, $comment, $version,
 
   if ($UseHotPages && in_array($page, $hotPages))
     $text .= '<img src="images/hot.png" alt="Hot!" title="Hot!" width="16" height="15" border="0">';
-
-  if (in_array($page, $modifiedWatchedPages))
-    $text .= '<img src="images/watch.png" alt="Modified watched page" title="Modified watched page" width="19" height="13" border="0">';
 
   $text = $text . ' . . . . ' .
           ($user == '' ? $host : html_ref($user, $user, $host));

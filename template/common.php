@@ -174,7 +174,6 @@ if (isset($args['tree']))
 // Its parameters are passed as an associative array with the following
 // members:
 //
-//   'watch'     => A string containing the page's name.
 //   'twin'      => A string containing the page's name; if not empty,
 //                  twin pages will be sought and printed.
 //   'edit'      => A string containing the page's name; if not empty,
@@ -191,10 +190,8 @@ if (isset($args['tree']))
 
 function template_common_epilogue($args)
 {
-  global $FindScript, $pagestore, $page, $UserName, $PrefsScript;
-  global $AdditionalFooter;
-  global $HomePage;
-  global $ndfnow;
+  global $AdditionalFooter, $EmailSuffix, $EnableSubscriptions, $FindScript;
+  global $HomePage, $ndfnow, $page, $pagestore, $PrefsScript, $UserName;
 
   $pg = $pagestore->page($page);
   $pagetext = $pg->text;
@@ -216,19 +213,15 @@ else
 ?></small>
 
 <?php
-if ($UserName != '' && isset($args['watch']) && !empty($args['watch']) && $page != $HomePage && $page != 'RecentChanges')
-{
-    if ($pg->isWatched($UserName))
-        $caption = 'Remove watch';
+if ($EnableSubscriptions && isset($EmailSuffix) && $UserName != ''
+    && isset($args['subscribe']) && !empty($args['subscribe'])) {
+    if ($pg->isSubscribed($UserName))
+        $caption = 'Unsubscribe';
     else
-        $caption = 'Watch this page';
+        $caption = 'Subscribe';
 
-    print '| <small>';
-    print '<a href="' . pageWatchURL($args['watch']) . '">';
-    print '<img src="images/watch.png" alt="' . $caption . '" title="' . $caption . '" width="19" height="13" border="0">';
-    print $caption;
-    print '</a>';
-    print '</small>';
+    print ' | <small><a href="' . pageSubscribeURL($args['subscribe']) . '">' .
+          $caption . '</a></small>';
 }
 ?>
 <br><br>

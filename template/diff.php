@@ -35,8 +35,7 @@ print $args['html'];
 ?>
 
 <?php
-  template_common_epilogue(array('watch'     => '',
-                                 'twin'      => $args['page'],
+  template_common_epilogue(array('twin'      => $args['page'],
                                  'edit'      => $args['page'],
                                  'editver'   => $args['editable'] ? 0 : -1,
                                  'history'   => $args['page'],

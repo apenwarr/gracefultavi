@@ -122,26 +122,6 @@ class PageStore
         return $list;
     }
 
-    // Return modified watched pages of a user.
-    function getModifiedWatchedPages($userName)
-    {
-        global $PgTbl, $PwTbl;
-
-        $qid = $this->dbh->query("SELECT DISTINCT title " .
-                                 "FROM $PgTbl p, $PwTbl w " .
-                                 "WHERE p.title = w.page " .
-                                 "AND p.time > w.time " .
-                                 "AND p.minoredit = 0 " .
-                                 "AND w.username = '$userName'");
-
-        $list = array();
-
-        while(($result = $this->dbh->result($qid)))
-            $list[] = $result[0];
-
-        return $list;
-    }
-
     // Return backlinks
     function getBacklinks($text)
     {
@@ -644,11 +624,11 @@ class PageStore
   function lock()
   {
     global $PgTbl, $IwTbl, $SwTbl, $LkTbl, $RtTbl, $RemTbl,
-    	$PaTbl, $MpTbl, $PwTbl, $LeTbl;
+           $PaTbl, $MpTbl, $SuTbl, $LeTbl;
 
     $this->dbh->query("LOCK TABLES $PgTbl WRITE, $IwTbl WRITE, $SwTbl WRITE, " .
                       "$LkTbl WRITE, $RtTbl WRITE, $RemTbl WRITE, " .
-                      "$PaTbl WRITE, $MpTbl WRITE, $PwTbl WRITE, $LeTbl WRITE");
+                      "$PaTbl WRITE, $MpTbl WRITE, $SuTbl WRITE, $LeTbl WRITE");
   }
 
   // Unlock the database tables.

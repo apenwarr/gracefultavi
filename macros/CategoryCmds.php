@@ -44,11 +44,6 @@ class Macro_CategoryCmds
 
         $newPages = $pagestore->getNewPages();
 
-        if ($UserName == '')
-            $modifiedWatchedPages = array();
-        else
-            $modifiedWatchedPages = $pagestore->getModifiedWatchedPages($UserName);
-
         $now = time();
         for ($i = 0; $i < count($list); $i++)
         {
@@ -69,7 +64,7 @@ class Macro_CategoryCmds
 
             $text = $text . html_category($list[$i][0], $list[$i][1], $list[$i][2],
                                           $list[$i][3], $list[$i][5], $list[$i][7],
-                                          $hotPagesList, $newPages, $modifiedWatchedPages);
+                                          $hotPagesList, $newPages);
 
             // Do not put a newline on the last one.
             if ($i < count($list) - 1)

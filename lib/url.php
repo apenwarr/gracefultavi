@@ -34,8 +34,8 @@ if(!isset($ReparentBase))
   { $ReparentBase = $ScriptBase . '?action=reparent&amp;page='; }
 if(!isset($ContentBase))
   { $ContentBase = $ScriptBase . '?action=content&amp;page='; }
-if(!isset($PageWatchBase))
-  { $PageWatchBase = $ScriptBase . '?action=watch&amp;page='; }
+if(!isset($PageSubscribeBase))
+  { $PageSubscribeBase = $ScriptBase . '?action=subscribe&amp;page='; }
 
 if(!function_exists('viewURL'))
 {
@@ -122,13 +122,13 @@ function contentURL($page)
 }
 }
 
-if(!function_exists('pageWatchURL'))
+if(!function_exists('pageSubscribeURL'))
 {
-function pageWatchURL($page)
+function pageSubscribeURL($page)
 {
-  global $PageWatchBase;
+  global $PageSubscribeBase;
 
-  return $PageWatchBase . urlencode($page);
+  return $PageSubscribeBase . urlencode($page);
 }
 }
 

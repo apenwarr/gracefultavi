@@ -142,6 +142,15 @@ $MaxNesting = 20;
 // $MaxHeading determines the maximum allowed heading level in headings.
 $MaxHeading = 6;
 
+// If $EnableSubscriptions is set to 1, users will be allowed to subscribe to
+// pages and receive an email when they're updated. If it is set to 0, this
+// feature will be disabled.
+$EnableSubscriptions = 0;
+
+// $EmailSuffix specifies the email address suffix that should be appended to
+// the username when sending the page subscription email.
+$EmailSuffix = '';
+
 // $ParseEngine indicates what parsing rules will be run when displaying a
 //   wiki page.  To disable a particular rule, you can place a comment at the
 //   beginning of its line.  The order of this list is important.

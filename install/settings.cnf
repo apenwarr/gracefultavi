@@ -172,3 +172,16 @@ To get the current working directory, type 'pwd' at a shell prompt.
 For example, /home/mich/wiki/gracefultavi
              /usr/bin/gracefultavi
 // Complete working directory of the wiki files, no trailing slashes
+----
+boolean $EnableSubscriptions 0
+Would you like page subscriptions to be enabled on your wiki? This feature allows
+users to receive an email when specified pages are updated.
+// If $EnableSubscriptions is set to 1, users will be allowed to subscribe to
+// pages and receive an email when they're updated. If it is set to 0, this
+// feature will be disabled.
+----
+string $EmailSuffix ''
+Enter the email suffix of your company. For example, if your email is
+'me@mycompany.org', enter '@mycompany.org'.
+// $EmailSuffix specifies the email address suffix that should be appended to
+// the username when sending the page subscription email.

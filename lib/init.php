@@ -23,7 +23,7 @@ $RtTbl = $DBTablePrefix . 'rate';
 $RemTbl = $DBTablePrefix . 'remote_pages';
 $PaTbl = $DBTablePrefix . 'parents';
 $MpTbl = $DBTablePrefix . 'metaphone';
-$PwTbl = $DBTablePrefix . 'pageswatch';
+$SuTbl = $DBTablePrefix . 'subscribe';
 $LeTbl = $DBTablePrefix . 'lastedit';
 // Don't forget to update pagestore->lock() when adding new tables.
 

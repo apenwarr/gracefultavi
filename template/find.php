@@ -70,8 +70,7 @@ if ($args['pages'])
 </div>
 
 <?php
-  template_common_epilogue(array('watch'     => '',
-                                 'twin'      => '',
+  template_common_epilogue(array('twin'      => '',
                                  'edit'      => '',
                                  'editver'   => 0,
                                  'history'   => '',

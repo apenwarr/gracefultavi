@@ -70,8 +70,7 @@ else
 </div>
 
 <?php
-  template_common_epilogue(array('watch'     => '',
-                                 'twin'      => $args['page'],
+  template_common_epilogue(array('twin'      => $args['page'],
                                  'edit'      => '',
                                  'editver'   => 0,
                                  'history'   => '',

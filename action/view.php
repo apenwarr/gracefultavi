@@ -34,11 +34,6 @@ function action_view()
 
     $document = $pg->text;
 
-    // Saves user's access to the page if it's marked to be watched for that
-    // user.
-    if ($pg->isWatched($UserName))
-        $pg->updateAccessTime($UserName);
-
     gen_headers($pg->time);
 
     template_view(array('page'      => $page,

@@ -102,10 +102,9 @@ $qid = $dbh->prepare("CREATE TABLE " . $prefix . "metaphone ( "
                      . "primary key (page) )");
 $qid->execute or die "Error creating table\n";
 
-$qid = $dbh->prepare("CREATE TABLE " . $prefix . "pageswatch ( "
+$qid = $dbh->prepare("CREATE TABLE " . $prefix . "subscribe ( "
                      . "page varchar(80) binary not null, "
                      . "username varchar(80) not null, "
-                     . "time timestamp(14), "
                      . "primary key (page, username) )");
 $qid->execute or die "Error creating table\n";
 

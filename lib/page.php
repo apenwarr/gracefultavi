@@ -136,13 +136,13 @@ class WikiPage
         }
     }
 
-    // Check if the page is set to be watched by a user.
-    function isWatched($userName)
+    // Check if a user is subscribed to a page.
+    function isSubscribed($userName)
     {
-        global $PwTbl;
-        
+        global $SuTbl;
+
         $query = "SELECT count(*) " .
-                 "FROM $PwTbl " .
+                 "FROM $SuTbl " .
                  "WHERE page='{$this->name}' " .
                  "AND username='$userName'";
 
@@ -156,37 +156,43 @@ class WikiPage
             return 1;
     }
 
-    // Toggle page watch for a user
-    function toggleWatch($userName)
+    // Toggle page subscription for a user
+    function toggleSubscribe($userName)
     {
-        global $PwTbl;
-        
+        global $SuTbl;
+
         if ($userName != '')
         {
-            if ($this->isWatched($userName))
-                $this->db->query("DELETE FROM $PwTbl " .
+            if ($this->isSubscribed($userName))
+                $this->db->query("DELETE FROM $SuTbl " .
                                  "WHERE page = '{$this->name}' " .
                                  "AND username = '$userName'");
             else
-                $this->db->query("INSERT INTO $PwTbl (page, username) " .
+                $this->db->query("INSERT INTO $SuTbl (page, username) " .
                                  "VALUES ('{$this->name}', '$userName')");
         }
 
         return;
     }
 
-    // Saves access time. Assume that isWatched is used before to check if the
-    // record exists in the table PwTbl.
-    function updateAccessTime($userName)
+    function getSubscribedUsers($skip_username = '')
     {
-        global $PwTbl;
+        global $SuTbl;
 
-        $this->db->query("UPDATE $PwTbl " .
-                         "SET time = NULL " .
-                         "WHERE page = '{$this->name}' " .
-                         "AND username = '$userName'");
+        $query = "SELECT username " .
+                 "FROM $SuTbl " .
+                 "WHERE page='{$this->name}'";
+        if ($skip_username) {
+            $query .= " AND username<>'$skip_username'";
+        }
+        $qid = $this->db->query($query);
 
-        return;
+        $usernames = array();
+        while ($result = $this->db->result($qid)) {
+            $usernames[] = $result[0];
+        }
+
+        return $usernames;
     }
 }
 ?>
