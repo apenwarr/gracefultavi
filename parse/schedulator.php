@@ -524,7 +524,9 @@ function sch_extrabugs($user, $fixfor, $enddate)
     $start = sch_format_day($sch_start);
     $today = sch_today();
     $fixfor_in_past = ($enddate && sch_parse_day($enddate) < $today);
-    $bugs1 = $bugs2 = "";
+    
+    $bugs1 = array();
+    $bugs2 = array();
     
     $a = bug_list($user, $fixfor, $start, $enddate);
     foreach ($a as $bugid => $bug)
@@ -551,13 +553,18 @@ function sch_extrabugs($user, $fixfor, $enddate)
 	    continue;
 	}
 	
-	$val = sch_bug($bugid, $bug[0], $bug[1], $bug[2], $bug[3], 0);
 	if ($done)
-	  $bugs1 .= $val;
+	  $bugs1[$bugid] = $bug;
 	else
-	  $bugs2 .= $val;
+	  $bugs2[$bugid] = $bug;
     }
-    return $ret . $bugs1 . $bugs2;
+    
+    foreach ($bugs1 as $bugid => $bug)
+      $ret .= sch_bug($bugid, $bug[0], $bug[1], $bug[2], $bug[3], 0);
+    foreach ($bugs2 as $bugid => $bug)
+      $ret .= sch_bug($bugid, $bug[0], $bug[1], $bug[2], $bug[3], 0);
+    
+    return $ret;
 }
 
 function sch_milestone($descr, $name, $due)
@@ -578,14 +585,15 @@ function sch_milestone($descr, $name, $due)
     if (!$due)
       $due = sch_format_day($sch_curday+1);
     
+    $today = sch_today();
     $old_curday = $sch_curday;
     
     $newday = sch_parse_day($due);
     $xdue = sch_format_day($newday);
     $slip = ($newday-$sch_curday)*8 / $sch_load;
     #$ret .= sch_line("SLIPPAGE (to $xdue)", "", 0,$slip,0,$slip, 0, true);
-    $ret .= sch_line("<b>$descr: $name ($xdue)</b>", '', 0,$slip,0,$slip, 0,
-		     false);
+    $ret .= sch_line("<b>$descr: $name ($xdue)</b>", '', 0,$slip,0,$slip,
+		     $newday < $today, false);
     $sch_need_extraline = 1;
     
     $sch_curday = $old_curday; # slippage doesn't actually take time... right?
