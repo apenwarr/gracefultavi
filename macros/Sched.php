@@ -1201,6 +1201,34 @@ function sch_switch_loadfactor($load)
 }
 
 
+function sch_next_milestone($fixfor)
+{
+    global $bug_h;
+    bug_init();
+    $ret = "";
+    
+    $query = "select dtDue " . 
+             "  from schedulator.Milestone " .
+             "  where dtDue > now() and sMilestone='$fixfor' " .
+             "  order by dtDue limit 1 ";
+    $result = mysql_query($query, $bug_h);
+    $row = mysql_fetch_row($result);
+    if (count($row) >= 1)
+      return $row[0];
+    else
+      return "";
+}
+
+
+function sch_month_out($str, $count)
+{
+    $months = array("Jan", "Feb", "Mar", "Apr", "May", "Jun",
+		    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec");
+    $simple = $months[substr($str, 5, 2) - 1];
+    return "<th class='year' colspan=$count>$simple</th>";
+}
+
+
 function sch_summary($fixfor)
 {
     global $bug_h;
@@ -1223,15 +1251,27 @@ function sch_summary($fixfor)
 	$task = $row[2];
 	
 	# $nicedue = ereg_replace("-", " ", $due);
-	$nicedue = ereg_replace("(....)-(..)-(..)", "\\2 \\3", $due);
+	$nicedue = ereg_replace("(....)-(..)-(..)", "\\3", $due);
 	$dates[$due] = $nicedue;
 	$last_date = $due;
 	
 	$bugs[$person][$due][] = $task;
     }
     
+    $nextbounce = sch_next_milestone($fixfor);
+    if ($nextbounce)
+    {
+	$next_str = " (Scheduled for $nextbounce)";
+	$daystobounce = (strtotime($nextbounce) - time()) / 24 / 60 / 60;
+    }
+    else
+    {
+	$next_str = " (No bounces scheduled)";
+	$daystobounce = 365;
+    }
+    
     $ret .= "<h1>Schedulator Summary for '$fixfor'</h1>\n";
-    $ret .= "<p>Predicted Bounce: $last_date</p>\n";
+    $ret .= "<p>Predicted Bounce: $last_date$next_str</p>\n";
     
     $ret .= "<style type='text/css'>\n" .
       " table.schedsum th " .
@@ -1240,8 +1280,14 @@ function sch_summary($fixfor)
              "{ background: lightgray }\n" .
       " table.schedsum th.day,td.bugs " .
              "{ font-size: 8pt; }\n" .
+      " table.schedsum td.superlate " .
+             "{ background: #ee9999 }\n" .
+      " table.schedsum td.superlate a:link,td.superlate a:visited " .
+             "{ color: yellow; background: #aa0000 }\n" .
       " table.schedsum td.late " .
-             "{ background: yellow }\n" .
+             "{ background: #f0f0c0 }\n" .
+      " table.schedsum td.late a:link,td.late a:visited " .
+             "{ color: red; background: yellow }\n" .
       "</style>";
     
     $date_list = array_keys($dates);
@@ -1259,7 +1305,6 @@ function sch_summary($fixfor)
     foreach ($date_list as $due)
     {
 	$year = ereg_replace("(....)-(..)-(..)", "\\1", $due);
-	$month = ereg_replace("(....)-(..)-(..)", "\\1 \\2", $due);
 	if (!$lastyear) $lastyear = $year;
 	if ($year != $lastyear)
 	{
@@ -1270,6 +1315,24 @@ function sch_summary($fixfor)
 	$yearcount++;
     }
     $ret .= "<th class='year' colspan=$yearcount>$lastyear</th>";
+    $ret .= "</tr>\n";
+    
+    $ret .= "<tr class='schedsum'><th></th>";
+    $lastmonth = 0;
+    $monthcount = 0;
+    foreach ($date_list as $due)
+    {
+	$month = ereg_replace("(....)-(..)-(..)", "\\1 \\2", $due);
+	if (!$lastmonth) $lastmonth = $month;
+	if ($month != $lastmonth)
+	{
+	    $ret .= sch_month_out($lastmonth, $monthcount);
+	    $lastmonth = $month;
+	    $monthcount = 0;
+	}
+	$monthcount++;
+    }
+    $ret .= sch_month_out($lastmonth, $monthcount);
     $ret .= "</tr>\n";
     
     $ret .= "<tr><th></th><th class='day'>" 
@@ -1302,7 +1365,14 @@ function sch_summary($fixfor)
 	    }
 
 	    $colclass = "";
-	    if ($n && strtotime($due) < time())
+	    $daysleft = (strtotime($due) - time()) / 24 / 60 / 60;
+	    if ($daysleft < -7)
+	      $colclass = "superlate";
+	    else if ($daysleft < -2)
+	      $colclass = "late";
+	    else if ($daystobounce - $daysleft < 0)
+	      $colclass = "superlate";
+	    else if ($daystobounce - $daysleft < ($daystobounce / 2.5))
 	      $colclass = "late";
 	    
 	    $ret .= "<td class='bugs $colclass'>$v</td>";
