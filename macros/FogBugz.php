@@ -497,38 +497,38 @@ class Estimate
     
     function est_orig()
     {
-	if ($this->origest != '')
+	if ($this->origest !== '')
 	  return $this->origest;
 	else if ($this->isbug && $this->task->isresolved() && !$this->task->resolved_byme)
 	  return 0.01; // FIXME: for broken old-style schedulator weirdness
 	else if ($this->isbug)
 	  return $this->task->origest;
 	else
-	  return '';
+	  return 0;
     }
     
     function est_curr()
     {
-	if ($this->currest != '')
+	if ($this->currest !== '')
 	  return $this->currest;
 	else if ($this->isbug && $this->task->isresolved() && !$this->task->resolved_byme)
 	  return 0.01; // FIXME: for broken old-style schedulator weirdness
 	else if ($this->isbug)
 	  return $this->task->currest;
 	else
-	  return '';
+	  return 0;
     }
     
     function est_elapsed()
     {
-	if ($this->elapsed != '')
+	if ($this->elapsed !== '')
 	  return $this->elapsed;
 	else if ($this->isbug && $this->task->isresolved() && !$this->task->resolved_byme)
 	  return 0.009; // FIXME: for broken old-style schedulator weirdness
 	else if ($this->isbug)
 	  return $this->task->elapsed;
 	else
-	  return '';
+	  return 0;
     }
     
     function est_remain()
@@ -536,12 +536,12 @@ class Estimate
 	if ($this->isestimated())
 	  return $this->est_curr() - $this->est_elapsed();
 	else
-	  return '';
+	  return 0;
     }
 
     function isestimated()
     {
-	return $this->est_curr() != '' && $this->est_elapsed() != '';
+	return $this->est_curr() !== '' && $this->est_elapsed() !== '';
     }
     
     function isdone()
