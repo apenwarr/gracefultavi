@@ -235,12 +235,12 @@ class Macro_TaskMaster
     
     function savecookie($name)
     {
-	if ($_GET[$name])
+	if (array_key_exists($name, $_GET))
 	{
 	    setcookie($name, $_GET[$name]);
 	    $_REQUEST[$name] = $_GET[$name];
 	}
-	else if ($_POST[$name])
+	else if (array_key_exists($name, $_POST))
 	{
 	    setcookie($name, $_POST[$name]);
 	    $_REQUEST[$name] = $_POST[$name];
@@ -307,45 +307,40 @@ class Macro_TaskMaster
 	$user = $_REQUEST["filter-user"];
 	$fixfor = $_REQUEST["filter-fixfor"];
 	$text = $_REQUEST["filter-text"];
-	$userquery = ($user > -1) ? "and x.ixPersonAssignedTo='$user'" : "";
-	$fixforquery = ($fixfor > -1) ? "and x.ixFixFor='$fixfor'" : "";
-	$textquery = ($text) ? "and sSubTask like '%$text%'" : "";
-	$query = "select ixXTask, sTask, sSubTask, sFixFor, " .
-	  " sFullName, fDone " .
-	  " from schedulator.XTask x, FixFor f, Person p" .
-	  " where x.ixFixFor=f.ixFixFor " .
-	  " and p.ixPerson=x.ixPersonAssignedTo " .
-	  " $userquery $fixforquery $textquery limit 500 ";
-	
-	$result = mysql_query($query, $this->bug_h);
-	if (!$result)
-	  $this->out(mysql_error($this->bug_h));
 	
 	$this->table("table");
 	$this->row(6, "(*)", "XTask", "Task", "Subtask",
 		   "FixFor", "Assigned To");
 	
-	while ($row = mysql_fetch_row($result))
+	foreach ($this->db->xtask->a as $t)
 	{
-	    $done = $row[5];
+	    if ($fixfor>=0 && $t->fixfor->ix != $fixfor)
+	      continue;
+	    if ($user>=0 && $t->assignto->ix != $user)
+	      continue;
+	    if ($text!='' && !strstr(strtolower($t->name), strtolower($text)))
+	      continue;
+	    
+	    $tag = "task-select-" . $t->ix;
+	    $done = $t->isdone();
 	    $doneclass = $done ? "done" : "notdone";
 	    $this->out("<tr class='$doneclass fooref' " .
 	       "onClick='" .
-	       "x = document.forms[\"taskform\"][\"task-select-$row[0]\"]; " .
+	       "x = document.forms[\"taskform\"][\"$tag\"]; " .
 	       "x.waschecked = x.checked = !x.waschecked'>");
 	    
-	    $checked = $_REQUEST["select-all"] || $_REQUEST[$row[0]];
+	    $checked = $_REQUEST["select-all"] || $_REQUEST[$tag];
 	    if ($_REQUEST["unselect-all"])
 	      $checked = 0;
 	    $this->push();
-	    $this->form_checkbox("task-select-$row[0]", $checked);
+	    $this->form_checkbox($tag, $checked);
 	    $this->col(1, $this->pop());
 	    
-	    $this->col(1, $row[0]);
-	    $this->col(0, $row[1]);
-	    $this->col(0, $row[2], "fooref");
-	    $this->col(0, $row[3]);
-	    $this->col(0, $row[4]);
+	    $this->col(1, $t->ix);
+	    $this->col(0, $t->task);
+	    $this->col(0, $t->name, "fooref");
+	    $this->col(0, $t->fixfor->name);
+	    $this->col(0, $t->assignto->fullname);
 	    
 	    $this->out("</tr>");
 	}
@@ -390,7 +385,30 @@ class Macro_TaskMaster
 	    $this->out("</tr>");
 	}
 	$this->table_end();
-	$this->form_button("cmd", "Create");
+	$this->form_button("cmdCreate", "Create");
+	$this->out("<hr>");
+	$this->out("For build:");
+	$bounce = $this->db->fixfor->a[$_REQUEST["filter-fixfor"]];
+	if (!$bounce)
+	  $bounce = "??";
+	else
+	  $bounce = $bounce->name . "#??";
+	$this->form_hidden("oldtestplan-bounce", $bounce);
+	$this->form_input("testplan-bounce", $bounce, 20);
+	$this->form_button("cmdTestPlans", "Create TestPlans");
+    }
+    
+    function add_task($task, $subtask, $fixforix, $userix)
+    {
+	$task = mysql_escape_string($task);
+	$subtask = mysql_escape_string($subtask);
+	$fixforix += 0;
+	$userix += 0;
+	$this->query
+	  ("insert ignore into schedulator.XTask " .
+	   "  (sTask,sSubTask,ixFixFor,ixPersonAssignedTo) " .
+	   "  values (\"$task\", \"$subtask\", '$fixforix', '$userix') "
+	   );
     }
     
     function do_create()
@@ -413,11 +431,61 @@ class Macro_TaskMaster
 		$subtask = $_REQUEST["create-$i-subtask"];
 		if ($task != "") {
 		    $this->out("Creating task: '$task' '$subtask'<br>");
-		    $this->query
-		     ("insert into schedulator.XTask " .
-		      "  (sTask,sSubTask,ixFixFor,ixPersonAssignedTo,fDone) " .
-		      "  values (\"$task\", \"$subtask\", $fixfor, $user, 0) "
-		      );
+		    $this->add_task($task, $subtask, $fixfor, $user);
+		}
+	    }
+	    
+	    if ($_REQUEST["cmdTestPlans"])
+	    {
+		$rel = $_REQUEST["testplan-bounce"];
+		$this->out("Creating test plans in release '$rel'.<br>");
+		
+		if ($rel == $_REQUEST["oldtestplan-bounce"])
+		{
+		    $this->out("You forgot to fill in the bounce number!  " .
+			       "Aborted.<br>");
+		}
+		else
+		{
+		    global $pagestore;
+		    $pg = $pagestore->page("TestingWeaver");
+		    $pg->read();
+		    
+		    preg_match_all("/(Testing[-a-zA-Z0-9_.]+)/", $pg->text,
+				   $matches);
+		    $create = array();
+		    $skip = array();
+		    
+		    foreach ($matches[0] as $match)
+		    {
+			if ($match == "TestingProcedureTemplate"
+			    || $match == "TestingFeature"
+			    || preg_match("/^TestingWeaver[0-9]/", $match))
+			  $skip[$match] = $match;
+			else
+			  $create[$match] = $match;
+		    }
+		    
+		    sort($skip);
+		    sort($create);
+		    
+		    if (count($skip) > 0)
+		    {
+			$this->out("WARNING: Not making tasks " .
+				   "for these pages: <ul>");
+			foreach ($skip as $p)
+			  $this->out("$p ");
+			$this->out("</ul>");
+		    }
+		    
+		    $this->out("Making tasks for these pages:<ul>");
+		    foreach ($create as $p)
+		    {
+			$this->out("$p ");
+			$this->add_task("$rel", "Execute $p on $rel",
+					$fixfor, $user);
+		    }
+		    $this->out("</ul>");
 		}
 	    }
 	}
@@ -573,80 +641,24 @@ class Macro_TaskMaster
 	}
 	else if ($words[0] == "CREATE")
 	{
-	    if ($_REQUEST["cmd"] == "Create")
+	    if ($_REQUEST["cmdCreate"] || $_REQUEST["cmdTestPlans"])
 	      $this->do_create();
 	    else
 	      $this->do_create_form();
-/*	    
-	    $ave = $this->db->person->first_prefix("username", "apenwar");
-	    $this->out("person: $ave->fullname; $ave->email; $ave->username<br>");
-	    
-	    $foo = $this->db->project->first("name", "1-Weaver");
-	    $em = $foo->owner->email;
-	    $this->out("project: $foo->ix; $foo->name; $em<br>");
-	    
-	    $foo = $this->db->fixfor->first("name", "Wv 4.0");
-	    $projname = $foo->project->name;
-	    $this->out("fixfor: $foo->ix; $foo->name; $projname<br>");
-	    
-	    $foo = $this->db->bug->first_match("name", "/crash/i");
-	    $this->out("bug: $foo->name;<br>");
-	    
-	    $foo = $this->db->estimate->a[5];
-	    $pname = $foo->assignto->fullname;
-	    $this->out("estimate: $pname;<br>");
-*/	    
-	    $this->table("table");
-	    $this->row(5, "XTask", "Task", "SubTask", "FixFor", "Assigned To");
-	    foreach ($this->db->xtask->a as $t)
-	    {
-		$this->row(1, $t->ix, $t->task, $t->name,
-			   $t->fixfor->name, $t->assignto->email);
-	    }
-	    $this->table_end();
-/*
-	    $this->table("table");
-	    $this->row(2, "FixFor", "Due");
-	    foreach ($this->db->fixfor->a as $t)
-	    {
-		$this->row(1, $t->name, $t->date);
-	    }
-	    $this->table_end();
-*/
-/*
-	    $this->table("table");
-	    $this->row(4, "Bug", "Title", "FixFor", "Assigned To");
-	    foreach ($this->db->bug->a as $t)
-	    {
-		$this->row(1,
-		   "<a href='http://nits/fogbugz3?$t->ix'>$t->ix</a>",
-		   $t->name, $t->fixfor->name, $t->assignto->email);
-	    }
-	    $this->table_end();
-*/
-	    $this->table("table");
-	    $this->row(8, "ix", "Person", "bug?", "task",
-		       "origest", "currest", "elapsed", "remain");
-	    foreach ($this->db->estimate->a as $e)
-	    {
-		$this->row_class
-		  (2, $e->isdone() ? "done" : "notdone",
-		   $e->isbug ? bug_link($e->id) : $e->id,
-		   $e->task->assignto->email,
-		   $e->isbug . ':' . $e->fake . ':' .
-		     $e->isdone() . ':' . $e->task->isdone(),
-		   $e->task->name,
-		   $e->est_orig(), $e->est_curr(), $e->est_elapsed(),
-		   $e->est_remain());
-	    }
-	    $this->table_end();
 	}
 	else if ($words[0] == "ASSIGN")
 	{
 	    if ($_REQUEST["cmd"] == "Assign")
-	      $this->do_assign();
+	    {
+		$this->do_assign();
+		$this->db = new FogTables($userix);
+	    }
 	    if ($_REQUEST["cmd"] == "Retarget")
-	      $this->do_retarget();
+	    {
+		$this->do_retarget();
+		$this->db = new FogTables($userix);
+	    }
+	    
 	    $this->do_assign_form($_REQUEST["new-user"]);
 	}
 	$this->form_end();

@@ -600,12 +600,18 @@ class FogTables
 	if (!$userix)
 	  $userix = 0;
 	
-	$this->my_userix = $userix;
 	$this->person = new PersonTable();
 	$this->project = new ProjectTable($this->person);
 	$this->fixfor = new FixForTable($this->project);
 	
+	$this->my_userix = $userix;
 	$p = $this->person->a[$userix];
+	if (!$p)
+	  $p = $this->person->first("username", $userix);
+	if (!$p)
+	  $p = $this->person->first("fullname", $userix);
+	if ($p)
+	  $userix = $p->ix;
 	$whichbugs = sql_simple("select ixTask from schedulator.Estimate " .
 				"    where ixPerson=$userix and fIsBug=1");
 	$whichbugs += sql_simple("select ixBug from Bug " .
