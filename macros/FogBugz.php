@@ -150,11 +150,11 @@ class FixFor
 function fixfor_compare($a, $b)
 {
     if ($a->date > $b->date)
-      return 1;
+        return 1;
     else if ($a->date < $b->date)
-      return -1;
+        return -1;
     else
-      return strcmp($a->name, $b->name);
+        return strcmp($a->name, $b->name);
 }
 
 
@@ -193,9 +193,9 @@ class FixForTable extends FogTable
 	foreach ($this->a as $f)
 	{
 	    if (!$date || strcmp($f->date, $date) <= 0)
-	      $match = $f;
+                $match = $f;
 	    else
-	      return $match; // passed the last one
+                return $match; // passed the last one
 	}
 	
 	return $match;
@@ -249,7 +249,7 @@ class Bug
 	$this->manual_ix = $_manual_ix;
 	
 	if ($this->isresolved())
-	  $this->elapsed = $this->currest;
+            $this->elapsed = $this->currest;
     }
     
     function isopen()
@@ -304,13 +304,13 @@ function bug_compare($a, $b)
     $bix =  $b->manual_ix == 0 ? $b->ix : $b->manual_ix;
 
     if ($fixcmp)
-      return $fixcmp;
+        return $fixcmp;
     else if ($ares != $bres)
-      return strcmp($ares, $bres);
+        return strcmp($ares, $bres);
     else if ($a->get_priority() != $b->get_priority())
-      return $a->get_priority() - $b->get_priority();
+        return $a->get_priority() - $b->get_priority();
     else
-      return $aix - $bix;
+        return $aix - $bix;
 }
 
 
@@ -361,7 +361,7 @@ class BugTable extends FogTable
         if (!$r)
         {
             // FIXME: Freak out, or make something up
-            print "Aaah! Freaking out in create_bug<br>\n";
+            print "Error: Could not find bug $bugid in the database.<br>\n";
         }
 	return $this->create_bug_from_db_row($r);
     }
@@ -449,10 +449,10 @@ class XTaskTable extends FogTable
 	   "  from schedulator.XTask $where");
 	while ($r = mysql_fetch_row($res))
         {
-	  $p[$r[0]] = &new XTask($r[0], $r[1], $r[2], $fixfors->a[$r[3]],
-				$persons->a[$r[4]], $persons->a[$my_userix]);
-          if ($r[0] > $this->max_ix)
-            $this->max_ix = $r[0];
+            $p[$r[0]] = &new XTask($r[0], $r[1], $r[2], $fixfors->a[$r[3]],
+                                $persons->a[$r[4]], $persons->a[$my_userix]);
+            if ($r[0] > $this->max_ix)
+                $this->max_ix = $r[0];
         }
 	uasort($p, "bug_compare");
 	$this->FogTable($p);
@@ -492,59 +492,59 @@ class Estimate
 	$this->my_user = $h;
         $this->loadfactor = $loadfactor;
 	if (!$this->isbug)
-	  $this->id = "TM#" . $this->task->ix;
+            $this->id = "TM#" . $this->task->ix;
 	else
-	  $this->id = $this->task->ix;
+            $this->id = $this->task->ix;
     }
     
     function get_resolvedate()
     {
 	return $this->resolvedate ? $this->resolvedate
-	  : ($this->isbug ? $this->task->resolvedate : '');
+            : ($this->isbug ? $this->task->resolvedate : '');
     }
     
     function est_orig()
     {
 	if ($this->origest !== '')
-	  return $this->origest;
+            return $this->origest;
 	else if ($this->isbug && $this->task->isresolved() && !$this->task->resolved_byme)
-	  return 0.01; // FIXME: for broken old-style schedulator weirdness
+            return 0.01; // FIXME: for broken old-style schedulator weirdness
 	else if ($this->isbug)
-	  return $this->task->origest;
+            return $this->task->origest;
 	else
-	  return 0;
+            return 0;
     }
     
     function est_curr()
     {
 	if ($this->currest !== '')
-	  return $this->currest;
+            return $this->currest;
 	else if ($this->isbug && $this->task->isresolved() && !$this->task->resolved_byme)
-	  return 0.01; // FIXME: for broken old-style schedulator weirdness
+            return 0.01; // FIXME: for broken old-style schedulator weirdness
 	else if ($this->isbug)
-	  return $this->task->currest;
+            return $this->task->currest;
 	else
-	  return 0;
+            return 0;
     }
     
     function est_elapsed()
     {
 	if ($this->elapsed !== '')
-	  return $this->elapsed;
+            return $this->elapsed;
 	else if ($this->isbug && $this->task->isresolved() && !$this->task->resolved_byme)
-	  return 0.009; // FIXME: for broken old-style schedulator weirdness
+            return 0.009; // FIXME: for broken old-style schedulator weirdness
 	else if ($this->isbug)
-	  return $this->task->elapsed;
+            return $this->task->elapsed;
 	else
-	  return 0;
+            return 0;
     }
     
     function est_remain()
     {
 	if ($this->isestimated())
-	  return $this->est_curr() - $this->est_elapsed();
+            return $this->est_curr() - $this->est_elapsed();
 	else
-	  return 0;
+            return 0;
     }
 
     function isestimated()
@@ -561,9 +561,9 @@ class Estimate
     {
 	// make sure they're valid numbers
 	if ($currest == 0)
-	  $currest = 0;
+            $currest = 0;
 	if ($elapsed == 0)
-	  $elapsed = 0;
+            $elapsed = 0;
 	
 	$userix = $this->assignto->ix;
 	$taskix = $this->task->ix;
@@ -575,17 +575,17 @@ class Estimate
 	   "   values ($userix, $this->isbug, $taskix)");
 
 	if (!$this->origest)
-	  $this->origest = $currest;
+            $this->origest = $currest;
 	$this->currest = $currest;
 	$this->elapsed = $elapsed;
 	$this->be_done = ($this->currest == $this->elapsed);
 	if ($this->be_done && $this->task->assignto->ix == $this->my_user->ix)
-	  $this->task->finish();
+            $this->task->finish();
 	else
-	  $this->task->assign($this->my_user->ix);
+            $this->task->assign($this->my_user->ix);
 	
 	$resolv = $this->est_remain() 
-	  ? "dtResolved=null, " : "dtResolved=now(), ";
+            ? "dtResolved=null, " : "dtResolved=now(), ";
 	bug_query
 	  ("update schedulator.Estimate " .
 	   "  set $resolv " .
@@ -606,9 +606,9 @@ class Estimate
 	}
 	else if ($this->isbug && $this->task->isresolved() 
 		 && !$this->isdone())
-	  return "VERIFY: " . $this->task->name;
+            return "VERIFY: " . $this->task->name;
 	else
-	  return $this->task->name;
+            return $this->task->name;
     }
 }
 
@@ -617,11 +617,11 @@ class Estimate
 function estimate_compare($a, $b)
 {
     if ($a->isdone() != $b->isdone())
-      return $b->isdone() - $a->isdone(); // done before not done
+        return $b->isdone() - $a->isdone(); // done before not done
     else if ($a->isdone() && $a->get_resolvedate() != $b->get_resolvedate())
-      return strcmp($a->get_resolvedate(), $b->get_resolvedate());
+        return strcmp($a->get_resolvedate(), $b->get_resolvedate());
     else
-      return bug_compare($a->task, $b->task);
+        return bug_compare($a->task, $b->task);
 }
 
 
@@ -632,11 +632,11 @@ function estimate_compare_fixfor_only($a, $b)
 {
     $ffcmp = fixfor_compare($a->task->fixfor, $b->task->fixfor);
     if ($ffcmp)
-      return $ffcmp;
+        return $ffcmp;
     else if ($a->task->ix != $b->task->ix)
-      return $a->task->ix - $b->task->ix;
+        return $a->task->ix - $b->task->ix;
     else
-      return $a->ix - $b->ix;
+        return $a->ix - $b->ix;
 }
 
 
@@ -737,11 +737,11 @@ function sql_simple($query)
     while ($row = mysql_fetch_row($result))
     {
 	if (count($row) == 1)
-	  $ret[$row[0]] = $row[0];
+            $ret[$row[0]] = $row[0];
 	else if (count($row) == 2)
-	  $ret[$row[0]] = $row[1];
+            $ret[$row[0]] = $row[1];
 	else
-	  $ret[$row[0]] = $row;
+            $ret[$row[0]] = $row;
     }
     
     return $ret;
@@ -767,30 +767,30 @@ class FogTables
 	
 	// clean up the fixforix
 	if (!$fixforix || $fixforix==1)
-	  $fixforix = 0;
+	    $fixforix = 0;
 	$f = $this->fixfor->a[$fixforix];
 	if (!$f)
-	  $f = $this->fixfor->first("name", $fixforix);
+	    $f = $this->fixfor->first("name", $fixforix);
 	if (!$f)
-	  $f = $this->fixfor->first_prefix("name", $fixforix);
+	    $f = $this->fixfor->first_prefix("name", $fixforix);
 	if ($f)
-	  $fixforix = $f->ix;
+	    $fixforix = $f->ix;
 	if (!$fixforix || $fixforix==1)
-	  $fixforix = 0;
+	    $fixforix = 0;
 	$and_fixfor = $fixforix>0 ? "and ixFixFor=$fixforix" : "";
 
 	// clean up the userix
 	if (!$userix || $userix==1)
-	  $userix = 0;
+	    $userix = 0;
 	$p = $this->person->a[$userix];
 	if (!$p)
-	  $p = $this->person->first("username", $userix);
+	    $p = $this->person->first("username", $userix);
 	if (!$p)
-	  $p = $this->person->first("fullname", $userix);
+	    $p = $this->person->first("fullname", $userix);
 	if ($p)
-	  $userix = $p->ix;
+            $userix = $p->ix;
 	if (!$userix || $userix==1)
-	  $userix = 0;
+            $userix = 0;
 	$this->my_userix = $userix;
 	if ($userix > 0 || $fixforix <= 0) // don't ever get *all* bugs...
 	{
