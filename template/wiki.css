@@ -74,6 +74,9 @@ td.diff-removed {
 h1 {
     margin-bottom: 0;
 }
+h2 {
+    margin-bottom: 0;
+}
 hr {
     width: 80%; /* 70% */
 }

@@ -884,4 +884,25 @@ function parse_table($text)
 
   return $text;
 }
+
+function parse_redirect($text)
+{
+    global $action, $no_redirect, $page, $version;
+
+    if (preg_match('/^#redirect\s+\[?(.*?)\]?\s*$/i', $text, $matches)
+        && validate_page($matches[1]))
+    {
+        if ($no_redirect || $action != 'view' || isset($version))
+        {
+            $text = new_entity(array('raw', '#redirect ')) . wikiname_token($matches[1], '');
+        }
+        else
+        {
+            header ('Location: ' . viewUrl($matches[1]) . '&redirect_from=' . $page);
+            exit;
+        }
+    }
+
+    return $text;
+}
 ?>

@@ -17,7 +17,7 @@ function template_save($args) {
     // does in WikiWiki, or to display a list of words that fail spell-check.
     // For now, we simply redirect to the view action for this page.
 
-    $newLocation = viewURL($args['page']);
+    $newLocation = viewURL($args['page']) . '&no_redirect=1';
     if(isset($args['anchor']))
         $newLocation .= "#" . $args['anchor'];
 

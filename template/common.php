@@ -65,6 +65,9 @@ if ($AdditionalHeader) { include($AdditionalHeader); }
 <a href="<?php print viewURL($HomePage); ?>"><img src="<?php print $WikiLogo; ?>" alt="[Home]"></a>
 </div>
 
+<table cellspacing="0" cellpadding="0" border="0">
+<tr>
+<td>
 <?php
 print '<h1>' . $args['heading'];
 if ($args['headlink'] != '')
@@ -85,12 +88,21 @@ if (count($twin = $pagestore->twinpages($args['headlink'])))
     foreach ($twin as $site)
       { print " " . html_twin($site[0], $site[1]); }
     print "</sup>";
-}   
+}
 
 print $args['headsufx'] . '</h1>';
 
+if (isset($args['redirect_from']) && $args['redirect_from']) {
+    print '</td></tr><tr><td>';
+    print '<h2>Redirected from <a href="' . viewURL($args['redirect_from']) . '&no_redirect=1">' .
+        htmlspecialchars($args['redirect_from']) . '</a></h2>';
+}
 ?>
+</td>
+</tr>
 
+<tr>
+<td>
 <br>
 <form method="get" action="<?php print $FindScript; ?>">
 <div class="form">
@@ -121,6 +133,10 @@ if ( $args['headlink']
 
 </div>
 </form>
+
+</td>
+</td>
+</table>
 
 <?php
 if (isset($args['quote']))

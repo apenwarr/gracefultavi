@@ -11,7 +11,7 @@ require('lib/headers.php');
 function action_view()
 {
     global $page, $pagestore, $ParseEngine, $version, $UserName;
-    global $document;
+    global $document, $redirect_from;
 
     $pg = $pagestore->page($page);
 
@@ -42,6 +42,7 @@ function action_view()
                         'timestamp' => $pg->time,
                         'archive'   => $version != '',
                         'version'   => $pg->version,
-                        'edituser'  => $pg->username));
+                        'edituser'  => $pg->username,
+                        'redirect_from'  => $redirect_from));
 }
 ?>

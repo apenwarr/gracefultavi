@@ -162,6 +162,7 @@ $EmailSuffix = '';
 
 $ParseEngine = array(
                  'parse_elem_flag',
+                 'parse_redirect',
                  'parse_raw_html',
                  'parse_htmlisms',
                  'parse_code',

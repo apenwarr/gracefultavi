@@ -25,7 +25,8 @@ function template_view($args) {
                                                  : '',
                                  'tree' => 1,
                                  'quote' => 1,
-                                 'toolbar'  => 1));
+                                 'toolbar'  => 1,
+                                 'redirect_from' => $args['redirect_from']));
 ?>
 <div id="body" class="content">
 <?php

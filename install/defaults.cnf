@@ -29,6 +29,7 @@ $InterwikiPtn = "([A-Za-z0-9]+):" .
 
 $ParseEngine = array(
                  'parse_elem_flag',
+                 'parse_redirect',
 //                 'parse_raw_html',
                  'parse_htmlpre',    // implements missing <pre> support
 //                 'parse_htmlisms',
