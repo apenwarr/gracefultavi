@@ -28,7 +28,6 @@ function template_common_prologue($args)
     global $StyleScript, $SeparateTitleWords, $SeparateHeaderWords, $UserName;
     global $shortcutIcon, $AdditionalHeader;
     global $HomePage;
-    global $ndfnow;
 
     if ($SeparateTitleWords) { $args['title'] = html_split_name($args['title']); }
 
@@ -222,6 +221,7 @@ function template_common_epilogue($args)
   global $FindScript, $pagestore, $page, $UserName, $PrefsScript;
   global $AdditionalFooter;
   global $HomePage;
+  global $ndfnow;
 
   $pg = $pagestore->page($page);
   $pagetext = $pg->text;
