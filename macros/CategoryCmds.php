@@ -57,7 +57,7 @@ class Macro_CategoryCmds
                                substr($list[$i][0], 12, 2), substr($list[$i][0], 4, 2),
                                substr($list[$i][0], 6, 2), substr($list[$i][0], 0, 4));
             if ($DayLimit && $i >= $MinEntries &&
-                !$full && ($now - $editTime) > $DayLimit * 24 * 60 * 60)
+                !$full && ($now - $editTime) > ($DayLimit * 24 * 60 * 60))
             {
                 break;
             }
