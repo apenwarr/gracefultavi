@@ -15,19 +15,27 @@ require_once('template/common.php');
 //                version of the page.
 //   version   => Version number of page version being viewed.
 
-function template_view($args) {
-  template_common_prologue(array('norobots' => $args['archive'],
-                                 'title'    => $args['page'],
-                                 'heading'  => '',
-                                 'headlink' => $args['page'],
-                                 'headsufx' => $args['archive'] ?
-                                                 ' (' . html_timestamp($args['timestamp']) . ')'
-                                                 : '',
-                                 'tree' => 1,
-                                 'quote' => 1,
-                                 'toolbar'  => 1,
-                                 'redirect_from' => $args['redirect_from']));
+function template_view($args)
+{
+    template_common_prologue(array(
+        'heading'  => '',
+        'headlink' => $args['page'],
+        'headsufx' => $args['archive'] ? ' (' . html_timestamp($args['timestamp']) . ')' : '',
+        'norobots' => $args['archive'],
+        'quote'    => 1,
+        'redirect_from' => $args['redirect_from'],
+        'title'    => $args['page'],
+        'toolbar'  => 1,
+        'tree'     => 1,
+
+        'button_view' => 0,
+        'timestamp' => $args['timestamp'],
+        'editver'   => $args['editver'],
+        'button_backlinks' => 1,
+        'button_subscribe' => 1
+    ));
 ?>
+
 <div id="body" class="content">
 <?php
 print $args['html'];
@@ -38,14 +46,15 @@ print $args['html'];
 <a name="pageContentBottom">
 </div>
 <?php
-  template_common_epilogue(array('subscribe' => $args['page'],
-                                 'twin'      => $args['page'],
-                                 'edit'      => $args['page'],
-                                 'editver'   => !$args['editable'] ? -1
-                                                : ($args['archive']
-                                                   ? $args['version'] : 0),
-                                 'history'   => $args['page'],
-                                 'euser'     => $args['edituser'],
-                                 'timestamp' => $args['timestamp']));
+    template_common_epilogue(array(
+        'subscribe' => $args['page'],
+        'twin'      => $args['page'],
+        'edit'      => $args['page'],
+        'editver'   => !$args['editable'] ? -1 :
+            ($args['archive'] ? $args['version'] : 0),
+        'history'   => $args['page'],
+        'euser'     => $args['edituser'],
+        'timestamp' => $args['timestamp']
+    ));
 }
 ?>

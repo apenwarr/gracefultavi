@@ -8,19 +8,25 @@ require_once('template/common.php');
 
 function template_prefs()
 {
-  global $AuthorDiff, $DayLimit, $EditCols, $EditRows, $EmailSuffix;
-  global $EnableSubscriptions, $HistMax, $HTTP_REFERER, $MinEntries;
-  global $PrefsScript, $TimeZoneOff, $UseHotPages, $UserName;
+    global $AuthorDiff, $DayLimit, $EditCols, $EditRows, $EmailSuffix;
+    global $EnableSubscriptions, $HistMax, $HTTP_REFERER, $MinEntries;
+    global $PrefsScript, $TimeZoneOff, $UseHotPages, $UserName;
 
-  template_common_prologue(array('norobots' => 1,
-                                 'title'    => 'UserOptions',
-                                 'heading'  => 'UserOptions',
-                                 'headlink' => '',
-                                 'headsufx' => '',
-                                 'toolbar'  => 0));
+    template_common_prologue(array(
+        'norobots' => 1,
+        'title'    => 'UserOptions',
+        'heading'  => 'UserOptions',
+        'headlink' => '',
+        'headsufx' => '',
+        'toolbar'  => 0,
 
-
+        'button_view' => 0,
+        #'timestamp' => $args['timestamp']  no diff
+        #'editver'   => $args['editver']  no edit
+        'button_backlinks' => 0
+    ));
 ?>
+
 <div id="body">
 <form action="<?php print $PrefsScript; ?>" method="post">
 <div class="form">

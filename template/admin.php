@@ -12,13 +12,21 @@ require_once('template/common.php');
 
 function template_admin($args)
 {
-  template_common_prologue(array('norobots' => 1,
-                                 'title'    => 'Administration',
-                                 'heading'  => 'Administration',
-                                 'headlink' => '',
-                                 'headsufx' => '',
-                                 'toolbar'  => 0));
+    template_common_prologue(array(
+        'norobots' => 1,
+        'title'    => 'Administration',
+        'heading'  => 'Administration',
+        'headlink' => '',
+        'headsufx' => '',
+        'toolbar'  => 0,
+
+        'button_view' => 0,
+        #'timestamp' => $args['timestamp']  no diff
+        #'editver'   => $args['editver']  no edit
+        'button_backlinks' => 0
+    ));
 ?>
+
 <div id="body">
 <?php print $args['html']; ?>
 </div>

@@ -17,17 +17,25 @@ require_once('template/common.php');
 
 function template_preview($args)
 {
-  global $EditRows, $EditCols, $categories, $UserName, $comment, $PrefsScript;
-  global $minoredit;
+    global $EditRows, $EditCols, $categories, $UserName, $comment, $PrefsScript;
+    global $minoredit;
 
-  template_common_prologue(array('norobots' => 1,
-                                 'title'    => 'Previewing ' . $args['page'],
-                                 'heading'  => 'Previewing ',
-                                 'headlink' => $args['page'],
-                                 'headsufx' => '',
-                                 'tree' => 1,
-                                 'toolbar'  => 1));
+    template_common_prologue(array(
+        'norobots' => 1,
+        'title'    => 'Previewing ' . $args['page'],
+        'heading'  => 'Previewing ',
+        'headlink' => $args['page'],
+        'headsufx' => '',
+        'tree' => 1,
+        'toolbar'  => 1,
+
+        'button_view' => 1,
+        'timestamp' => $args['timestamp'],
+        #'editver'   => $args['editver']  no edit
+        'button_backlinks' => 1
+    ));
 ?>
+
 <div id="body" class="content">
 <form method="post" action="<?php print saveURL($args['page']); ?>">
 <div class="form">

@@ -126,3 +126,59 @@ blockquote.cite {
     margin: 0px 0px 0px 0px;
     padding: 0px 0px 0px 15px;
 }
+
+a.button {
+    border: 1px solid black;
+    padding: 2px 4px 3px 4px;
+    text-align: center;
+    font-size: 11pt;
+    text-decoration: none;
+    color: blue;
+    font-weight: bold;
+    background: white;
+    line-height: 25px;
+}
+a.button:visited {
+    border: 1px solid black;
+    padding: 2px 4px 3px 4px;
+    text-align: center;
+    font-size: 11pt;
+    text-decoration: none;
+    color: blue;
+    font-weight: bold;
+    background: white;
+    line-height: 25px;
+}
+a.button:active {
+    border: 1px solid black;
+    padding: 2px 4px 3px 4px;
+    text-align: center;
+    font-size: 11pt;
+    text-decoration: none;
+    color: blue;
+    font-weight: bold;
+    background: white;
+    line-height: 25px;
+}
+a.button:hover {
+    border: 1px solid black;
+    padding: 2px 4px 3px 4px;
+    text-align: center;
+    font-size: 11pt;
+    text-decoration: none;
+    color: blue;
+    font-weight: bold;
+    background: #eaeaff;
+    line-height: 25px;
+}
+span.buttonDisabled {
+    border: 1px solid #808080;
+    padding: 2px 4px 3px 4px;
+    text-align: center;
+    font-size: 11pt;
+    text-decoration: none;
+    color: #c0c0c0;
+    font-weight: bold;
+    background: #f6f2f6;
+    line-height: 25px;
+}

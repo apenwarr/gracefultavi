@@ -19,15 +19,23 @@ require_once('template/common.php');
 
 function template_conflict($args)
 {
-  global $EditRows, $EditCols, $UserName, $PrefsScript;
+    global $EditRows, $EditCols, $UserName, $PrefsScript;
 
-  template_common_prologue(array('norobots' => 1,
-                                 'title'    => 'Editing ' . $args['page'],
-                                 'heading'  => 'Editing ',
-                                 'headlink' => $args['page'],
-                                 'headsufx' => '',
-                                 'toolbar'  => 1));
+    template_common_prologue(array(
+        'norobots' => 1,
+        'title'    => 'Editing ' . $args['page'],
+        'heading'  => 'Editing ',
+        'headlink' => $args['page'],
+        'headsufx' => '',
+        'toolbar'  => 1,
+
+        'button_view' => 1,
+        'timestamp' => $args['timestamp'],
+        #'editver'   => $args['editver']  no edit
+        'button_backlinks' => 1
+    ));
 ?>
+
 <div id="body">
 <p class="warning">
   Warning: since you started editing, this document has been changed by someone

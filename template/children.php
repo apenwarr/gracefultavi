@@ -10,13 +10,21 @@ require_once('template/tree.php');
 //   children => An array containing the list of children, in the same format
 //               as returned from pagestore->getTree().
 
-function template_children($args) {
-    template_common_prologue(array('norobots' => 1,
-                                   'title'    => 'Children of ' . $args['page'],
-                                   'heading'  => 'Children of ',
-                                   'headlink' => $args['page'],
-                                   'headsufx' => '',
-                                   'toolbar'  => 1));
+function template_children($args)
+{
+    template_common_prologue(array(
+        'norobots' => 1,
+        'title'    => 'Children of ' . $args['page'],
+        'heading'  => 'Children of ',
+        'headlink' => $args['page'],
+        'headsufx' => '',
+        'toolbar'  => 1,
+
+        'button_view' => 1,
+        'timestamp' => $args['timestamp'],
+        'editver'   => $args['editver'],
+        'button_backlinks' => 1
+    ));
 
     global $pagestore;
 

@@ -11,42 +11,44 @@ require('lib/headers.php');
 // Display the known history of a page's edits.
 function action_history()
 {
-  global $pagestore, $page, $full, $HistMax;
-  global $ver1, $ver2;
+    global $full, $HistMax, $page, $pagestore, $UserName, $ver1, $ver2;
 
-  $history = $pagestore->history($page);
+    $history = $pagestore->history($page);
 
-  gen_headers($history[0][0]);
+    gen_headers($history[0][0]);
 
-  $versions = diff_get_history_versions($history, $ver1, $ver2);
-  $latest_ver = $versions['latest_ver'];
-  $previous_ver = $versions['previous_ver'];
+    $versions = diff_get_history_versions($history, $ver1, $ver2);
+    $latest_ver = $versions['latest_ver'];
+    $previous_ver = $versions['previous_ver'];
 
-  $text = '';
+    $text = '';
 
-  for($i = 0; $i < count($history); $i++)
-  {
-    if($i < $HistMax || $full)
-        $text = $text . html_history_entry($page, $history[$i][2],
-                                           $history[$i][0], $history[$i][1],
-                                           $history[$i][3],
-                                           $previous_ver == $history[$i][2],
-                                           $latest_ver == $history[$i][2],
-                                           $history[$i][4]);
-  }
+    for($i = 0; $i < count($history); $i++)
+    {
+        if($i < $HistMax || $full)
+            $text = $text . html_history_entry($page, $history[$i][2],
+                                               $history[$i][0], $history[$i][1],
+                                               $history[$i][3],
+                                               $previous_ver == $history[$i][2],
+                                               $latest_ver == $history[$i][2],
+                                               $history[$i][4]);
+    }
 
-  if($i >= $HistMax && !$full)
-    $text = $text . html_fullhistory($page, count($history));
+    if($i >= $HistMax && !$full)
+        $text = $text . html_fullhistory($page, count($history));
 
-  $p1 = $pagestore->page($page);
-  $p1->version = $previous_ver;
-  $p2 = $pagestore->page($page);
-  $p2->version = $latest_ver;
+    $p1 = $pagestore->page($page);
+    $p1->version = $previous_ver;
+    $p2 = $pagestore->page($page);
+    $p2->version = $latest_ver;
 
-  $diff = diff_compute($p1->read(), $p2->read());
+    $diff = diff_compute($p1->read(), $p2->read());
 
-  template_history(array('page'    => $page,
-                         'history' => $text,
-                         'diff'    => diff_parse($diff)));
+    template_history(array(
+        'page'    => $page,
+        'history' => $text,
+        'diff'    => diff_parse($diff),
+        'editver'   => ($UserName && $p2->mutable) ? 0 : -1
+    ));
 }
 ?>

@@ -15,12 +15,19 @@ require_once('template/common.php');
 
 function template_find($args)
 {
-  template_common_prologue(array('norobots' => 1,
-                                 'title'    => 'Find ' . $args['find'],
-                                 'heading'  => $args['find'] . ' and related pages',
-                                 'headlink' => '',
-                                 'headsufx' => '',
-                                 'toolbar'  => 1));
+    template_common_prologue(array(
+        'norobots' => 1,
+        'title'    => 'Find ' . $args['find'],
+        'heading'  => $args['find'] . ' and related pages',
+        'headlink' => '',
+        'headsufx' => '',
+        'toolbar'  => 1,
+
+        'button_view' => 0,
+        #'timestamp' => $args['timestamp']  no diff
+        #'editver'   => $args['editver']  no edit
+        'button_backlinks' => 0
+    ));
 ?>
 
 <div id="body">

@@ -11,12 +11,19 @@ require_once('template/common.php');
 
 function template_subscriptions($args)
 {
-    template_common_prologue(array('norobots' => 1,
-                                   'title'    => 'Subscriptions',
-                                   'heading'  => 'Subscriptions',
-                                   'headlink' => '',
-                                   'headsufx' => '',
-                                   'toolbar'  => 0));
+    template_common_prologue(array(
+        'norobots' => 1,
+        'title'    => 'Subscriptions',
+        'heading'  => 'Subscriptions',
+        'headlink' => '',
+        'headsufx' => '',
+        'toolbar'  => 0,
+
+        'button_view' => 0,
+        #'timestamp' => $args['timestamp']  no diff
+        #'editver'   => $args['editver']  no edit
+        'button_backlinks' => 0
+    ));
 ?>
 
 <h2>Page Subscriptions</h2>

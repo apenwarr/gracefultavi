@@ -15,13 +15,21 @@ require_once('template/common.php');
 
 function template_diff($args)
 {
-  template_common_prologue(array('norobots' => 1,
-                                 'title'    => 'Differences in ' . $args['page'],
-                                 'heading'  => 'Differences in ',
-                                 'headlink' => $args['page'],
-                                 'headsufx' => '',
-                                 'toolbar'  => 1));
+    template_common_prologue(array(
+        'norobots' => 1,
+        'title'    => 'Differences in ' . $args['page'],
+        'heading'  => 'Differences in ',
+        'headlink' => $args['page'],
+        'headsufx' => '',
+        'toolbar'  => 1,
+
+        'button_view' => 1,
+        'timestamp' => $args['timestamp'],
+        'editver'   => $args['editver'],
+        'button_backlinks' => 1
+    ));
 ?>
+
 <div id="body">
 <strong>Difference between versions:</strong><br><br>
 <div class="diff">

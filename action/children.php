@@ -7,13 +7,17 @@ require('lib/headers.php');
 // Show children of a page.
 function action_children()
 {
-    global $page, $pagestore;
+    global $page, $pagestore, $UserName;
 
     $pg = $pagestore->page($page);
     $pg->read();
     gen_headers($pg->time);
 
-    template_children(array('page'     => $page,
-                            'children' => $pagestore->getChildren($page)));
+    template_children(array(
+        'page'     => $page,
+        'children' => $pagestore->getChildren($page),
+        'timestamp' => $pg->time,
+        'editver'   => ($UserName && $pg->mutable) ? 0 : -1
+    ));
 }
 ?>

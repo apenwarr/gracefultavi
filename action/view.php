@@ -36,13 +36,17 @@ function action_view()
 
     gen_headers($pg->time);
 
-    template_view(array('page'      => $page,
-                        'html'      => parseText($pg->text, $ParseEngine, $page),
-                        'editable'  => $UserName && $pg->mutable,
-                        'timestamp' => $pg->time,
-                        'archive'   => $version != '',
-                        'version'   => $pg->version,
-                        'edituser'  => $pg->username,
-                        'redirect_from'  => $redirect_from));
+    template_view(array(
+        'page'      => $page,
+        'html'      => parseText($pg->text, $ParseEngine, $page),
+        'editable'  => $UserName && $pg->mutable,
+        'timestamp' => $pg->time,
+        'archive'   => $version != '',
+        'version'   => $pg->version,
+        'edituser'  => $pg->username,
+        'redirect_from' => $redirect_from,
+        'editver'   => ($UserName && $pg->mutable) ?
+                       (($version == '') ? 0 : $version) : -1
+    ));
 }
 ?>

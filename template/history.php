@@ -13,14 +13,21 @@ require_once('template/common.php');
 
 function template_history($args)
 {
-  global $DiffScript, $full, $ver1;
+    global $DiffScript, $full, $ver1;
 
-  template_common_prologue(array('norobots' => 1,
-                                 'title'    => 'History of ' . $args['page'],
-                                 'heading'  => 'History of ',
-                                 'headlink' => $args['page'],
-                                 'headsufx' => '',
-                                 'toolbar'  => 1));
+    template_common_prologue(array(
+        'norobots' => 1,
+        'title'    => 'History of ' . $args['page'],
+        'heading'  => 'History of ',
+        'headlink' => $args['page'],
+        'headsufx' => '',
+        'toolbar'  => 1,
+
+        'button_view' => 1,
+        #'timestamp' => $args['timestamp']  no diff
+        'editver'   => $args['editver'],
+        'button_backlinks' => 1
+    ));
 ?>
 
 <div id="body">

@@ -18,15 +18,33 @@
 //   'headsufx' => A string containing the heading suffix.  If not
 //                 empty, it will be printed after the heading link.
 //   'toolbar'  => An integer; if nonzero, the toolbar will be displayed.
+//
+// Button specific parameters:
+//
+//   'button_view'      => An integer; if nonzero, the View button will be enabled.
+//   'timestamp'        => Timestamp for the page. If not empty, the Diff button will
+//                         be enabled.
+//   'editver'          => An integer; if greater than -1, the Edit button will be
+//                         enabled.
+//   'button_backlinks' => An integer; if nonzero, the Backlinks button will be
+//                         enabled.
 
-//require_once('lib/pagestore.php');
 require_once('template/tree.php');
+
+function toolbar_button($url, $label)
+{
+    if ($url)
+        print '<a class="button" href="'.$url.'">'.$label.'</a> ';
+    else
+        print '<span class="buttonDisabled">'.$label.'</span> ';
+}
 
 function template_common_prologue($args)
 {
     global $AdditionalHeader, $HomePage, $MetaDescription, $MetaKeywords, $page;
     global $pagestore, $ScriptBase, $SeparateHeaderWords, $SeparateTitleWords;
     global $shortcutIcon, $StyleScript, $UserName, $WikiLogo, $WikiName;
+    // global $EmailSuffix, $EnableSubscriptions # for subscription button
 
     if ($SeparateTitleWords) { $args['title'] = html_split_name($args['title']); }
 ?>
@@ -172,6 +190,55 @@ if (isset($args['tree']))
 ?>
 
 </td></tr>
+
+<tr><td>
+<?php
+// Toolbar
+
+// view
+toolbar_button($args['button_view'] ? viewURL($args['headlink']) : '', 'View');
+
+// edit
+$edit_label = 'Edit';
+if ($page != 'RecentChanges' && isset($args['editver'])
+    && $args['editver'] > -1) {
+    if ($args['editver'] == 0) {
+        $edit_url = editURL($args['headlink']);
+    } else {
+        $edit_url = editURL($args['headlink'], $args['editver']);
+        $edit_label = 'Edit Archive';
+    }
+} else {
+    $edit_url = '';
+}
+toolbar_button($edit_url, $edit_label);
+
+// diff
+$diff_url = ($page != 'RecentChanges' && isset($args['timestamp']) &&
+            $args['timestamp'] != '') ? historyURL($args['headlink']) : '';
+toolbar_button($diff_url, 'Diff');
+
+// backlinks
+$backlinks_url = ($args['button_backlinks'] && $args['headlink']) ?
+                 backlinksURL($args['headlink']) : '';
+toolbar_button($backlinks_url, 'Backlinks');
+
+// subscribe / unsubscribe
+/*
+if ($EnableSubscriptions && isset($EmailSuffix) && $UserName != '') {
+    $pg = $pagestore->page($page);
+    if ($pg->isSubscribed($UserName))
+        $subscription_label = 'Unsubscribe';
+    else
+        $subscription_label = 'Subscribe';
+    $subscription_url = $args['headlink'] ?
+        pageSubscribeURL($args['headlink']) : '';
+    toolbar_button($subscription_url, $subscription_label);
+}
+*/
+?>
+</td></tr>
+
 </table>
 </NOINDEX>
 

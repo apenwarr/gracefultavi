@@ -10,13 +10,21 @@ require_once('template/common.php');
 //   parents   =>
 //   backlinks =>
 
-function template_backlinks($args) {
-    template_common_prologue(array('norobots' => 1,
-                                   'title'    => 'Backlinks of ' . $args['page'],
-                                   'heading'  => 'Backlinks of ',
-                                   'headlink' => $args['page'],
-                                   'headsufx' => '',
-                                   'toolbar'  => 1));
+function template_backlinks($args)
+{
+    template_common_prologue(array(
+        'norobots' => 1,
+        'title'    => 'Backlinks of ' . $args['page'],
+        'heading'  => 'Backlinks of ',
+        'headlink' => $args['page'],
+        'headsufx' => '',
+        'toolbar'  => 1,
+
+        'button_view' => 1,
+        'timestamp' => $args['timestamp'],
+        'editver'   => $args['editver'],
+        'button_backlinks' => 0
+    ));
 
     global $pagestore;
 
