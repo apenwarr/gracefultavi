@@ -1,5 +1,5 @@
 <?php
-// $Id: common.php,v 1.2 2003/03/24 21:58:22 mich Exp $
+// $Id: common.php,v 1.3 2003/03/28 19:54:25 mich Exp $
 
 // This function generates the common prologue and header
 // for the various templates.
@@ -26,7 +26,7 @@ function template_common_prologue($args)
 {
     global $WikiName, $HomePage, $WikiLogo, $MetaKeywords, $MetaDescription;
     global $StyleScript, $SeparateTitleWords, $SeparateHeaderWords, $UserName;
-    global $shortcutIcon;
+    global $shortcutIcon, $AdditionalHeader;
 
     if($SeparateTitleWords)
         { $args['title'] = html_split_name($args['title']); }
@@ -46,9 +46,16 @@ function template_common_prologue($args)
 
 <body>
 
-<?php print '<small><a href="' . contentURL($args['headlink']) . '">Entire wiki contents</a></small>'; ?>
+<?php
+if ($AdditionalHeader)
+    include($AdditionalHeader);
+?>
 
-<table class="topbox" border="0">
+<table align="center" class="topbox" border="0">
+<tr valign="top"><td>
+<?php print '<small><a href="' . contentURL($args['headlink']) . '">Entire wiki contents</a></small>'; ?>
+</td></tr>
+
 <tr valign="top"><td>
 <div id="header">
 
@@ -158,7 +165,7 @@ if($args['tree'])
 </td></tr>
 </table>
 
-<table width="100%" border="1" bordercolor="black" cellspacing="0" bgcolor="white" cellpadding="10">
+<table width="98%" align="center" border="1" bordercolor="black" cellspacing="0" bgcolor="white" cellpadding="10">
 <tr>
 <td>
 <?php
@@ -200,11 +207,16 @@ function template_common_epilogue($args)
 </tr>
 </table>
 
-<small><?php 
-  if ($UserName)
-      print("Logged in as " . html_ref($UserName, $UserName));
-  else
-      print("Not <a href=\"login/?$page\">logged in</a>.");
+
+<div id="footer">
+<table align="center" class="bottombox" border="0">
+<tr><td colspan="3">
+
+<small><?php
+if ($UserName)
+    print("Logged in as " . html_ref($UserName, $UserName));
+else
+    print("Not <a href=\"login/?$page\">logged in</a>.");
 ?></small>
 
 <?php
@@ -223,18 +235,19 @@ if ($UserName != '' && $args['watch'] != '' && $page != 'FrontPage' && $page != 
     print '</small>';
 }
 ?>
+<br><br>
 
-<p></p>
+</td></tr>
 
-<div id="footer">
-<table class="bottombox"><tr><td>
+
+<tr><td>
 
 <?php
 // if($args['toolbar']) { print html_toolbar_bottom(); }
 //print html_toolbar_bottom();
 
 print html_ref('RecentChanges', 'RecentChanges') . ', ' .
-      '<a href="' . $PrefsScript . '">UserOptions</a>';
+    '<a href="' . $PrefsScript . '">UserOptions</a>';
 
 if ($page != 'RecentChanges')
 {
@@ -277,7 +290,11 @@ if ($page != 'RecentChanges')
     }
 }
 ?>
-</td></tr></table>
+
+</td></tr>
+
+
+<tr><td colspan="3">
 
 <?php
 if ($page != 'FrontPage' && $page != 'RecentChanges')
@@ -314,11 +331,6 @@ if ($page != 'FrontPage' && $page != 'RecentChanges')
             <input type="hidden" name="Save" value="1">
             <input type="hidden" name="appending" value="1">
             <input type="hidden" name="page" value="<?php print $page ?>">
-            <?php
-            // Modified by mich on Sept 30, 2002, fix the "Add a Comment" bug
-            // print '<input type="hidden" name="document" value="' . $document . '">';
-            ?>
-            <input type="hidden" name="document" value="This value should never be used anywhere. If you see it, other than in a view html source, please contact someone in charge of the wiki.">
             <?php
             if(!strcasecmp($page, 'annoyingquote'))
             {
@@ -365,6 +377,9 @@ if ($page != 'FrontPage' && $page != 'RecentChanges')
 <?php
 }
 ?>
+
+</td></tr>
+</table>
 
 </div>
 
