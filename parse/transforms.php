@@ -519,7 +519,10 @@ function parse_indents($text)
     }
 
     // Locate the indent prefix characters.
-    preg_match('/^(\s*)([:\\-\\*#>])([^:\\-\\*#>].*\\n?)$/', $text, $result);
+    $matched = preg_match('/^(\s*)([:\\-\\*#>])([^:\\-\\*#>].*\\n?)$/', $text, $result);
+    if (!$matched) {
+        preg_match('/^(\s*)(:)(-.*\\n?)$/', $text, $result);
+    }
 
     if(isset($result[1])) $indentSpaces = $result[1];
     if(isset($result[2])) $indentChar = $result[2];
