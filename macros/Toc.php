@@ -37,6 +37,8 @@ class Macro_Toc
         global $pagestore, $MaxHeading;
         global $document, $TocJavascriptFunctions;
 
+        $document = parseText($document, array('parse_htmlpre', 'parse_nowiki'), $page);
+
         if (!$max_level) $max_level = $MaxHeading; // maximum for the wiki
         if (!$max_level) $max_level = 9;           // maximum in html
 
