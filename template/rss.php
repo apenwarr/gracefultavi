@@ -9,47 +9,35 @@
 
 function template_rss($args)
 {
-  global $ScriptBase, $WikiName, $MetaDescription, $InterWikiPrefix;
-  global $Charset;
+  global $Charset, $InterWikiPrefix, $MetaDescription, $ScriptBase, $WikiName;
 
   header('Content-type: text/xml');
 ?>
 <?php print '<?xml '; ?>version="1.0" encoding="<?php print $Charset; ?>"?>
-<rdf:RDF
-     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-     xmlns="http://purl.org/rss/1.0/"
-     xmlns:dc="http://purl.org/dc/elements/1.1/"
-     xmlns:wiki="http://purl.org/rss/1.0/modules/wiki/"
->
-    <!--
-        Add a "days=nnn" URL parameter to get nnn days of information
-        (the default is 2).  Use days=-1 to show entire history.
-        Add a "min=nnn" URL parameter to force a minimum of nnn entries
-        in the output (the default is 10).
-    -->
-    <channel rdf:about="<?php print $ScriptBase; ?>">
-        <title><?php print htmlspecialchars($WikiName); ?></title>
-        <link><?php print htmlspecialchars($ScriptBase); ?></link>
-        <description><?php print htmlspecialchars($MetaDescription); ?></description>
-        <wiki:interwiki>
-            <rdf:Description link="<?php print $ScriptBase . '?'; ?>">
-                <rdf:value><?php print htmlspecialchars($InterWikiPrefix); ?></rdf:value>
-            </rdf:Description>
-        </wiki:interwiki>
-        <items>
-            <rdf:Seq>
-<?php
-  print $args['itemseq'];
-?>
-            </rdf:Seq>
-        </items>
-    </channel>
 
-<?php
-  print $args['itemdesc'];
-?>
+<rss version="2.0">
 
-</rdf:RDF>
+<!--
+Add a "days=nnn" URL parameter to get nnn days of information
+(the default is 2).  Use days=-1 to show entire history.
+Add a "min=nnn" URL parameter to force a minimum of nnn entries
+in the output (the default is 10).
+-->
+
+<channel>
+
+<title><?php print htmlspecialchars($WikiName); ?></title>
+<link><?php print htmlspecialchars($ScriptBase); ?></link>
+<description><?php print htmlspecialchars($MetaDescription); ?></description>
+<style type="text/css">
+td.diff-added { background-color: #ccffcc; }
+td.diff-removed { background-color: #ffaaaa; }
+</style>
+
+<?php print $args['itemdesc']; ?>
+</channel>
+
+</rss>
 <?php
 }
 ?>

@@ -24,14 +24,11 @@ require_once('template/tree.php');
 
 function template_common_prologue($args)
 {
-    global $WikiName, $HomePage, $WikiLogo, $MetaKeywords, $MetaDescription;
-    global $StyleScript, $SeparateTitleWords, $SeparateHeaderWords, $UserName;
-    global $shortcutIcon, $AdditionalHeader;
-    global $HomePage, $page;
+    global $AdditionalHeader, $HomePage, $MetaDescription, $MetaKeywords, $page;
+    global $pagestore, $ScriptBase, $SeparateHeaderWords, $SeparateTitleWords;
+    global $shortcutIcon, $StyleScript, $UserName, $WikiLogo, $WikiName;
 
     if ($SeparateTitleWords) { $args['title'] = html_split_name($args['title']); }
-
-    global $pagestore;
 ?>
 
 <html>
@@ -43,6 +40,7 @@ function template_common_prologue($args)
 <?php } ?>
 <link rel="STYLESHEET" href="<?php print $StyleScript; ?>" type="text/css">
 <link rel="SHORTCUT ICON" href="<?=$shortcutIcon?>">
+<link rel="ALTERNATE" title="<?=htmlspecialchars($WikiName)?>" href="<?=$ScriptBase?>?action=rss" TYPE="application/rss+xml">
 <title><?php print $args['title'] . ' - ' . htmlspecialchars($WikiName); ?></title>
 </head>
 
@@ -141,11 +139,11 @@ if ( $args['headlink']
 <?php
 if (isset($args['quote']))
 {
-    global $pagestore, $ParseEngine;
     $quotepage = $pagestore->page('AnnoyingQuote');
     $quote = $quotepage->read();
     if ($quotepage->exists())
     {
+        global $ParseEngine;
         foreach (explode("\n\n", $quotepage->text) as $line);
         $yada = $line;
         print '<div align="right"><span class="quote">';
@@ -162,8 +160,6 @@ if (isset($args['quote']))
 <?php
 if (isset($args['tree']))
 {
-    global $pagestore;
-
     $tree = $pagestore->getTreeFromLeaves($HomePage, $args['headlink']);
 
     if (isset($tree[$HomePage]) && count($tree[$HomePage]) > 0)

@@ -50,6 +50,17 @@ function viewURL($page, $version = '', $full = '')
 }
 }
 
+if(!function_exists('viewFullURL'))
+{
+function viewFullURL($page, $version = '')
+{
+  global $ScriptBase;
+
+  return $ScriptBase . '?page=' . urlencode($page) .
+         ($version == '' ? '' : "&amp;version=$version");
+}
+}
+
 if(!function_exists('editURL'))
 {
 function editURL($page, $version = '', $pagefrom = '')
