@@ -28,6 +28,7 @@ function template_common_prologue($args)
     global $StyleScript, $SeparateTitleWords, $SeparateHeaderWords, $UserName;
     global $shortcutIcon, $AdditionalHeader;
     global $HomePage;
+    global $ndfnow;
 
     if ($SeparateTitleWords) { $args['title'] = html_split_name($args['title']); }
 
@@ -272,7 +273,9 @@ if ($UserName != '' && isset($args['watch']) && !empty($args['watch']) && $page 
 //print html_toolbar_bottom();
 
 print html_ref('RecentChanges', 'RecentChanges') . ', ' .
-    '<a href="' . $PrefsScript . '">UserOptions</a>';
+               '<a href="' . $PrefsScript . '">UserOptions</a>';
+
+if ($ndfnow) print '<br><br><a href="?NowOnWednesdays"><img src="images/ndfnow.png"></a>';
 
 if ($page != 'RecentChanges')
 {
