@@ -701,12 +701,9 @@ class EstimateTable extends FogTable
 
     function remove_estimate($bugid)
     {
-	for ($i = 1; $i < count($this->a); $i++)
+	foreach ($this->a as $i=>$e)
 	    if ($this->a[$i]->task->ix == $bugid)
-	    {
 		unset($this->a[$i]);
-		return;
-	    }
     }
 }
 
