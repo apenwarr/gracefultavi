@@ -170,8 +170,17 @@ function bug_get($bugid)
     $b = $sch_db->bug->first("ix", $bugid);
 
     if ($b)
+    {
+        // $b->status doesn't give what we want.  Can't wait to return Bug
+        // objects.
+        if ($b->isresolved())
+            $mystatus = "Resolved";
+        else
+            $mystatus = "ACTIVE";
+
         return array($b->name, $b->origest, $b->currest, $b->elapsed, 
-                $b->status, $b->fixfor->name);
+                $mystatus, $b->fixfor->name);
+    }
     else
     {
         bug_init();
@@ -672,7 +681,7 @@ function sch_bug($feat, $task, $_orig, $_curr, $_elapsed, $done)
         if (!strcmp($_curr,''))    $_curr = $bug[2];
         if (!strcmp($_elapsed,'')) $_elapsed = $bug[3];
         if (!$done && !$notdone && $bug[4] != 'ACTIVE') $done = 1;
-	if ((!$done && $_curr != $_elapsed)
+        if ((!$done && $_curr != $_elapsed)
 	    || ($bug[4] != 'ACTIVE'))
 	{
 	    // already listed as not done, *or* really done in fogbugz:
