@@ -318,6 +318,7 @@ class XTaskTable extends FogTable
 class Estimate
 {
     var $fake;
+    var $be_done;
     var $ix;
     var $assignto;
     var $isbug;
@@ -329,9 +330,10 @@ class Estimate
     var $resolvedate;
     var $my_user;
     
-    function Estimate($fake, $aa, $a, $b, $c, $d, $e, $f, $g, $h)
+    function Estimate($fake, $be_done, $aa, $a, $b, $c, $d, $e, $f, $g, $h)
     {
 	$this->fake = $fake;
+	$this->be_done = $be_done;
 	$this->ix = $aa;
 	$this->assignto = $a;
 	$this->isbug = $b;
@@ -398,11 +400,7 @@ class Estimate
     
     function isdone()
     {
-	// if this estimate was explicitly added as a fake, that might be
-	// because it's not done, even if it has a zero estimate.
-	return !$this->est_remain() 
-	  && !($this->fake && $this->isbug 
-	       && $this->task->assignto->ix == $this->my_user->ix);
+	return $this->be_done;
     }
 }
 
@@ -437,25 +435,25 @@ class EstimateTable extends FogTable
 	   "  $where ");
 	while ($r = mysql_fetch_row($res))
 	{
+	    $bug = $r[2] ? $bugs->a[$r[3]] : $xtasks->a[$r[3]];
 	    $e = new Estimate(0, // not fake
+			      $r[5] == $r[6],
 			      $r[0], $persons->a[$r[1]], $r[2],
-			      $r[2] ? $bugs->a[$r[3]] : $xtasks->a[$r[3]],
+			      $bug,
 			      $r[4], $r[5], $r[6], $r[7],
 			      $persons->a[$my_userix]);
 	    $p[$r[0]] = $e;
 	    if ($e->isbug)
-	    {
-		if ($e->task->isdone() || !$e->isdone())
-		  $did_bug[$e->task->ix] = 1;
-	    }
+	      $did_bug[$bug->ix] = ($e->isdone() == $bug->isdone());
 	    else
-	      $did_xtask[$e->task->ix] = 1;
+	      $did_xtask[$bug->ix] = ($e->isdone() == $bug->isdone());
 	}
 	
 	foreach ($bugs->a as $bug)
 	{
 	    if (!$did_bug[$bug->ix])
 	      $p[] = new Estimate(1, // fake (not in database)
+				  $bug->isdone(),
 				  "", $bug->assignto, 1,
 				  $bug, "", "", "", $bug->resolvedate,
 				  $persons->a[$my_userix]);
@@ -465,6 +463,7 @@ class EstimateTable extends FogTable
 	{
 	    if (!$did_xtask[$task->ix])
 	      $p[] = new Estimate(1, // fake (not in database)
+				  $task->isdone(),
 				  "", $task->assignto, 0, 
 				  $task, "", "", "", "",
 				  $persons->a[$my_userix]);
@@ -509,17 +508,19 @@ class FogTables
     
     function FogTables($userix)
     {
+	if (!$userix)
+	  $userix = 0;
+	
 	$this->my_userix = $userix;
 	$this->person = new PersonTable();
 	$this->project = new ProjectTable($this->person);
 	$this->fixfor = new FixForTable($this->project);
 	
 	$p = $this->person->a[$userix];
-	$pix = $p->ix;
 	$whichbugs = sql_simple("select ixTask from schedulator.Estimate " .
-				"    where ixPerson=$pix and fIsBug=1");
+				"    where ixPerson=$userix and fIsBug=1");
 	$whichbugs += sql_simple("select ixBug from Bug " .
-				 "    where ixPersonAssignedTo=$pix");
+				 "    where ixPersonAssignedTo=$userix");
 	
 	// this mess is referred to by the mysql people as the 'max-concat'
 	// trick.  It returns the list of bug numbers that are currently
@@ -539,9 +540,9 @@ class FogTables
 	$whichbugs += array_keys($resolved_tasks);
 	
 	$whichtasks = sql_simple("select ixTask from schedulator.Estimate " .
-				 "    where ixPerson=$pix and fIsBug=0");
+				 "    where ixPerson=$userix and fIsBug=0");
 	$whichtasks += sql_simple("select ixXTask from schedulator.XTask " .
-				  "    where ixPersonAssignedTo=$pix");
+				  "    where ixPersonAssignedTo=$userix");
 	
 	$bugwhere = count($whichbugs) 
 	  ? " where ixBug in (" . join(",", $whichbugs) . ")"
@@ -555,7 +556,7 @@ class FogTables
 				  $this->project, $this->fixfor);
 	$this->xtask = new XTaskTable($taskwhere, $userix,
 				      $this->person, $this->fixfor);
-	$this->estimate = new EstimateTable("where ixPerson=$pix", $userix,
+	$this->estimate = new EstimateTable("where ixPerson=$userix", $userix,
 					    $this->person,
 					    $this->bug, $this->xtask);
     }
