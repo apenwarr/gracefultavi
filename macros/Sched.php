@@ -628,7 +628,8 @@ function sch_create($user)
     }
 
     // Print last release line
-    $ret .= sch_release_line($old_fixfor, $e, false);
+    if (isset($old_fixfor))
+        $ret .= sch_release_line($old_fixfor, $e, false);
 
     $ret .= sch_line("END", "", 0,0,0,0,0, true);
     $ret .= "</table>";
