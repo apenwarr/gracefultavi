@@ -523,7 +523,7 @@ function sch_extrabugs($user, $fixfor, $enddate)
     
     $start = sch_format_day($sch_start);
     $today = sch_today();
-    $fixfor_in_past = (sch_parse_day($enddate) < $today);
+    $fixfor_in_past = ($enddate && sch_parse_day($enddate) < $today);
     $bugs1 = $bugs2 = "";
     
     $a = bug_list($user, $fixfor, $start, $enddate);
