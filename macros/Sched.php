@@ -113,10 +113,7 @@ function bug_unfinished_list($user, $fixfor, $enddate)
 
     $a = array();
     while ($row = mysql_fetch_row($result))
-    {
-        $bug = array_shift($row);
-        $a[$bug] = $row;
-    }
+        array_push($a, $row);
     
     return $a;
 }
@@ -125,13 +122,15 @@ function bug_unfinished_list($user, $fixfor, $enddate)
 // return a list of all RESOLVED bugs that were resolved by this user before
 // the given fixfor *and* (if given) the given enddate.
 //
+// The list is in order of least-to-most-recently-resolved.
+//
 // Returns an array:
 //       bugid -> (title,OrigEst,CurrEst,Elapsed,FixForDate)
 function bug_finished_list($user, $fixfor, $startdate, $enddate)
 {
     global $bug_h;
     bug_init();
-
+    
     // We want to get all bugs *resolved by* the user after the given start
     // date.  The bugs are probably no longer assigned to that user.
     $personid = bug_person($user);
@@ -150,12 +149,13 @@ function bug_finished_list($user, $fixfor, $startdate, $enddate)
              "  and b.ixStatus > 1 " .
              "  and e.sVerb like 'RESOLVED%' " .
              "  and e.sVerb != 'Resolved (Again)' " .
-             "  order by sortdate, sFixFor, ixPriority, ixBug, ixBugEvent desc";
-    //print "(($query))<p>";
+             "  order by ixBugEvent desc ";
+    // print "(($query))<p>";
     $result = mysql_query($query, $bug_h);
     if (!$result)
         print mysql_error($bug_h);
-
+    
+    $owned = array();
     $done = array();
     $a = array();
     while ($row = mysql_fetch_row($result))
@@ -168,7 +168,7 @@ function bug_finished_list($user, $fixfor, $startdate, $enddate)
 	    continue;
 	}
 	
-	if ($a[$bug])
+	if ($owned[$bug])
 	{
 	    // I own this bug already
 	    continue;
@@ -184,14 +184,17 @@ function bug_finished_list($user, $fixfor, $startdate, $enddate)
         // the bug is done, so don't give it any more time remaining
         if (!$row[2])
             $row[2] = 0.001;  // nonzero so we know the 'remaining' is accurate
-        
         $row[3] = $row[2]; // elapsed = estimate; bug is done!
 
-	if (!$a[$bug])
-	  $a[$bug] = $row;
+	if (!$owned[$bug])
+	{
+	    array_unshift($row, $bug);
+	    array_push($a, $row);
+	    $owned[$bug] = 1;
+	}
     }
 
-    return $a;
+    return array_reverse($a);
 }
 
 
@@ -680,8 +683,9 @@ function sch_extrabugs($user, $fixfor, $enddate, $only_done)
     }
 
     // handle done bugs
-    foreach ($a as $bugid => $bug)
+    foreach ($a as $idx => $bug)
     {
+	$bugid = array_shift($bug);
         $zeroest = (abs($bug[2]) <= 0.01 && abs($bug[2]) >= 0.0001);
         $done = ($bug[2] && $bug[3] == $bug[2]);
         if (!$done)
@@ -708,8 +712,9 @@ function sch_extrabugs($user, $fixfor, $enddate, $only_done)
         $sch_elapsed_subtract = array();
 
         $a = bug_unfinished_list($user, '', '');
-        foreach ($a as $bugid => $bug)
+        foreach ($a as $idx => $bug)
         {
+	    $bugix = array_shift($bug);
             $elapsed += $bug[3];
             $sch_elapsed_subtract[$bugid] = $bug[3];
         }
@@ -725,8 +730,9 @@ function sch_extrabugs($user, $fixfor, $enddate, $only_done)
     // handle unfinished bugs
     if (!$only_done)
     {
-        foreach ($ua as $bugid => $bug)
+        foreach ($ua as $idx => $bug)
         {
+	    $bugid = array_shift($bug);
             $zeroest = (abs($bug[2]) <= 0.01 && abs($bug[2]) >= 0.0001);
             $done = ($bug[2] && $bug[3] == $bug[2]);
 
