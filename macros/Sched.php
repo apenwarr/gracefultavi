@@ -161,6 +161,7 @@ function bug_finished_list($user, $fixfor, $startdate, $enddate)
 }
 
 
+// FIXME: Return a Bug object from this
 function bug_get($bugid)
 {
     global $sch_db;
@@ -1517,7 +1518,6 @@ class Macro_Sched
             {
                 // title, origest, currest, elapsed, status, fixfor
                 $bugdata = bug_get($bugid);
-                print "task='$task'; bugdata[0]='".$bugdata[0]."'<br>\n";
                 if (!$task) $task = $bugdata[0];
                 $orig = $bugdata[1];
                 if (!strcmp($est,''))    $est = $bugdata[2];
