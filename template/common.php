@@ -1,5 +1,5 @@
 <?php
-// $Id: common.php,v 1.7 2003/04/01 18:32:36 mich Exp $
+// $Id: common.php,v 1.8 2003/04/08 00:37:42 mich Exp $
 
 // This function generates the common prologue and header
 // for the various templates.
@@ -28,8 +28,9 @@ function template_common_prologue($args)
     global $StyleScript, $SeparateTitleWords, $SeparateHeaderWords, $UserName;
     global $shortcutIcon, $AdditionalHeader;
 
-    if($SeparateTitleWords)
-        { $args['title'] = html_split_name($args['title']); }
+    if($SeparateTitleWords) { $args['title'] = html_split_name($args['title']); }
+
+    global $pagestore;
 ?>
 
 <html>
@@ -47,8 +48,7 @@ function template_common_prologue($args)
 <body>
 
 <?php
-if ($AdditionalHeader)
-    include($AdditionalHeader);
+if ($AdditionalHeader) { include($AdditionalHeader); }
 ?>
 
 <table align="center" class="topbox" border="0">
@@ -75,7 +75,6 @@ if($args['headlink'] != '')
     print '</a>';
 }
 
-global $pagestore;
 if(count($twin = $pagestore->twinpages($args['headlink'])))
 {
     // point at the sisterwiki's version
@@ -87,8 +86,6 @@ if(count($twin = $pagestore->twinpages($args['headlink'])))
 }   
 
 print $args['headsufx'] . '</h1>';
-
-                                                                                                    
 
 ?>
 
@@ -103,7 +100,14 @@ print $args['headsufx'] . '</h1>';
 <td><input type="text" name="find" size="20"></td>
 </tr>
 
-<?php if ($args['headlink'] && $args['headlink'] != 'FrontPage' && $args['headlink'] != 'RecentChanges') { ?>
+<?php
+if ( $args['headlink']
+     && $args['headlink'] != 'FrontPage'
+     && $args['headlink'] != 'RecentChanges'
+     && $pagestore->getChildren($args['headlink'])
+     )
+{
+?>
 <tr>
 <td></td>
 <td>
