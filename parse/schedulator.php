@@ -7,8 +7,11 @@ global $sch_bugs;
 global $sch_curday;
 global $sch_elapsed_curday;
 global $sch_got_bug;
+global $sch_did_all_done;
+global $sch_elapsed_subtract;
 global $sch_unknown_fixfor;
 global $bug_h;
+
 
 function bug_person($user)
 {
@@ -24,6 +27,7 @@ function bug_person($user)
       return -1;
 }
 
+
 function bug_duedate($fixfor)
 {
     global $bug_h;
@@ -38,13 +42,24 @@ function bug_duedate($fixfor)
       return '';
 }
 
-function bug_list($user, $fixfor, $startdate, $enddate)
+
+# return a list of all bugs for the given user, due on or before the given
+# fixfor, finished after the given startdate or still unfinished, and only
+# if the fixfor date is before the given enddate.
+#
+# All parameters are optional.  If not given, they don't restrict the
+# result set.
+#
+# Use bug_unfinished_list() or bug_finished_list() instead, since they
+# figure out $userquery for you.
+#
+# Returns a mysql result set: (bugid,title,OrigEst,CurrEst,Elapsed,FixForDate)
+function _bug_list($userquery, $fixfor, $startdate, $enddate)
 {
     global $bug_h;
     bug_init();
     
     $ffquery = '';
-    $userquery = '';
     $endquery = '';
 
     if ($fixfor and $enddate)
@@ -60,21 +75,8 @@ function bug_list($user, $fixfor, $startdate, $enddate)
     if ($enddate)
       $endquery = "  and b.dtOpened < '$enddate' ";
     
-    # We want to get all bugs resolved by the user after the given start
-    # date, *and* all bugs currently assigned to the user.
-    if ($user)
-    {
-	$personid = bug_person($user);
-	$userquery = "  and (" .
-	  " (b.ixPersonAssignedTo=$personid and sStatus='ACTIVE') " .
-	  " or (sStatus<>'ACTIVE' and e.ixPerson=$personid " .
-	  "        and e.sVerb like 'RESOLVED%' " .
-	  "     and e.dt >= '$startdate')" .
-	  ") ";
-    }
-
     $query = "select distinct " . 
-      "b.ixBug,sStatus,sTitle,hrsOrigEst,hrsCurrEst,hrsElapsed, " .
+      "b.ixBug,sTitle,hrsOrigEst,hrsCurrEst,hrsElapsed, " .
       "  ifnull(f.dt, '2099/9/9') as sortdate " .
       "from Bug as b, BugEvent as e, FixFor as f, Status as s " .
       "where e.ixBug=b.ixBug " .
@@ -89,23 +91,71 @@ function bug_list($user, $fixfor, $startdate, $enddate)
     if (!$result)
       print mysql_error($bug_h);
     
+    return $result;
+}
+
+
+function bug_unfinished_list($user, $fixfor, $startdate, $enddate)
+{
+    $userquery = '';
+    
+    # We want to get only ACTIVE bugs currently assigned to the user.
+    if ($user)
+    {
+	$personid = bug_person($user);
+	$userquery = "  and (" .
+	  " b.ixPersonAssignedTo=$personid and sStatus='ACTIVE' " .
+	  ") ";
+    }
+    
+    $result = _bug_list($userquery, $fixfor, $startdate, $enddate);
+
     $a = array();
     while ($row = mysql_fetch_row($result))
     {
 	$bug = array_shift($row);
-	$status = array_shift($row);
-	if ($status != "ACTIVE")
-	{
-	    # the bug is done, so don't give it any more time remaining
-	    if (!$row[2])
-	      $row[2] = 0.001;  # nonzero so we know the 'remaining' is accurate
-	    $row[3] = $row[2]; # elapsed = estimate; bug is done!
-	}
 	$a[$bug] = $row;
     }
     
     return $a;
 }
+
+
+function bug_finished_list($user, $fixfor, $startdate, $enddate)
+{
+    $userquery = '';
+    
+    # We want to get all bugs *resolved by* the user after the given start
+    # date.  The bugs are probably no longer assigned to that user.
+    if ($user)
+    {
+	$personid = bug_person($user);
+	$userquery = "  and (" .
+	  " sStatus<>'ACTIVE' and e.ixPerson=$personid " .
+	  "        and e.sVerb like 'RESOLVED%' " .
+	  "     and e.dt >= '$startdate'" .
+	  ") ";
+    }
+
+    $result = _bug_list($userquery, $fixfor, $startdate, $enddate);
+    
+    $a = array();
+    while ($row = mysql_fetch_row($result))
+    {
+	$bug = array_shift($row);
+	#$status = array_shift($row);
+
+	# the bug is done, so don't give it any more time remaining
+	if (!$row[2])
+	  $row[2] = 0.001;  # nonzero so we know the 'remaining' is accurate
+	$row[3] = $row[2]; # elapsed = estimate; bug is done!
+	
+	$a[$bug] = $row;
+    }
+    
+    return $a;
+}
+
 
 function bug_get($bugid)
 {
@@ -127,16 +177,19 @@ function bug_get($bugid)
       return $row;
 }
 
+
 function bug_link($bugid)
 {
     return "<a href='http://nits/FogBUGZ3/?$bugid'>$bugid</a>";
 }
+
 
 function bug_title($bugid)
 {
     $bug = bug_get($bugid);
     return $bug[0];
 }
+
 
 function bug_milestone_realname($name)
 {
@@ -153,6 +206,7 @@ function bug_milestone_realname($name)
       return $row[0];
 }
 
+
 function bug_set_release($fixfor, $dt)
 {
     global $bug_h;
@@ -167,6 +221,7 @@ function bug_set_release($fixfor, $dt)
          "  values ('$fixfor', 0, '$dt')";
     $result = mysql_query($query, $bug_h);
 }
+
 
 function bug_set_milestones($fixfor, $dates)
 {
@@ -192,6 +247,7 @@ function bug_set_milestones($fixfor, $dates)
     }
 }
 
+
 function bug_get_milestones($fixfor)
 {
     global $bug_h;
@@ -208,6 +264,7 @@ function bug_get_milestones($fixfor)
 	array_push($a, $row[0]);
     return $a;
 }
+
 
 function bug_add_task($user, $fixfor, $t)
 {
@@ -228,11 +285,13 @@ function bug_add_task($user, $fixfor, $t)
       print 'x-' . mysql_error($bug_h);
 }
 
+
 function bug_add_tasks($user, $fixfor, $tasks)
 {
     foreach ($tasks as $t)
       bug_add_task($user, $fixfor, $t);
 }
+
 
 function bug_add_volunteer_tasks()
 {
@@ -266,6 +325,7 @@ function bug_add_volunteer_tasks()
     }
 }
 
+
 function bug_start_user($user)
 {
     global $bug_h;
@@ -274,6 +334,7 @@ function bug_start_user($user)
     $query = "update schedulator.Task set fValid=0 where sPerson='$user'";
     $result = mysql_query($query, $bug_h);
 }
+
 
 function bug_finish_user($user)
 {
@@ -295,6 +356,7 @@ function sch_today()
     #print("(today=$dat:$today/" . sch_format_day($today) . ")");
     return $today;
 }
+
 
 function sch_parse_day($day)
 {
@@ -330,6 +392,7 @@ function sch_parse_day($day)
     }
 }
 
+
 function sch_format_day($day)
 {
     if (!$day)
@@ -349,6 +412,7 @@ function sch_format_day($day)
     return $ret;
 }
 
+
 function sch_add_hours($day, $hours)
 {
     global $sch_load;
@@ -358,6 +422,7 @@ function sch_add_hours($day, $hours)
     
     return $day + ($hours * $sch_load) / 8.0;
 }
+
 
 # returns a time in hours
 function sch_parse_period($str)
@@ -373,6 +438,7 @@ function sch_parse_period($str)
       return $str + 0.0;
 }
 
+
 function _sch_period($hours)
 {
     #return $hours;
@@ -385,6 +451,7 @@ function _sch_period($hours)
     else
       return sprintf("%dd", $hours/8);
 }
+
 
 function sch_period($hours)
 {
@@ -399,12 +466,14 @@ function sch_fullline($text)
     return "<tr><td colspan=7>$text</td></tr>";
 }
 
+
 function sch_warning($text)
 {
     return sch_fullline("<font color=red>&nbsp;&nbsp;"
 			. "** WARNING: $text **" 
 			. "</font>");
 }
+
 
 function sch_genline($feat, $task, $orig, $curr, $elapsed, $left, $due)
 {
@@ -426,6 +495,7 @@ function sch_genline($feat, $task, $orig, $curr, $elapsed, $left, $due)
 		  array($orig, $curr, $elapsed, $left, $due)) .
       "$junk2</td></tr>";
 }
+
 
 function sch_line($feat, $task, $orig, $curr, $elapsed, $remain, $done,
 		  $allow_red)
@@ -462,6 +532,7 @@ function sch_line($feat, $task, $orig, $curr, $elapsed, $remain, $done,
 			  "too hard.");
     return $ret;
 }
+
 
 function sch_bug($feat, $task, $_orig, $_curr, $_elapsed, $done)
 {
@@ -517,7 +588,8 @@ function sch_bug($feat, $task, $_orig, $_curr, $_elapsed, $done)
     return $ret;
 }
 
-function sch_extrabugs($user, $fixfor, $enddate)
+
+function sch_extrabugs($user, $fixfor, $enddate, $only_done)
 {
     global $sch_got_bug, $sch_start;
     
@@ -528,16 +600,24 @@ function sch_extrabugs($user, $fixfor, $enddate)
     $bugs1 = array();
     $bugs2 = array();
     
-    $a = bug_list($user, $fixfor, $start, $enddate);
+    $ua = bug_unfinished_list($user, $fixfor, $start, $enddate);
+    if (count($ua))  # there are unfinished bugs for this release!
+      $a = bug_finished_list($user, "", $start, ""); # *all* finished bugs
+    else
+      $a = bug_finished_list($user, $fixfor, $start, $enddate); # only some
+    
+    # handle done bugs
     foreach ($a as $bugid => $bug)
     {
 	$zeroest = (abs($bug[2]) <= 0.01 && abs($bug[2]) >= 0.0001);
 	$done = ($bug[2] && $bug[3] == $bug[2]);
+	if (!$done)
+	  sch_warning("Weird: I don't know if bug #$bugid is done!");
 	
 	if ($sch_got_bug[$bugid])
 	    continue;
 	
-	if ($done && $zeroest)
+	if ($zeroest)
 	{
 	    # the bug is done, but with a zero estimate; probably a
 	    # duplicate, wontfix, or something.  Skip it.
@@ -545,27 +625,73 @@ function sch_extrabugs($user, $fixfor, $enddate)
 	    continue;
 	}
 	
-	if (!$done && $fixfor_in_past)
-	{
-	    # if this release is in the past, but it's not fixed yet, the
-	    # bug must not *actually* be for this milestone.  Skip it now,
-	    # and add it into the next release or at the end of the schedule.
-	    continue;
-	}
-	
-	if ($done)
-	  $bugs1[$bugid] = $bug;
-	else
-	  $bugs2[$bugid] = $bug;
+	$ret .= sch_bug($bugid, $bug[0], $bug[1], $bug[2], $bug[3], 0);
     }
     
-    foreach ($bugs1 as $bugid => $bug)
-      $ret .= sch_bug($bugid, $bug[0], $bug[1], $bug[2], $bug[3], 0);
-    foreach ($bugs2 as $bugid => $bug)
-      $ret .= sch_bug($bugid, $bug[0], $bug[1], $bug[2], $bug[3], 0);
+    # handle unfinished bugs
+    if (!$only_done)
+    {
+	foreach ($ua as $bugid => $bug)
+	{
+	    $zeroest = (abs($bug[2]) <= 0.01 && abs($bug[2]) >= 0.0001);
+	    $done = ($bug[2] && $bug[3] == $bug[2]);
+	    if ($done)
+	      sch_warning("Weird: I don't know if bug #$bugid is done!");
+	    
+	    if ($sch_got_bug[$bugid])
+	      continue;
+	    
+	    if ($zeroest)
+	    {
+		# the bug is done, but with a zero estimate; probably a
+		# duplicate, wontfix, or something.  Skip it.
+		$sch_got_bug[$bugid] = 1;
+		continue;
+	    }
+	    
+	    if ($fixfor_in_past)
+	    {
+		# if this release is in the past, but it's not fixed yet,
+		# the bug must not *actually* be for this milestone.  Skip
+		# it now, and add it into the next release or at the end of
+		# the schedule.
+		continue;
+	    }
+	    
+	    $ret .= sch_bug($bugid, $bug[0], $bug[1], $bug[2], $bug[3], 0);
+	}
+    }
     
     return $ret;
 }
+
+
+function sch_all_done($user)
+{
+    global $sch_did_all_done, $sch_elapsed_subtract;
+    
+    $elapsed = 0;
+    $ret = "";
+    
+    if (!$sch_did_all_done)
+    {
+	$ret .= sch_extrabugs($user, '', '', true);
+
+	$a = bug_unfinished_list($user, '', '', '');
+	foreach ($a as $bugid => $bug)
+	    $elapsed += $bug[3];
+	
+	if ($elapsed > 0.1)
+	  $ret .= sch_bug("MAGIC",
+		  "Time elapsed on unfinished bugs listed below",
+		  $elapsed, $elapsed, $elapsed, true);
+    }
+    
+    $sch_did_all_done = true;
+    
+    return $ret;
+}
+
 
 function sch_milestone($descr, $name, $due)
 {
@@ -579,7 +705,7 @@ function sch_milestone($descr, $name, $due)
       $tmpdue = $due;
     
     # fill in all bugs up to this milestone
-    $ret .= sch_extrabugs($sch_user, $name, $tmpdue);
+    $ret .= sch_extrabugs($sch_user, $name, $tmpdue, false);
     
     # if no due date was given, make it the day after the last bug finished.
     if (!$due)
@@ -592,14 +718,18 @@ function sch_milestone($descr, $name, $due)
     $xdue = sch_format_day($newday);
     $slip = ($newday-$sch_curday)*8 / $sch_load;
     #$ret .= sch_line("SLIPPAGE (to $xdue)", "", 0,$slip,0,$slip, 0, true);
-    $ret .= sch_line("<b>$descr: $name ($xdue)</b>", '', 0,$slip,0,$slip,
-		     $newday < $today, false);
+    $done = $newday < $today;
+    $ret .= sch_genline("<b>$descr: $name ($xdue)</b>", '',
+			'', sch_period($slip), '',
+			$done ? "done" : sch_period($slip),
+			'');
     $sch_need_extraline = 1;
     
     $sch_curday = $old_curday; # slippage doesn't actually take time... right?
     
     return $ret;
 }
+
 
 function view_macro_schedulator($text)
 {
@@ -656,7 +786,7 @@ function view_macro_schedulator($text)
     }
     else if ($words[0] == "FIXFOR")
     {
-	$ret .= sch_extrabugs($sch_user, $words[1], '');
+	$ret .= sch_extrabugs($sch_user, $words[1], '', false);
     }
     else if ($words[0] == "SETBOUNCE")
     {
@@ -683,7 +813,7 @@ function view_macro_schedulator($text)
     }
     else if ($words[0] == "END")
     {
-	$ret .= sch_extrabugs($sch_user, '', '');
+	$ret .= sch_extrabugs($sch_user, '', '', false);
 	bug_add_tasks($sch_user, 'UNKNOWN', $sch_unknown_fixfor);
 	bug_finish_user($sch_user);
 	bug_add_volunteer_tasks();
@@ -697,6 +827,7 @@ function view_macro_schedulator($text)
 	$est = $words[2];
 	$elapsed = $words[3];
 	  
+	$ret .= sch_all_done($sch_user);
 	$ret .= sch_bug($bug, $task, $est, $est, $elapsed, 0);
     }
 
