@@ -71,6 +71,8 @@ $ActionList = array(
               );
 
 // Default action and page names.
+if(isset($q))
+  { $action = 'find'; $find = $q; }
 if(empty($page) && empty($action))
   { $page = $QUERY_STRING; }
 if(empty($action))
