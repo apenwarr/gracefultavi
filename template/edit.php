@@ -79,8 +79,6 @@ Add document to category:
 <?php
     template_common_epilogue(array('watch'     => '',
                                    'twin'      => $args['page'],
-                                   'edit'      => '',
-                                   'editver'   => '',
                                    'history'   => $args['page'],
                                    'euser'     => $args['edituser'],
                                    'timestamp' => $args['timestamp']));
