@@ -75,6 +75,7 @@ $ActionList = array(
                 'content' => array('action/content.php', 'action_content', 'edit'),
                 'subscribe' => array('action/subscribe.php', 'action_subscribe', 'edit'),
                 'subscriptions' => array('action/subscriptions.php', 'action_subscriptions', 'view'),
+                'imgbar'  => array('action/imgbar.php', 'action_imgbar', ''),
                 'lock'    => array('action/lock.php', 'action_lock', ''),
                 'js'      => array('action/js.php', 'action_js', '')
               );
