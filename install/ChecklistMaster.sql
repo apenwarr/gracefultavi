@@ -51,3 +51,11 @@ CREATE TABLE chklst_role (
 INSERT INTO chklst_role VALUES (1,'CTO');
 INSERT INTO chklst_role VALUES (2,'Release Pusher');
 INSERT INTO chklst_role VALUES (3,'Feature Pusher');
+
+
+DROP TABLE IF EXISTS chklst_owner;
+CREATE TABLE chklst_owner (
+  id    int(10) unsigned NOT NULL auto_increment,
+  name  varchar(100) NOT NULL default '',
+  PRIMARY KEY  (id)
+);

@@ -74,24 +74,6 @@ function magic_quotes($text)
     }
 }
 
-function owner_sort($a, $b)
-{
-    if (strcasecmp($a['owner_name'], $b['owner_name']) == 0)
-    {
-        if ($a['torder'] < $b['torder'])
-            return -1;
-        else if ($a['torder'] > $b['torder'])
-            return 1;
-        else
-            return 0;
-    }
-    else if ($a['owner_name'] == '')
-        return 1;
-    else if ($b['owner_name'] == '')
-        return -1;
-    else
-        return strcasecmp($a['owner_name'], $b['owner_name']);
-}
 
 
 class Macro_ChecklistMaster
@@ -195,9 +177,22 @@ class Macro_ChecklistMaster
     function form_radio($name, $value, $content, $checked)
     {
         $ch = $checked ? "checked" : "";
-        $this->out('<input type="radio" name="'.$name.'" '.
+
+        if (strlen($content))
+        {
+            $id = 'id="'.$name.$value.'"';
+            $label = '<label for="'.$name.$value.'">'.
+                     htmlspecialchars($content).'</label>';
+        }
+        else
+        {
+            $id = '';
+            $label = '';
+        }
+
+        $this->out('<input '.$id.' type="radio" name="'.$name.'" '.
                    'value="'.htmlspecialchars($value).'" '.$ch.'>'.
-                   htmlspecialchars($content).'</input>');
+                   $label);
     }
 
     function form_select($name, $selectedid, $selected, $items, $small = false)
@@ -973,6 +968,88 @@ CALENDAR_JAVASCRIPT;
 
 
 
+    // *************************** users ***************************
+
+    function list_users()
+    {
+        if (isset($this->users_list))
+            return $this->users_list;
+
+        $users = chklst_query("select id, name " .
+                              "from chklst_owner " .
+                              "order by name");
+
+        $this->users_list = $users;
+
+        return $users;
+    }
+
+    function mark_used_users(&$users)
+    {
+        $result = chklst_query("select distinct owner, owner foo " .
+                               "from chklst_checklist_details");
+
+        foreach ($users as $id => $name)
+            if (isset($result[$id]))
+                $users[$id] .= '*';
+    }
+
+    function user_add($name)
+    {
+        $this->list_users();
+
+        if (in_array($name, $this->users_list)) return;
+
+        $name = quote(trim($name));
+        if (!$name) return;
+
+        chklst_insert_query("insert into chklst_owner (name) " .
+                            "values ('$name')");
+    }
+
+    function user_rename($id, $name)
+    {
+        $name = quote(trim($name));
+        if (!$name) return;
+
+        chklst_query("update chklst_owner set " .
+                     "name = '$name' " .
+                     "where id = $id");
+    }
+
+    function user_delete($id)
+    {
+        $result = chklst_query("select count(*) count " .
+                               "from chklst_checklist_details " .
+                               "where owner = $id");
+
+        if ($result['count'] == 0)
+            chklst_query("delete from chklst_owner " .
+                         "where id = $id");
+    }
+
+    function do_edit_user()
+    {
+        switch ($_REQUEST['useraction'])
+        {
+            case 'add':
+                $this->user_add($_REQUEST['username']);
+                break;
+
+            case 'rename':
+                $this->user_rename($_REQUEST['userid'], $_REQUEST['username']);
+                break;
+
+            case 'delete':
+                $this->user_delete($_REQUEST['userid']);
+                break;
+        }
+
+        $this->redirect('template_list');
+    }
+
+
+
     // *************************** template ***************************
 
     function list_templates()
@@ -1135,6 +1212,21 @@ CALENDAR_JAVASCRIPT;
 
         $this->out('<p>');
         $this->form_button('template_edit', 'New', 0);
+
+
+        $users = $this->list_users();
+        $this->mark_used_users($users);
+
+        $this->out('<p>');
+        $this->out('<b>Edit owners:</b> ');
+        $this->form_select("userid", '', '', $users);
+        $this->form_input('username', '', 20);
+        $this->form_radio('useraction', 'add', 'Add', true);
+        $this->form_radio('useraction', 'rename', 'Rename', false);
+        $this->form_radio('useraction', 'delete', 'Delete', false);
+        $this->form_button('usergo', 'Go');
+        $this->out('<br><small>(Owners marked with a * are currently used ' .
+                   'and cannot be deleted.)</small>');
     }
 
     function print_edit_template_row($row, $roles, $last_row)
@@ -1378,32 +1470,36 @@ CALENDAR_JAVASCRIPT;
     {
         switch ($sort)
         {
+            case 'owner':
+                $tmp_col = '';
+                $sort_col = "lower(ifnull(o.name, 'zzzzzzzzzzzzzzz')), ";
+                $join = 'left join chklst_owner o on d.owner = o.id ';
+                break;
+
             case 'duedate':
-                $tmp_col = ", ifnull(duedate, '9999-99-99') datesort";
+                $tmp_col = ", ifnull(d.duedate, '9999-99-99') datesort";
                 $sort_col = 'datesort, ';
+                $join = '';
                 break;
+
             case 'lastconfdate':
-                $tmp_col = ", ifnull(lastconfdate, '9999-99-99') datesort";
+                $tmp_col = ", ifnull(d.lastconfdate, '9999-99-99') datesort";
                 $sort_col = 'datesort, ';
+                $join = '';
                 break;
+
             default:
                 $tmp_col = '';
                 $sort_col = '';
+                $join = '';
         }
 
-        $result = chklst_query("select id, category, description, owner, " .
-                               "duedate, lastconfdate, notes, noteshidden, " .
-                               "status$tmp_col " .
-                               "from chklst_checklist_details " .
+        $result = chklst_query("select d.id, d.category, d.description, d.owner, " .
+                               "d.duedate, d.lastconfdate, d.notes, d.noteshidden, " .
+                               "d.status$tmp_col " .
+                               "from chklst_checklist_details d " . $join .
                                "where checklist = $id " .
-                               "order by ${sort_col}torder");
-
-        if ($sort == 'owner')
-        {
-            foreach ($result as $id => $row)
-                $result[$id]['owner_name'] = $this->get_uname($row['owner']);
-            uasort($result, 'owner_sort');
-        }
+                               "order by ${sort_col}d.torder");
 
         return $result;
     }
@@ -1499,39 +1595,6 @@ CALENDAR_JAVASCRIPT;
     {
         chklst_query("delete from chklst_checklist_details " .
                      "where id = $id");
-    }
-
-    function get_uname($id)
-    {
-        if (!isset($this->users_list))
-            $this->list_users();
-
-        return isset($this->users_list[$id]) ? $this->users_list[$id] : '';
-    }
-
-    function list_users()
-    {
-        if (isset($this->users_list))
-            return $this->users_list;
-
-        bug_init();
-        $fb_users = sql_simple("select ixPerson, sEmail " .
-                               "from Person " .
-                               "where fDeleted=0 " .
-                               "and sEmail is not null " .
-                               "order by sEmail");
-
-        $users = array();
-        foreach ($fb_users as $fb_user_id => $fb_email)
-        {
-            $uname = preg_replace("/@.*/", "", $fb_email);
-            if ($uname != 'qa' && $uname != 'dcoombs-fogbugz')
-                $users[$fb_user_id] = $uname;
-        }
-
-        $this->users_list = $users;
-
-        return $users;
     }
 
     function update_checklist_status($id, $status)
@@ -1803,6 +1866,21 @@ CALENDAR_JAVASCRIPT;
         return preg_replace($ptn, "\\1<a href=\"?\\2\">\\2</a>", $text, -1);
     }
 
+    function create_wiki_name($name)
+    {
+        global $LinkPtn;
+
+        // if already a wiki link
+        if (preg_match("/$LinkPtn/", $name)) return $name;
+
+        // clean the name and return if only one word
+        $name = preg_replace('/[^0-9a-z ]/', '', strtolower($name));
+        if (strpos($name, ' ') === false) return $name;
+
+        // glue the words into a wiki link
+        return str_replace(' ', '', ucwords($name));
+    }
+
     function params_url($name = null, $value = null)
     {
         $params = array('hidecat', 'sort', 'hidecompleted');
@@ -1947,7 +2025,11 @@ CALENDAR_JAVASCRIPT;
             $this->out($this->parse_wiki_links($row['description']));
             $this->out('</label></td>');
             $this->out('<td id="col1row'.$row['id'].'" '.$class.' nowrap>');
-            $this->out('<a href="?'.$users[$row['owner']].'">'.
+            $this->out('<a href="?'.
+
+            $this->create_wiki_name($users[$row['owner']])
+
+            .'">'.
                  $users[$row['owner']].'</a>');
             $this->out('</td>');
 
@@ -2155,6 +2237,10 @@ CALENDAR_JAVASCRIPT;
             else if ($_REQUEST['template_export'])
             {
                 $this->do_template_export();
+            }
+            else if ($_REQUEST['usergo'])
+            {
+                $this->do_edit_user();
             }
             else
             {
