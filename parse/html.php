@@ -67,9 +67,9 @@ function html_hr()
 function html_newline()
   { return "<br>\n"; }
 function html_head_start($level)
-  { return "<h$level>"; }
+  { static $count = 0; $count++; return "<a name=\"toc$count\"><h$level>"; }
 function html_head_end($level)
-  { return "</h$level>"; }
+  { return "</h$level></a>"; }
 function html_nowiki($text)
   { return $text; }
 function html_code($text)

@@ -11,6 +11,7 @@ require('lib/headers.php');
 function action_view()
 {
     global $page, $pagestore, $ParseEngine, $version, $UserName;
+    global $document;
 
     $pg = $pagestore->page($page);
 
@@ -30,6 +31,8 @@ function action_view()
             $pg->version = $version;
         $pg->read();
     }
+
+    $document = $pg->text;
 
     // Saves user's access to the page if it's marked to be watched for that
     // user.
