@@ -78,7 +78,7 @@ class PageStore
     }
 
     // Return new pages, i.e. pages having their most recent edit less than 24 hours
-    // before the first edit.
+    // before the first edit. Ignores minor edits.
     function getNewPages()
     {
         global $PgTbl;
