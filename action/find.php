@@ -45,7 +45,7 @@ function action_find()
     // -- From this point, '$search' is always an array. --
 
     // try to find one page by its name...
-    if ($doFindOne && $findOne = $pagestore->findOne($search[0]))
+    if ($doFindOne && $findOne = $pagestore->findOne(trim($search[0])))
         header('Location: ' . viewURL($findOne));
     else
     {
