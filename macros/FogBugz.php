@@ -131,23 +131,28 @@ class FixFor
     {
 	$this->ix = $a;
 	$this->name = $b;
-	$this->date = $c;
+	$this->date = $c ? $c : "2099-09-09"; // no due date? in the future...
 	$this->deleted = $d;
 	$this->project = $e;
     }
     
+    // returns true if this is due before the fixfor $f.
+    function due_before($f)
+    {
+	return strcmp($this->date, $f->date) <= 0;
+    }
 }
 
 
 // php can't seem to handle it if this is a member function...
 function fixfor_compare($a, $b)
 {
-    $adate = $a->date ? $a->date : "2099-09-09";
-    $bdate = $b->date ? $b->date : "2099-09-09";
+//    $adate = $a->date ? $a->date : "2099-09-09";
+//    $bdate = $b->date ? $b->date : "2099-09-09";
     
-    if ($adate > $bdate)
+    if ($a->date > $b->date)
       return 1;
-    else if ($adate < $bdate)
+    else if ($a->date < $b->date)
       return -1;
     else
       return strcmp($a->name, $b->name);
@@ -167,6 +172,20 @@ class FixForTable extends FogTable
 				 $projects->a[$r[4]]);
 	uasort($p, "fixfor_compare");
 	$this->FogTable($p);
+    }
+    
+    // return the last fixfor with a due date <= the given date.
+    function last_before($date)
+    {
+	foreach ($this->a as $f)
+	{
+	    if (!$date || strcmp($f->date, $date) <= 0)
+	      $match = $f;
+	    else
+	      return $match; // passed the last one
+	}
+	
+	return $match;
     }
 }
 
@@ -403,6 +422,8 @@ class Estimate
     {
 	if ($this->origest != '')
 	  return $this->origest;
+	else if ($this->isbug && $this->task->isresolved() && !$this->task->resolved_byme)
+	  return 0.01; // FIXME: for broken old-style schedulator weirdness
 	else if ($this->isbug)
 	  return $this->task->origest;
 	else
@@ -413,6 +434,8 @@ class Estimate
     {
 	if ($this->currest != '')
 	  return $this->currest;
+	else if ($this->isbug && $this->task->isresolved() && !$this->task->resolved_byme)
+	  return 0.01; // FIXME: for broken old-style schedulator weirdness
 	else if ($this->isbug)
 	  return $this->task->currest;
 	else
@@ -423,6 +446,8 @@ class Estimate
     {
 	if ($this->elapsed != '')
 	  return $this->elapsed;
+	else if ($this->isbug && $this->task->isresolved() && !$this->task->resolved_byme)
+	  return 0.009; // FIXME: for broken old-style schedulator weirdness
 	else if ($this->isbug)
 	  return $this->task->elapsed;
 	else
@@ -483,6 +508,14 @@ class Estimate
 	   "      hrsElapsed=$this->elapsed " .
 	   "  where fIsBug=$this->isbug and ixTask=$taskix and " .
 	   "        ixPerson=$userix ");
+    }
+    
+    function nice_title()
+    {
+	if ($this->isbug && $this->task->isresolved() && !$this->task->resolved_byme)
+	  return "VERIFY: " . $this->task->name;
+	else
+	  return $this->task->name;
     }
 }
 
