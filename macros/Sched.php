@@ -87,26 +87,10 @@ function bug_fixfor_query($fixfor, $enddate)
 }
 
 
-// return a list of all bugs for the given user, due on or before the given
-// fixfor, finished after the given startdate or still unfinished, and only
-// if the fixfor date is before the given enddate.
-//
-// All parameters are optional.  If not given, they don't restrict the
-// result set.
-//
-// Use bug_unfinished_list() or bug_finished_list() instead, since they
-// figure out $userquery for you.
-//
-// Returns a mysql result set: (bugid,title,OrigEst,CurrEst,Elapsed,FixForDate)
-function _bug_list($userquery, $fixfor, $startdate, $enddate)
-{
-}
-
-
 // return a list of all ACTIVE bugs due by the given fixfor/enddate.
 //
-// Returns a mysql result set:
-//       (bugid,title,OrigEst,CurrEst,Elapsed,FixForDate)
+// Returns an array:
+//       bugid -> (title,OrigEst,CurrEst,Elapsed,FixForDate)
 function bug_unfinished_list($user, $fixfor, $enddate)
 {
     global $bug_h;
@@ -138,6 +122,11 @@ function bug_unfinished_list($user, $fixfor, $enddate)
 }
 
 
+// return a list of all RESOLVED bugs that were resolved by this user before
+// the given fixfor *and* (if given) the given enddate.
+//
+// Returns an array:
+//       bugid -> (title,OrigEst,CurrEst,Elapsed,FixForDate)
 function bug_finished_list($user, $fixfor, $startdate, $enddate)
 {
     global $bug_h;
@@ -550,7 +539,7 @@ function sch_genline($feat, $task, $orig, $curr, $elapsed, $left, $due)
 function sch_line($feat, $task, $orig, $curr, $elapsed, $remain, $done, $allow_red)
 {
     global $sch_curday, $sch_elapsed_curday, $sch_elapsed_subtract;
-    global $sch_bugs, $sch_got_bug;
+    global $sch_bugs;
 
     if (preg_match('/^[0-9]+$/', $feat))
         $xfeat = bug_link($feat);
@@ -603,6 +592,9 @@ function sch_bug($feat, $task, $_orig, $_curr, $_elapsed, $done)
 {
     global $sch_user, $sch_curday, $sch_bugs, $sch_need_extraline;
     global $sch_got_bug, $sch_unknown_fixfor;
+    
+    if (!$done)
+        $done = 0;
 
     if ($sch_need_extraline)
     {
@@ -613,13 +605,19 @@ function sch_bug($feat, $task, $_orig, $_curr, $_elapsed, $done)
     $fixfor = '';
     if (preg_match('/^[0-9]+$/', $feat))
     {
-        $sch_got_bug[$feat] = 1;
         $bug = bug_get($feat);
         if (!$task)     $task = $bug[0];
         if (!$_orig)    $_orig = $bug[1];
         if (!$_curr)    $_curr = $bug[2];
         if (!$_elapsed) $_elapsed = $bug[3];
         if (!$done && $bug[4] != 'ACTIVE') $done = 1;
+	if ((!$done && $_curr != $_elapsed)
+	    || ($bug[4] != 'ACTIVE'))
+	{
+	    // already listed as not done, *or* really done in fogbugz:
+	    // never need to auto-import this bug again.
+	    $sch_got_bug[$feat] = 1;
+	}
         $fixfor = $bug[5];
     }
 
@@ -701,6 +699,7 @@ function sch_extrabugs($user, $fixfor, $enddate, $only_done)
         }
 
         $ret .= sch_bug($bugid, $bug[0], $bug[1], $bug[2], $bug[3], 0);
+	$sch_got_bug[$bugid] = 1;  # definitely done now
     }
 
     if ($do_all_done && !$fixfor_in_past && !$sch_did_all_done)
@@ -758,6 +757,7 @@ function sch_extrabugs($user, $fixfor, $enddate, $only_done)
             }
 
             $ret .= sch_bug($bugid, $bug[0], $bug[1], $bug[2], $bug[3], 0);
+	    $sch_got_bug[$bugid] = 1;
         }
     }
 
@@ -821,7 +821,7 @@ class Macro_Sched
     function parse($args, $page)
     {
         global $sch_start, $sch_curday, $sch_elapsed_curday;
-        global $sch_user, $sch_load, $sch_got_bug;
+        global $sch_user, $sch_load;
         global $sch_unknown_fixfor;
 
         $ret = "";
