@@ -1,10 +1,12 @@
 /* WikkiTikkiTavi default style sheet. */
-/* $Id: wiki.css,v 1.8 2002/01/15 16:02:43 smoonen Exp $ */
+/* $Id: wiki.css,v 1.1.1.1 2003/03/15 03:53:58 apenwarr Exp $ */
 body {
     background-color: #eeeeee;
     color:            #000000;
-    margin-right:     1%;
-    margin-left:      1%;
+    margin-right:     0%;
+    margin-left:      0%;
+    margin-top:       0%;
+    margin-bottom:    0%;
 }
 a:link {
     color:      #0000ff;  /* 4f6997 */
@@ -32,11 +34,11 @@ div.logo {
     float: left;
 }
 table.topbox {
-    width:            100%;
+    width:            98%;
     background-color: #eeeeee;
 }
 table.bottombox {
-    width:            100%;
+    width:            98%;
     background-color: #eeeeee;
 }
 div.diff {
