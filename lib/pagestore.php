@@ -759,15 +759,22 @@ class PageStore
     // empty body. This ignores the minor edits.
     function allpages()
     {
-        global $CoTbl, $PgTbl;
+        global $CoTbl, $PgTbl, $DayLimit, $MinEntries;
 
-        $qid = $this->dbh->query("SELECT p.title, c.version, c.author, " .
-                                 "c.time, c.username, p.bodylength, " .
-                                 "c.comment, p.mutable, c.minoredit " .
-                                 "FROM $PgTbl p, $CoTbl c " .
-                                 "WHERE p.id=c.page " .
-                                 "AND p.bodylength>1 " .
-                                 "AND p.lastversion_major=c.version");
+        $from_time = date('YmdHis', time() - ($DayLimit * 24 * 60 * 60));
+
+        $base_qry = "SELECT p.title, c.version, c.author, " .
+                    "c.time, c.username, p.bodylength, " .
+                    "c.comment, p.mutable, c.minoredit " .
+                    "FROM $PgTbl p, $CoTbl c " .
+                    "WHERE p.id=c.page " .
+                    "AND p.bodylength>1 " .
+                    "AND p.lastversion_major=c.version ";
+
+        $qid = $this->dbh->query($base_qry . "AND p.updatetime>$from_time");
+        if (mysql_num_rows($qid) < $MinEntries) {
+            $qid = $this->dbh->query($base_qry . "ORDER BY c.time DESC LIMIT $MinEntries");
+        }
 
         $list = array();
         while ($result = $this->dbh->result($qid)) {
