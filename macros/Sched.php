@@ -1363,7 +1363,7 @@ function sch_summary($fixfor)
     }
     
     /* mouseovers on bugs */
-    table.schedsum a:hover:link,a:hover:visited {
+    table.schedsum a:hover:link,a:hover:visited,span:hover {
 	color: white; background: green;
     }
 </style>
@@ -1461,7 +1461,8 @@ EOF;
 		            "href='http://nits/fogbugz3?$task' " . 
 		            "title='Bug $task: $subtask'>$pri</a> ";
 		    else
-		      $v .= "<span class='bugclass'>$pri</span>";
+		      $v .= "<span class='bugclass' " .
+		            "title=\"$task: $subtask\">$pri</span> ";
 		}
 	    }
 
