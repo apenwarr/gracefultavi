@@ -1444,7 +1444,8 @@ EOF;
 		    $n++;
                     $task = $bug["task"];
                     $subtask = $bug["subtask"];
-		    $priclass = "pri" . $bug["priority"];
+                    $pri = $bug["priority"];
+		    $priclass = "pri$pri";
 		    if ($bug["resolved"])
 			$bugclass = "resolved $priclass";
 		    else
@@ -1455,7 +1456,7 @@ EOF;
 		    if (($task + 0) . "" == $task)
 		      $v .= "<a class='$bugclass' " .
 		            "href='http://nits/fogbugz3?$task' " . 
-		            "title='Bug $task: $subtask'>$n</a> ";
+		            "title='Bug $task: $subtask'>$pri</a> ";
 		    else
 		      $v .= "$n";
 		}
