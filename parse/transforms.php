@@ -1,5 +1,5 @@
 <?php
-// $Id: transforms.php,v 1.24 2002/01/14 18:07:55 smoonen Exp $
+// $Id: transforms.php,v 1.1.1.1 2003/03/15 03:53:58 apenwarr Exp $
 
 // The main parser components.  Each of these takes a line of text and scans it
 //   for particular wiki markup.  It converts markup elements to
@@ -297,9 +297,18 @@ function parse_bold($text)
                       $text, -1);
 }
 
+function highlight_pair_tokens($text)
+{
+    if (trim(strtolower($text)) == 'pass')
+        return pair_tokens('highlightpass', $text);
+    else if (trim(strtolower($text)) == 'fail')
+        return pair_tokens('highlightfail', $text);
+    else
+        return pair_tokens('highlight', $text);
+}
 function parse_highlight($text)
 {
-  return preg_replace("/\*{2}(()|[^*].*)\*{2}/Ue", "pair_tokens('highlight', q1('\\1'))",
+  return preg_replace("/\*{2}(()|[^*].*)\*{2}/Ue", "highlight_pair_tokens(q1('\\1'))",
                       $text, -1);
 }
 

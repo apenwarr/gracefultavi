@@ -1,5 +1,5 @@
 <?php
-// $Id: html.php,v 1.1.1.2 2003/03/15 03:54:58 apenwarr Exp $
+// $Id: html.php,v 1.2 2003/04/21 18:20:58 mich Exp $
 
 // These functions take wiki entities like 'bold_begin' or 'ref' and return
 //   HTML representing these entities.  They are used throught this script
@@ -25,6 +25,14 @@ function html_singlequote_end()
 function html_highlight_start()
   { return '<span class="highlight">'; }
 function html_highlight_end()
+  { return '</span>'; }
+function html_highlightpass_start()
+  { return '<span class="highlightpass">'; }
+function html_highlightpass_end()
+  { return '</span>'; }
+function html_highlightfail_start()
+  { return '<span class="highlightfail">'; }
+function html_highlightfail_end()
   { return '</span>'; }
 function html_tt_start()
   { return '<tt>'; }

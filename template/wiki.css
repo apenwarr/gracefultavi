@@ -1,5 +1,5 @@
 /* WikkiTikkiTavi default style sheet. */
-/* $Id: wiki.css,v 1.1.1.1 2003/03/15 03:53:58 apenwarr Exp $ */
+/* $Id: wiki.css,v 1.2 2003/03/28 23:03:53 mich Exp $ */
 body {
     background-color: #eeeeee;
     color:            #000000;
@@ -25,6 +25,14 @@ a.title {
 }
 span.highlight {
     background: #ffff00; /* eeeeff */
+    font-weight: bold;
+}
+span.highlightpass {
+    background: #88ff88;
+    font-weight: bold;
+}
+span.highlightfail {
+    background: #ff7777;
     font-weight: bold;
 }
 img {
