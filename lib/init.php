@@ -13,6 +13,7 @@ require('lib/url.php');
 require('lib/messages.php');
 require('lib/pagestore.php');
 require('lib/rate.php');
+require('parse/schedulator.php');
 
 $PgTbl = $DBTablePrefix . 'pages';
 $IwTbl = $DBTablePrefix . 'interwiki';

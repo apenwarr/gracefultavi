@@ -250,7 +250,7 @@ $DisplayEngine = array(
                    'diff_add'            => 'html_diff_add',
                    'diff_delete'         => 'html_diff_delete'
                  );
-
+                 
 // $ViewMacroEngine determines what macro names will be processed when
 //   displaying a page.  For each name, a function must be provided.
 //   See parse/macros.php
@@ -263,7 +263,8 @@ $ViewMacroEngine = array(
                      'OrphanedPages' => 'view_macro_orphans',
                      'WantedPages'   => 'view_macro_wanted',
                      'PageLinks'     => 'view_macro_outlinks',
-                     'PageRefs'      => 'view_macro_refs'
+                     'PageRefs'      => 'view_macro_refs',
+                     'Sched'         => 'view_macro_schedulator'
                    );
 
 // $SaveMacroEngine determines what save macros will be called after a
