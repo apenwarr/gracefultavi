@@ -221,10 +221,11 @@ class Bug
     var $elapsed;
     var $resolved_byme;
     var $my_user;
+    var $category;
     var $manual_ix;
     
     function Bug($a, $b, $c, $d, $e, $f, $g, $h,
-		 $i, $j, $k, $l, $m, $n, $o, $p, $q,
+		 $i, $j, $k, $l, $m, $n, $o, $p, $q, $r,
 		 $_manual_ix=0)
     {
 	$this->ix = $a;
@@ -244,6 +245,7 @@ class Bug
 	$this->resolvedate = $o;
 	$this->resolved_byme = $p;
 	$this->my_user = $q;
+	$this->category = $r;
 	$this->manual_ix = $_manual_ix;
 	
 	if ($this->isresolved())
@@ -348,7 +350,7 @@ class BugTable extends FogTable
     {
         return "select ixBug, fOpen, dtOpened, sTitle, ixProject, ixArea, " .
         "    ixPersonOpenedBy, ixPersonAssignedTo, ixStatus, ixPriority, " .
-        "    ixFixFor, hrsOrigEst, hrsCurrEst, hrsElapsed " .
+        "    ixFixFor, hrsOrigEst, hrsCurrEst, hrsElapsed, ixCategory " .
         "  from Bug " .
         "  $where ";
     }
@@ -377,7 +379,8 @@ class BugTable extends FogTable
 		       $this->persons->a[$r[7]], $r[8], $r[9],
 		       $this->fixfors->a[$r[10]], $r[11], $r[12], $r[13],
 		       $resolved_date, $resolved_byme != '' ? 1 : 0,
-		       $this->persons->a[$this->my_userix]);
+		       $this->persons->a[$this->my_userix],
+		       $r[14]);
     }
 }
 

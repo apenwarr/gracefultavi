@@ -161,7 +161,7 @@ function bug_add_volunteer_tasks()
     $result = bug_query($query, $bug_h);
 
     $query = "select sFullName, sFixFor, ixBug, sTitle, " .
-             "    b.ixStatus, ixPriority " .
+             "    b.ixStatus, ixPriority, b.ixCategory " .
              "  from Bug as b, Person as p, FixFor as f, Status as s " .
              "  where p.ixPerson=b.ixPersonAssignedTo " .
              "    and f.ixFixFor=b.ixFixFor " .
@@ -178,8 +178,9 @@ function bug_add_volunteer_tasks()
         $title = $row[3];
 	$resolved = ($row[4] != 1);
 	$priority = $row[5];
+	$testcat = ($row[6] == 4);
         $info = array($bugid, $title, 1000, 1000, 0, '2099/9/9', 0,
-		      $resolved, $priority);
+		      $resolved || $testcat, $priority);
         bug_add_task($person, $fixfor, $info);
     }
 }
@@ -476,9 +477,10 @@ function sch_bug($estimate)
     // FIXME: Call $estimate->update or something.
     $task = $estimate->isbug ? $estimate->task->ix : $estimate->task->task;
     $resolved = $estimate->isbug && $estimate->task->isresolved();
+    $testcat = $estimate->isbug && $estimate->task->category == 4;
     $buga = array($task, $title, $orig, $curr, $elapsed,
                   sch_format_day($sch_curday), $estimate->task->isdone(), 
-                  $resolved, $estimate->task->get_priority());
+                  $resolved || $testcat, $estimate->task->get_priority());
     if (!$estimate->isdone() && 
 	isset($estimate->task->fixfor) && $estimate->task->fixfor != -1)
         bug_add_task($sch_user->username, $estimate->task->fixfor->name, $buga);
@@ -770,7 +772,10 @@ function sch_summary($fixfor, $unfixed_thres, $fixed_thres)
 	# $nicedue = ereg_replace("-", " ", $due);
 	$nicedue = ereg_replace("(....)-(..)-(..)", "\\3", $due);
 	$dates[$due] = $nicedue;
-	$last_date = $due;
+	
+	if (( $resolved && $priority <= $fixed_thres) ||
+	    (!$resolved && $priority <= $unfixed_thres))
+	    $last_date = $due;
 
 	$bugs[$person][$due][] = array
 	  ("task" => $task, 
