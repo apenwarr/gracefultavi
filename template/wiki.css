@@ -77,6 +77,12 @@ h1 {
 h2 {
     margin-bottom: 0;
 }
+h1.underline,h2.underline,h3.underline,
+h4.underline,h5.underline,h6.underline {
+    padding-top: 0.5em;
+    padding-bottom: 0.17em;
+    border-bottom: 1px solid #aaaaaa;
+}
 hr {
     width: 80%; /* 70% */
 }

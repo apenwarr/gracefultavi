@@ -713,19 +713,17 @@ function parse_heading($text)
 {
   global $MaxHeading;
 
-  if(!preg_match('/^\s*(=+)([^=]*)(=+)(.*)$/', $text, $result))
+  if(!preg_match('/^\s*(_?)(=+)([^=]*)(=+)(.*)$/', $text, $result))
     { return $text; }
 
-  if(strlen($result[1]) != strlen($result[3]))
+  if(strlen($result[2]) != strlen($result[4]))
     { return $text; }
 
-  if(($level = strlen($result[1])) > $MaxHeading)
+  if(($level = strlen($result[2])) > $MaxHeading)
     { $level = $MaxHeading; }
 
-  return new_entity(array('head_start', $level)) .
-         trim($result[2]) .
-         new_entity(array('head_end', $level)) .
-         $result[4];
+  return new_entity(array('head_start', $level, strlen($result[1]))) .
+         trim($result[3]) . new_entity(array('head_end', $level)) . $result[5];
 }
 
 function parse_htmlisms($text)

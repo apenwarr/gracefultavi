@@ -50,7 +50,7 @@ class Macro_Toc
         $prevLevel = $max_level;
         foreach (explode("\n", $document) as $line)
         {
-            if (preg_match('/^\s*(=+)([^=]*)(=+)\s*$/', strip_tags($line), $result) &&
+            if (preg_match('/^\s*_?(=+)([^=]*)(=+)\s*$/', strip_tags($line), $result) &&
                 strlen($result[1]) === strlen($result[3]))
             {
                 $level = min(strlen($result[1]), $max_level);
@@ -66,7 +66,7 @@ class Macro_Toc
         $count = 0;
         foreach (explode("\n", $document) as $line)
         {
-            if (preg_match('/^\s*(=+)([^=]*)(=+)\s*$/', strip_tags($line), $result) &&
+            if (preg_match('/^\s*_?(=+)([^=]*)(=+)\s*$/', strip_tags($line), $result) &&
                 strlen($result[1]) === strlen($result[3]))
             {
                 $level = strlen($result[1]);

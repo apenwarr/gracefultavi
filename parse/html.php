@@ -74,8 +74,12 @@ function html_hr()
   { return "<hr>\n"; }
 function html_newline()
   { return "<br>\n"; }
-function html_head_start($level)
-  { static $count = 0; $count++; return "<a name=\"toc$count\"></a><h$level>"; }
+function html_head_start($level, $underline)
+  {
+    static $count = 0; $count++;
+    $class = $underline ? ' class="underline"' : '';
+    return "<a name=\"toc$count\"></a><h$level$class>";
+  }
 function html_head_end($level)
   { return "</h$level>"; }
 function html_nowiki($text)
