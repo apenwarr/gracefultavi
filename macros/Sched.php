@@ -1465,7 +1465,7 @@ EOF;
 		    else
 		      $v .= "<span class='bugclass' " .
 		            "title=\"$task: $subtask\">$pri</span>";
-		    if (!$bug["currest"])
+		    if ($bug["currest"] < 0.05)
 		      $v .= "<sup>?</sup>";
 		    $v .= " ";
 		}
