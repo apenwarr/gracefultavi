@@ -676,13 +676,10 @@ class EstimateTable extends FogTable
 			      $r[4], $r[5], $r[6], $r[7],
 			      $me);
 	    $p[$r[0]] = $e;
-	    if (!$e->isdone() || ($e->isdone() && $bug->isdone()))
-	    {
-		if ($e->isbug)
-		  $did_bug[$bug->ix] = 1;
-		else
-		  $did_xtask[$bug->ix] = 1;
-	    }
+	    if ($e->isbug)
+		$did_bug[$bug->ix] = 1;
+	    else
+		$did_xtask[$bug->ix] = 1;
 	}
 	
 	foreach ($bugs->a as $bug)
