@@ -153,11 +153,21 @@ function html_ref($refPage, $appearance, $hover = '', $anchor = '', $anchor_appe
     $p = new WikiPage($db, $refPage);
 
     $twintext = "";
-    if(count($twin = $pagestore->twinpages($refPage)))
+    $onlytwin = "";
+    $twin = $pagestore->twinpages($refPage);
+    if(!$p->exists() && count($twin) == 1)
+    {
+	$onlytwin = html_twin_x($twin[0][0], $twin[0][1], $twin[0][1]);
+    }
+    else if(count($twin))
     {
     	// point at the sisterwiki's version
+	$n = 1;
         foreach($twin as $site)
-          { $twintext = $twintext . html_twin($site[0], $site[1]); }
+	{ 
+	    $twintext = $twintext . html_twin_x($site[0], $n, $site[1]);
+	    $n++;
+	}
         $twintext = '<sup>' . $twintext . '</sup>';
     }
     
@@ -169,15 +179,17 @@ function html_ref($refPage, $appearance, $hover = '', $anchor = '', $anchor_appe
         }
 
         $result = '<a href="' . viewURL($refPage) . $anchor . '"' . $hover . '>'
-               . $appearance . $anchor_appearance . '</a>';
+               . $appearance . $anchor_appearance . '</a>' . $onlytwin;
     }
     else
     {
         if(validate_page($refPage) == 1       // Normal WikiName
             && $appearance == $refPage)       // ... and is what it appears
         {
-            $result = $refPage . '<a href="' . editURL($refPage, '', $page) . '"' . $hover . '>?</a>'
-                               . $twintext;
+	    if ($onlytwin)
+	        $result = $onlytwin;
+	    else
+	        $result = $refPage;
         }
         else                                  // Free link.
         {
@@ -187,9 +199,14 @@ function html_ref($refPage, $appearance, $hover = '', $anchor = '', $anchor_appe
             else
                 $tempAppearance = "($appearance)";
 
-            $result = $tempAppearance . '<a href="' . editURL($refPage, '', $page) . '"' . $hover . '>?</a>'
-                                      . $twintext;
+            $result = $tempAppearance;
         }
+
+	$result = $result
+	           . '<a href="' . editURL($refPage, '', $page) . '"'
+	           . ' title="Create this Wiki page" '
+	           . $hover . '>?</a>'
+	           . $twintext;
     }
     return $result;
 }
@@ -198,12 +215,17 @@ function html_interwiki($url, $text)
 {
   return '<a href="' . $url . '">' . $text . '</a>';
 }
-function html_twin($base, $ref)
+function html_twin($whichwiki, $ref)
+{
+  return html_twin_x($whichwiki, "[$whichwiki]", $ref);
+}
+function html_twin_x($whichwiki, $linktext, $ref)
 {
   global $pagestore;
 
-  return '<a href="' . $pagestore->interwiki($base) . $ref . '">' .
-         '<span class="twin"><em>[' . $base . ']</em></span></a>';
+  return '<a href="' . $pagestore->interwiki($whichwiki) . $ref . '"' .
+         'title="See also: ' . $ref . ' in ' . $whichwiki . '">' .
+         '<span class="twin"><em>' . $linktext . '</em></span></a>';
 }
 function html_category($time, $page, $host, $user, $comment, $version)
 {
@@ -224,13 +246,14 @@ function html_category($time, $page, $host, $user, $comment, $version)
   $text = '(' . html_timestamp($time) . ') (' .
           '<a href="' . historyURL($page) . '">history</a>) ' .
           html_ref($page, $page, '', "&$version");
-
+/*
+  // Skip this.  Why should twin pages show up in RecentChanges?
   if(count($twin = $pagestore->twinpages($page)))
   {
     foreach($twin as $site)
       { $text = $text . ' ' . html_twin($site[0], $site[1]); }
   }
-
+*/
   if ($version == 1)
     $text .= '<img src="images/new.png" alt="New!" title="" width="28" height="11" border="0">';
 

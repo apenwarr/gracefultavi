@@ -289,7 +289,7 @@ if ($page != 'RecentChanges')
     {
         if(count($twin = $pagestore->twinpages($args['twin'])))
         {
-            print 'Twin pages: ';
+            print 'See twins of this page in: ';
             for($i = 0; $i < count($twin); $i++)
             {
                 print html_twin($twin[$i][0], $twin[$i][1]) . ' ';
