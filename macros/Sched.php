@@ -720,10 +720,14 @@ function sch_dateclass($due, $daystobounce)
 }
 
 
-function sch_summary($fixfor)
+function sch_summary($fixfor, $unfixed_thres, $fixed_thres)
 {
     global $bug_h;
     bug_init();
+    
+    if ($unfixed_thres=="") $unfixed_thres = 6;
+    if ($fixed_thres=="")   $fixed_thres = 2;
+    
     $ret = "";
     $ff = addslashes($fixfor);
     $allpeople = array();
@@ -790,7 +794,10 @@ function sch_summary($fixfor)
     }
     
     $ret .= "<h1>Schedulator Summary for '$fixfor'</h1>\n";
-    $ret .= "<p>Predicted Bounce: $last_date$next_str</p>\n";
+    $ret .= "<p>Predicted Bounce: $last_date$next_str<br>\n";
+    $ret .= "&nbsp;&nbsp;(Bounce goals: " .
+      "fix bugs up to priority $unfixed_thres; " .
+      "verify bugs up to priority $fixed_thres.)</p>\n";
     
     $ret .= <<<EOF
       
@@ -822,10 +829,10 @@ function sch_summary($fixfor)
     table.schedsum a {
 	text-decoration: none;
     }
-    table.schedsum a.superlate:link,a.superlate:visited {
+    table.schedsum span.superlate,a.superlate:link,a.superlate:visited {
 	color: yellow; background: #aa0000
     }
-    table.schedsum a.late:link,a.late:visited {
+    table.schedsum span.late,a.late:link,a.late:visited {
 	color: red; background: yellow
     }
     
@@ -923,7 +930,7 @@ EOF;
 	{
 	    $dateclass = sch_dateclass($due, $daystobounce);
 	    $n = 0;
-	    $num_unresolved = 0;
+	    $num_important = 0;
 	    $v = "";
 	    if (is_array($bugs[$person][$due]))
 	    {
@@ -935,13 +942,24 @@ EOF;
                     $pri = $bug["priority"];
 		    $priclass = "pri$pri";
 		    $isbug = (($task + 0)."" == $task);
-		    if ($bug["resolved"] || !$isbug)
-			$bugclass = "resolved $priclass";
-		    else
+		    
+		    $resolved = ($bug["resolved"] || !$isbug);
+		    $resclass = $resolved ? "resolved" : "unresolved";
+		    
+		    $important = ($resolved && $pri <= $fixed_thres)
+		        || (!$resolved && $pri <= $unfixed_thres);
+		    if ($important)
 		    {
-			$bugclass = "unresolved $priclass $dateclass";
-			$num_unresolved++;
+			$dateclass2 = $dateclass;
+			$num_important++;
 		    }
+		    else
+		        $dateclass2 = "";
+		    
+		    if ($resolved)
+			$bugclass = "resolved $priclass $dateclass2";
+		    else
+			$bugclass = "unresolved $priclass $dateclass2";
 		    if ($isbug)
 		      $v .= "<a class='$bugclass' " .
 		            "href='http://nits/fogbugz3?$task' " . 
@@ -955,7 +973,7 @@ EOF;
 		}
 	    }
 
-	    if ($v == "" || $num_unresolved==0)
+	    if ($v == "" || $num_important==0)
 	      $colclass = "";
 	    else
 	      $colclass = $dateclass;
@@ -1083,7 +1101,11 @@ class Macro_Sched
 	else if ($words[0] == "SUMMARY")
 	{
 	    $fixfor = $words[1];
-	    $ret .= sch_summary($fixfor);
+	    $a = split("/", $words[2]);
+	    
+	    $unfixed_thres = $a[0];
+	    $fixed_thres = $a[1];
+	    $ret .= sch_summary($fixfor, $unfixed_thres, $fixed_thres);
 	}
         else
         {
