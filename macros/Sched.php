@@ -1235,6 +1235,15 @@ function sch_summary($fixfor)
     bug_init();
     $ret = "";
     
+    $allpeople = array();
+    $result = mysql_query("select distinct sPerson from schedulator.Task " .
+			  "  where fValid=1 and fDone=0 " . 
+			  "    and sPerson not like '-%-'" .
+			  "  order by sPerson ",
+			  $bug_h);
+    while ($result && $row = mysql_fetch_row($result))
+      $allpeople[$row[0]] = 1;
+    
     $query = "select dtDue, sPerson, sTask " . 
              "  from schedulator.Task " .
              "  where fValid=1 and sFixFor='$fixfor' and fDone = 0 " .
@@ -1256,6 +1265,7 @@ function sch_summary($fixfor)
 	$last_date = $due;
 	
 	$bugs[$person][$due][] = $task;
+	unset($allpeople[$person]);
     }
     
     $nextbounce = sch_next_milestone($fixfor);
@@ -1381,6 +1391,10 @@ function sch_summary($fixfor)
     }
     
     $ret .= "</table>\n";
+    
+    $ret .= "<p><b>Done for this release:</b> " .
+      join(", ", array_keys($allpeople)) .
+      "</p>\n";
     
     return $ret;
 }
