@@ -5,7 +5,7 @@ require('parse/main.php');
 require('parse/macros.php');
 require('parse/html.php');
 require('lib/diff.php');
-require('template/history.php');  #require(TemplateDir . '/history.php');
+require('template/history.php');
 require('lib/headers.php');
 
 // Display the known history of a page's edits.

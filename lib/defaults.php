@@ -84,6 +84,9 @@ $CookieName = 'prefs';
 //   regular internal diff.
 $EnableWordDiff = 0;
 
+// $WdiffCmd determines what command to run to compute word diffs.
+#$WdiffCmd = "/home/nitwiki/Files/wdiff";
+
 // When $EnableWordDiff is set to 1, $DiffModeCookieName determines the name of
 //   the cookie to store the diff mode preference.
 $DiffModeCookieName = 'diffmode';

@@ -13,7 +13,7 @@ function diff_compute($text1, $text2)
 
 function wdiff_compute($text1, $text2)
 {
-    global $TempDir;
+    global $TempDir, $WdiffCmd;
 
     $num = posix_getpid();  // Comment if running on Windows.
     // $num = rand();       // Uncomment if running on Windows.
@@ -30,7 +30,7 @@ function wdiff_compute($text1, $text2)
     fclose($h1);
     fclose($h2);
 
-    exec('wdiff -n --start-delete="<DEL>" --end-delete="</DEL>" --start-insert="<INS>" --end-insert="</INS>" ' . $temp1 . ' ' . $temp2, $output);
+    exec($WdiffCmd . ' -n --start-delete="<DEL>" --end-delete="</DEL>" --start-insert="<INS>" --end-insert="</INS>" ' . $temp1 . ' ' . $temp2, $output);
 
     unlink($temp1);
     unlink($temp2);
