@@ -116,9 +116,9 @@ class WikiPage
 
             $qry = "UPDATE $PgTbl SET lastversion=$this->version, " .
                    "bodylength=$body_length, " .
-                   "createtime=$this->createtime";
+                   "createtime='$this->createtime'";
             if ($insertMinorEdit) {
-                $qry .= ", updatetime=$this->updatetime";
+                $qry .= ", updatetime='$this->updatetime'";
             } else {
                 $qry .= ", updatetime=null" .
                         ", lastversion_major=$this->version";
@@ -153,8 +153,8 @@ class WikiPage
                 $qry = "UPDATE $PgTbl SET lastversion = $rollback[0], " .
                        "lastversion_major = $rollback[1], " .
                        "bodylength = $rollback[2], " .
-                       "createtime = $rollback[3], " .
-                       "updatetime = $rollback[4] " .
+                       "createtime = '$rollback[3]', " .
+                       "updatetime = '$rollback[4]' " .
                        "WHERE id=$page_id";
             } else {
                 $qry = "DELETE FROM $PgTbl " .
@@ -165,7 +165,7 @@ class WikiPage
         }
 
         if ($this->version > 1) {
-            $this->db->query("UPDATE $CoTbl SET time=$this->time, " .
+            $this->db->query("UPDATE $CoTbl SET time='$this->time', " .
                              "supercede=NULL WHERE page=$page_id " .
                              "AND version=" . ($this->version - 1));
         }
