@@ -1208,6 +1208,22 @@ function sch_month_out($str, $count)
 }
 
 
+function sch_dateclass($due, $daystobounce)
+{
+    $colclass = "";
+    $daysleft = (strtotime($due) - time()) / 24 / 60 / 60;
+    if ($daysleft < -7)
+      $colclass = "superlate";
+    else if ($daysleft < -2)
+      $colclass = "late";
+    else if ($daystobounce - $daysleft < 0)
+      $colclass = "superlate";
+    else if ($daystobounce - $daysleft < ($daystobounce / 2.5))
+      $colclass = "late";
+    return $colclass;
+}
+
+
 function sch_summary($fixfor)
 {
     global $bug_h;
@@ -1231,10 +1247,11 @@ function sch_summary($fixfor)
             "$person</a>";
     }
     
-    $query = "select dtDue, sPerson, sTask, sSubTask " . 
+    $query = "select dtDue, sPerson, sTask, sSubTask, " .
+             "    fDone, fResolved, ixPriority " . 
              "  from schedulator.Task " .
              "  where fValid=1 and sFixFor='$fixfor' and fDone = 0 " .
-             "  order by dtDue ";
+             "  order by dtDue, ixPriority, sTask, sSubTask ";
     $result = mysql_query($query, $bug_h);
 
     $dates = array();
@@ -1246,17 +1263,21 @@ function sch_summary($fixfor)
 	$person = $row[1];
 	$task = $row[2];
         $subtask = $row[3];
+	$done = $row[4];
+	$resolved = $row[5];
+	$priority = $row[6];
 	
 	# $nicedue = ereg_replace("-", " ", $due);
 	$nicedue = ereg_replace("(....)-(..)-(..)", "\\3", $due);
 	$dates[$due] = $nicedue;
 	$last_date = $due;
-	
-            
 
-	$bugs[$person][$due][] = array(
-                "task" => $task, 
-                "subtask" => $subtask);
+	$bugs[$person][$due][] = array
+	  ("task" => $task, 
+	   "subtask" => $subtask,
+	   "done" => $done,
+	   "resolved" => $resolved,
+	   "priority" => $priority);
 	unset($allpeople[$person]);
     }
     
@@ -1275,22 +1296,50 @@ function sch_summary($fixfor)
     $ret .= "<h1>Schedulator Summary for '$fixfor'</h1>\n";
     $ret .= "<p>Predicted Bounce: $last_date$next_str</p>\n";
     
-    $ret .= "<style type='text/css'>\n" .
-      " table.schedsum th " .
-             "{ font-weight:normal; margin:0pt; text-align:left }\n" .
-      " table.schedsum th.year,th.day,th.person " .
-             "{ background: lightgray }\n" .
-      " table.schedsum th.day,td.bugs " .
-             "{ font-size: 8pt; }\n" .
-      " table.schedsum td.superlate " .
-             "{ background: #ee9999 }\n" .
-      " table.schedsum td.superlate a:link,td.superlate a:visited " .
-             "{ color: yellow; background: #aa0000 }\n" .
-      " table.schedsum td.late " .
-             "{ background: #f0f0c0 }\n" .
-      " table.schedsum td.late a:link,td.late a:visited " .
-             "{ color: red; background: yellow }\n" .
-      "</style>";
+    $ret .= <<<EOF
+      
+<style type='text/css'>
+    /* headings */
+    table.schedsum th {
+	font-weight:normal; margin:0pt; text-align:left;
+    }
+    
+    /* headings except topleft corner */
+    table.schedsum th.year,th.day,th.person {
+	background: lightgray
+    }
+    
+    /* typical font size */
+    table.schedsum th.day,td.bugs {
+	font-size: 8pt;
+    }
+    
+    /* cell backgrounds */
+    table.schedsum td.superlate { 
+	background: #ee9999;
+    }
+    table.schedsum td.late { 
+	background: #f0f0c0
+    }
+    
+    /* bug text styles */
+    table.schedsum a.superlate:link,a.superlate:visited {
+	color: yellow; background: #aa0000
+    }
+    table.schedsum a.late:link,a.late:visited {
+	color: red; background: yellow
+    }
+    table.schedsum a.resolved:link,a.resolved:visited {
+	font-style: italic;
+    }
+    table.schedsum a.unresolved:link,a.unresolved:visited {
+	border-style: solid; border-width: 1px;
+    }
+    table.schedsum a:hover {
+	color: white; background: green;
+    }
+</style>
+EOF;
     
     $date_list = array_keys($dates);
     sort($date_list);
@@ -1300,7 +1349,7 @@ function sch_summary($fixfor)
     $rowcount = 2 + count($person_list);
     
     $ret .= "<table class='schedsum'>\n";
-    
+	  
     $ret .= "<tr class='schedsum'><th></th>";
     $lastyear = 0;
     $yearcount = 0;
@@ -1318,7 +1367,7 @@ function sch_summary($fixfor)
     }
     $ret .= "<th class='year' colspan=$yearcount>$lastyear</th>";
     $ret .= "</tr>\n";
-    
+	  
     $ret .= "<tr class='schedsum'><th></th>";
     $lastmonth = 0;
     $monthcount = 0;
@@ -1336,10 +1385,17 @@ function sch_summary($fixfor)
     }
     $ret .= sch_month_out($lastmonth, $monthcount);
     $ret .= "</tr>\n";
-    
-    $ret .= "<tr><th></th><th class='day'>" 
-      . join("</th><th class='day'>", array_values($dates)) . "</th>\n";
-    $ret .= "</tr>";
+	  
+    $ret .= "<tr><th></th>";
+    foreach ($date_list as $due)
+    {
+	$day = ereg_replace("(....)-(..)-(..)", "\\3", $due);
+	$colclass = sch_dateclass($due, $daystobounce);
+	$ret .= "<th class='day $colclass'>" .
+	  $day .
+	  "</th>\n";
+    }
+    $ret .= "</tr>\n";
     
     foreach ($person_list as $person)
     {
@@ -1351,7 +1407,9 @@ function sch_summary($fixfor)
 	  "$person</a></th>";
 	foreach ($date_list as $due)
 	{
+	    $dateclass = sch_dateclass($due, $daystobounce);
 	    $n = 0;
+	    $num_unresolved = 0;
 	    $v = "";
 	    if (is_array($bugs[$person][$due]))
 	    {
@@ -1360,24 +1418,26 @@ function sch_summary($fixfor)
 		    $n++;
                     $task = $bug["task"];
                     $subtask = $bug["subtask"];
+		    if ($bug["resolved"])
+			$bugclass = "resolved";
+		    else
+		    {
+			$bugclass = "unresolved $dateclass";
+			$num_unresolved++;
+		    }
 		    if (($task + 0) . "" == $task)
-		      $v .= "<a href='http://nits/fogbugz3?$task' " . 
-		            "title='FogBugz bug #$task - $subtask'>$n</a> ";
+		      $v .= "<a class='$bugclass' " .
+		            "href='http://nits/fogbugz3?$task' " . 
+		            "title='FogBugz bug #$task - $subtask'>$task</a> ";
 		    else
 		      $v .= "$n";
 		}
 	    }
 
-	    $colclass = "";
-	    $daysleft = (strtotime($due) - time()) / 24 / 60 / 60;
-	    if ($daysleft < -7)
-	      $colclass = "superlate";
-	    else if ($daysleft < -2)
-	      $colclass = "late";
-	    else if ($daystobounce - $daysleft < 0)
-	      $colclass = "superlate";
-	    else if ($daystobounce - $daysleft < ($daystobounce / 2.5))
-	      $colclass = "late";
+	    if ($v == "" || $num_unresolved==0)
+	      $colclass = "";
+	    else
+	      $colclass = $dateclass;
 	    
 	    $ret .= "<td class='bugs $colclass'>$v</td>";
 	}
