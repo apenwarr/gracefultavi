@@ -59,7 +59,8 @@ print '</textarea>';
 <br>
 
 <?php
-print '<input type="checkbox" name="minoredit" value="1">Minor edit<br>';
+$minorEditChecked = (substr($args['page'], -8) == 'Schedule') ? ' checked' : '';
+print '<input type="checkbox" name="minoredit" value="1"' . $minorEditChecked . '>Minor edit<br>';
 ?>
 
 Summary of change:
