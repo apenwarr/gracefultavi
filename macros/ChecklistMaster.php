@@ -89,11 +89,11 @@ class Macro_ChecklistMaster
     var $category_list;
     var $url_params;
 
-    var $notes_parsing_rules = array('parse_elem_flag',
-                                     'parse_freelink',
-                                     'parse_interwiki',
-                                     'parse_wikiname',
-                                     'parse_elements');
+    var $parsing_rules = array('parse_elem_flag',
+                               'parse_freelink',
+                               'parse_interwiki',
+                               'parse_wikiname',
+                               'parse_elements');
 
 
     function out()
@@ -1888,14 +1888,6 @@ CALENDAR_JAVASCRIPT;
         $this->do_checklist_create_form($name);
     }
 
-    function parse_wiki_links($text)
-    {
-        global $LinkPtn;
-        $ptn = "/(^|[^A-Za-z])(!?$LinkPtn)((\#[-A-Za-z0-9]+)?)(\"\")?/";
-
-        return preg_replace($ptn, "\\1<a href=\"?\\2\">\\2</a>", $text, -1);
-    }
-
     function create_wiki_name($name)
     {
         global $LinkPtn;
@@ -2027,7 +2019,9 @@ CALENDAR_JAVASCRIPT;
                 $this->out('<tr><td colspan="7">');
                 $this->out($this->show_hide_category_link($row['category'],
                            $hide_cat));
-                $this->out($this->parse_wiki_links($row['category']));
+                $parsed_category = parseText($row['category'],
+                    $this->parsing_rules, $this->page);
+                $this->out($parsed_category);
                 $this->out('</td></tr>');
                 $category = $row['category'];
             }
@@ -2052,15 +2046,14 @@ CALENDAR_JAVASCRIPT;
                 'setRowStyle('.$row['id'].', this.checked);');
             $this->out('</td><td id="col0row'.$row['id'].'" '.$class.'>');
             $this->out('<label for="status'.$row['id'].'">');
-            $this->out($this->parse_wiki_links($row['description']));
+            $parsed_description = parseText($row['description'],
+                $this->parsing_rules, $this->page);
+            $this->out($parsed_description);
             $this->out('</label></td>');
             $this->out('<td id="col1row'.$row['id'].'" '.$class.' nowrap>');
             $this->out('<a href="?'.
-
-            $this->create_wiki_name($users[$row['owner']])
-
-            .'">'.
-                 $users[$row['owner']].'</a>');
+                $this->create_wiki_name($users[$row['owner']])
+                .'">'.$users[$row['owner']].'</a>');
             $this->out('</td>');
 
             $tmp_date = str_replace('-', '', $row['duedate']);
@@ -2084,12 +2077,13 @@ CALENDAR_JAVASCRIPT;
                        '<img src="images/ChecklistMaster/edit.gif" '.
                        'alt="Edit notes" title="Edit notes" align="left" '.
                        'width="13" height="14" border="0"></a>');
-            $parsed_notes = parseText($row['notes'], $this->notes_parsing_rules,
-                                      $this->page);
-            if ($row['noteshidden'])
+            if ($row['noteshidden']) {
                 $this->out($this->notes_link($row['id'], $row['notes'], false));
-            else
+            } else {
+                $parsed_notes = parseText($row['notes'],
+                    $this->parsing_rules, $this->page);
                 $this->out($parsed_notes);
+            }
             $this->out('</span>');
 
             $this->out('<span style="display: none;" id="notesedit'.
