@@ -107,7 +107,10 @@ function action_save()
     else
         $pg->version = 1;
 
-    $pg->write($minoredit);
+    if (!$pg->write($minoredit)) {
+        $pagestore->unlock();
+        die("Error saving a page.");
+    }
 
     // Parenting stuff for new pages.
     if ($pg->version == 1)
@@ -138,6 +141,11 @@ function action_save()
 
     // Process save macros (e.g., to define interwiki entries).
     parseText($document, $SaveMacroEngine, $page);
+
+    // Remove any parenting if the page is empty.
+    if (strlen(trim($document)) == 0) {
+        $pagestore->reparent_emptypage($page);
+    }
 
     $pagestore->unlock();               // End "transaction".
 

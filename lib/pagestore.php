@@ -23,18 +23,41 @@ class PageStore
         return new WikiPage($this->dbh, $name);
     }
 
+    // Creates a cache of all existing pages, it speeds up pages having tons of
+    // links like RecentChanges.
+    function page_exists($page)
+    {
+        global $PgTbl;
+
+        static $page_exists_cache = array();
+
+        if (!$page_exists_cache) {
+            $qid = $this->dbh->query("SELECT title " .
+                                     "FROM $PgTbl " .
+                                     "WHERE bodylength>1");
+            while ($result = $this->dbh->result($qid)) {
+                $page_exists_cache[$result[0]] = 1;
+            }
+        }
+
+        return isset($page_exists_cache[$page]);
+    }
+
     // Return all pages names
     function getAllPageNames()
     {
         global $PgTbl;
 
-        $qid = $this->dbh->query("SELECT distinct title FROM $PgTbl " .
-                                 "ORDER BY lower(title)");
+        $qid = $this->dbh->query("SELECT title_notbinary " .
+                                 "FROM $PgTbl " .
+                                 "WHERE bodylength>1 " .
+                                 "ORDER BY title_notbinary");
 
         $list = array();
 
-        while(($result = $this->dbh->result($qid)))
+        while ($result = $this->dbh->result($qid)) {
             $list[] = $result[0];
+        }
 
         return $list;
     }
@@ -43,13 +66,15 @@ class PageStore
     // week. Ignores minor edits and multiple subsequent updates by the same user.
     function getHotPages()
     {
-        global $PgTbl;
+        global $CoTbl, $PgTbl;
 
-        $qid = $this->dbh->query("SELECT title, username, version " .
-                                 "FROM $PgTbl " .
-                                 "WHERE (unix_timestamp(sysdate()) - unix_timestamp(time)) < (7*24*60*60) " .
-                                 "AND minoredit = 0 " .
-                                 "ORDER BY title, version");
+        $qid = $this->dbh->query("SELECT p.title, c.username, c.version " .
+                                 "FROM $PgTbl p, $CoTbl c " .
+                                 "WHERE p.id=c.page " .
+                                 "AND (unix_timestamp(sysdate()) - " .
+                                 "unix_timestamp(c.time)) < (7*24*60*60) " .
+                                 "AND c.minoredit = 0 " .
+                                 "ORDER BY p.title, c.version");
 
         $list = array();
 
@@ -81,46 +106,17 @@ class PageStore
     // before the first edit. Ignores minor edits.
     function getNewPages()
     {
-        global $PgTbl, $LeTbl;
+        global $PgTbl;
 
-# new icon temporarily removed
-return array();
-
-/*
-        $qid = $this->dbh->query("select p1.title " .
-                                 "from $PgTbl p1, $PgTbl p2 " .
-                                 "where p1.title = p2.title " .
-                                 "and p1.version = 1 " .
-                                 "and p1.minoredit = 0 " .
-                                 "and p2.minoredit = 0 " .
-                                 "group by p1.title, p2.title " .
-                                 "having max(unix_timestamp(p2.time)) - min(unix_timestamp(p1.time)) < 60*60*24");
+        $qid = $this->dbh->query("SELECT title " .
+                                 "FROM $PgTbl " .
+                                 "WHERE unix_timestamp(updatetime) " .
+                                 "-unix_timestamp(createtime)<86400");
 
         $list = array();
-
-        while (($result = $this->dbh->result($qid)))
+        while ($result = $this->dbh->result($qid)) {
             $list[] = $result[0];
-*/
-
-        $qid = $this->dbh->query("select title, unix_timestamp(time) time " .
-                                 "from $PgTbl " .
-                                 "where version = 1");
-        $mintime = array();
-        while (($result = $this->dbh->result($qid)))
-            $mintime[$result[0]] = $result[1];
-
-        $qid = $this->dbh->query("SELECT p.title, unix_timestamp(p.time) time " .
-                                 "FROM $PgTbl p, $LeTbl l " .
-                                 "WHERE p.title = l.page " .
-                                 "AND p.version = l.version");
-        $maxtime = array();
-        while (($result = $this->dbh->result($qid)))
-            $maxtime[$result[0]] = $result[1];
-
-        $list = array();
-        foreach ($mintime as $title => $time)
-            if (!isset($maxtime[$title]) || ($maxtime[$title] - $time < 86400)) // 86400 seconds = 24 hours
-                $list[] = $title;
+        }
 
         return $list;
     }
@@ -145,10 +141,13 @@ return array();
     // Return parents
     function getParents($text)
     {
-        global $PaTbl;
+        global $PaTbl, $PgTbl;
 
-        $qid = $this->dbh->query("SELECT parent FROM $PaTbl " .
-                                 "WHERE page='$text' " .
+        $qid = $this->dbh->query("SELECT parent " .
+                                 "FROM $PaTbl a, $PgTbl g " .
+                                 "WHERE a.parent=g.title " .
+                                 "AND g.bodylength>1 " .
+                                 "AND page='$text' " .
                                  "ORDER BY lower(parent)");
 
         $list = array();
@@ -162,10 +161,13 @@ return array();
     // Return children
     function getChildren($text)
     {
-        global $PaTbl;
+        global $PaTbl, $PgTbl;
 
-        $qid = $this->dbh->query("SELECT page FROM $PaTbl " .
-                                 "WHERE parent='$text' " .
+        $qid = $this->dbh->query("SELECT page " .
+                                 "FROM $PaTbl a, $PgTbl g " .
+                                 "WHERE a.page=g.title " .
+                                 "AND g.bodylength>1 " .
+                                 "AND parent='$text' " .
                                  "ORDER BY lower(page)");
 
         $list = array();
@@ -206,18 +208,35 @@ return array();
     // It is assumed that the pages specified by $parents and $page all exists.
     function reparent($page, $parents)
     {
-        global $PaTbl;
+        global $PaTbl, $PgTbl;
 
         if ($parents && !is_array($parents))
             $parents = array($parents);
 
         $this->dbh->query("DELETE FROM $PaTbl " .
-                          "WHERE page = '$page'");
+                          "WHERE page='$page'");
+
+        // disallow parenting of empty pages
+        $qid = $this->dbh->query("SELECT id " .
+                                 "FROM $PgTbl " .
+                                 "WHERE title='$page' " .
+                                 "AND bodylength>1");
+        if (!mysql_num_rows($qid)) { return; }
 
         if ($parents)
             foreach ($parents as $parent)
                 $this->dbh->query("INSERT INTO $PaTbl (page, parent) " .
                                   "VALUES ('$page', '$parent')");
+    }
+
+    // Remove any parenting when deleting a page.
+    function reparent_emptypage($page)
+    {
+        global $PaTbl;
+
+        $this->dbh->query("DELETE FROM $PaTbl " .
+                          "WHERE page='$page' " .
+                          "OR parent='$page'");
     }
 
     // Return subscribed pages for a given user
@@ -232,7 +251,7 @@ return array();
         $qid = $this->dbh->query($query);
 
         $list = array();
-        while (($result = $this->dbh->result($qid))) {
+        while ($result = $this->dbh->result($qid)) {
             $list[] = $result[0];
         }
 
@@ -355,13 +374,20 @@ return array();
             if (!$initialLeaves)
             {
                 // get all pages
-                $qid = $this->dbh->query("SELECT distinct title FROM $PgTbl order by lower(title)");
+                $qid = $this->dbh->query("SELECT title_notbinary " .
+                                         "FROM $PgTbl " .
+                                         "WHERE bodylength>1 " .
+                                         "ORDER BY title_notbinary");
                 $pages = array();
                 while(($result = $this->dbh->result($qid)))
                     $pages[] = $result[0];
 
                 // get all pages with children
-                $qid = $this->dbh->query("SELECT distinct parent FROM $PaTbl order by lower(page)");
+                $qid = $this->dbh->query("SELECT DISTINCT a.parent " .
+                                         "FROM $PaTbl a, $PgTbl g " .
+                                         "WHERE a.parent=g.title " .
+                                         "AND g.bodylength>1 " .
+                                         "ORDER BY lower(a.page)");
                 $parents = array();
                 while(($result = $this->dbh->result($qid)))
                     $parents[] = $result[0];
@@ -419,22 +445,23 @@ return array();
 
         $list = array();
 
-        if ($caseSensitive)
-        {
-            $qid = $this->dbh->query("SELECT distinct title FROM $PgTbl");
+        if ($caseSensitive) {
+            $qid = $this->dbh->query("SELECT title FROM $PgTbl");
 
-            while(($result = $this->dbh->result($qid)))
-                if (levenshtein($result[0], $pageLower) <= $toleratedDistance)
+            while ($result = $this->dbh->result($qid)) {
+                if (levenshtein($result[0], $pageLower) <= $toleratedDistance) {
                     $list[] = $result[0];
-        }
-        else
-        {
-            $qid = $this->dbh->query("SELECT distinct lower(title), title FROM $PgTbl");
+                }
+            }
+        } else {
+            $qid = $this->dbh->query("SELECT lower(title), title FROM $PgTbl");
 
             $page = strtolower($page);
-            while(($result = $this->dbh->result($qid)))
-                if (levenshtein($result[0], $page) <= $toleratedDistance)
+            while ($result = $this->dbh->result($qid)) {
+                if (levenshtein($result[0], $page) <= $toleratedDistance) {
                     $list[] = $result[1];
+                }
+            }
         }
 
         return $list;
@@ -444,15 +471,17 @@ return array();
     // The metaphone values are actually stored in a table.
     function findSoundLike($page)
     {
-        global $PgTbl, $MpTbl;
+        global $PgTbl;
 
         $metaphone = metaphone($page);
 
-        $qid = $this->dbh->query("SELECT distinct title FROM $PgTbl as p, $MpTbl as m " .
-                                 "WHERE p.title=m.page AND metaphone='$metaphone'");
+        $qid = $this->dbh->query("SELECT title " .
+                                 "FROM $PgTbl " .
+                                 "WHERE metaphone='$metaphone'");
         $list = array();
-        while (($result = $this->dbh->result($qid)))
+        while ($result = $this->dbh->result($qid)) {
             $list[] = $result[0];
+        }
 
         return $list;
     }
@@ -460,18 +489,24 @@ return array();
     // Find one page in the database.
     function findOne($page)
     {
-        global $LeTbl;
+        global $PgTbl;
+
+        $dbname = str_replace('\\', '\\\\', $page);
+        $dbname = str_replace('\'', '\\\'', $dbname);
 
         // case sensitive search
-        $qid = $this->dbh->query("SELECT distinct page FROM $LeTbl " .
-                                 "WHERE page='$page'");
+        $qid = $this->dbh->query("SELECT title " .
+                                 "FROM $PgTbl " .
+                                 "WHERE title='$dbname' " .
+                                 "AND bodylength>1");
         if (mysql_num_rows($qid) == 1)
             return $page;
 
         // case insensitive search
-        $pageLower = strtolower($page);
-        $qid = $this->dbh->query("SELECT distinct page FROM $LeTbl " .
-                                 "WHERE lower(page)='$pageLower'");
+        $qid = $this->dbh->query("SELECT title_notbinary " .
+                                 "FROM $PgTbl " .
+                                 "WHERE title_notbinary='$dbname' " .
+                                 "AND bodylength>1");
         if (mysql_num_rows($qid) == 1)
         {
             $result = $this->dbh->result($qid);
@@ -479,9 +514,11 @@ return array();
         }
 
         // beginning with search
-        $qid = $this->dbh->query("SELECT distinct page FROM $LeTbl " .
-                                 "WHERE lower(page) like '$pageLower%' " .
-                                 "ORDER BY lower(page)");
+        $qid = $this->dbh->query("SELECT title_notbinary " .
+                                 "FROM $PgTbl " .
+                                 "WHERE title_notbinary like '$dbname%' " .
+                                 "AND bodylength>1 " .
+                                 "ORDER BY title_notbinary");
         if (mysql_num_rows($qid) > 0)
         {
             $result = $this->dbh->result($qid);
@@ -497,60 +534,77 @@ return array();
             return '';
     }
 
-  // Find text in the database.
-  function find($text)
-  {
-    global $PgTbl;
-
-    $qid = $this->dbh->query("SELECT title, max(version) FROM $PgTbl " .
-                             "GROUP BY title ORDER BY lower(title)");
-
-    $list = array();
-    $text = strtolower($text);
-    while(($result = $this->dbh->result($qid)))
+    // Find text in the database.
+    function find($text)
     {
-        $q2 = $this->dbh->query("SELECT title FROM $PgTbl " .
-                                "WHERE title='$result[0]' " .
-                                "AND version='$result[1]' " .
-                                "AND (lower(body) LIKE '%$text%' " .
-                                "OR lower(title) LIKE '%$text%')");
-        if($this->dbh->result($q2))
-            { $list[] = $result[0]; }
+        global $CoTbl, $PgTbl;
+
+        $text = strtolower($text);
+
+        $qid = $this->dbh->query("SELECT p.title " .
+                                 "FROM $PgTbl p, $CoTbl c " .
+                                 "WHERE p.id=c.page " .
+                                 "AND p.lastversion=c.version " .
+                                 "AND p.bodylength>1 " .
+                                 "AND (lower(body) LIKE '%$text%' " .
+                                 "OR title_notbinary LIKE '%$text%')");
+        $list = array();
+        while ($result = $this->dbh->result($qid)) {
+            $list[] = $result[0];
+        }
+
+        return $list;
     }
 
-    return $list;
-  }
-
-  // Retrieve a page's edit history.
-  function history($page)
-  {
-    global $PgTbl;
-
-    $qid = $this->dbh->query("SELECT time, author, version, username, " .
-                             "comment " .
-                             "FROM $PgTbl WHERE title='$page' " .
-                             "ORDER BY version DESC");
-
-    $list = array();
-    while(($result = $this->dbh->result($qid)))
+    // Retrieve a page's edit history.
+    function history($page)
     {
-      $list[] = array($result[0], $result[1], $result[2], $result[3],
-                      $result[4]);
+        global $CoTbl, $PgTbl;
+
+        $qid = $this->dbh->query("SELECT c.time, c.author, c.version, " .
+                                 "c.username, c.comment " .
+                                 "FROM $PgTbl p, $CoTbl c " .
+                                 "WHERE p.title='$page' " .
+                                 "AND p.id=c.page " .
+                                 "ORDER BY version DESC");
+
+        $list = array();
+        while ($result = $this->dbh->result($qid)) {
+            $list[] = array($result[0], $result[1], $result[2], $result[3],
+                            $result[4]);
+        }
+
+        return $list;
     }
 
-    return $list;
-  }
+    // Look up an interwiki prefix.
+    function interwiki($name, $viewing_page = '')
+    {
+        global $IwTbl;
 
-  // Look up an interwiki prefix.
-  function interwiki($name)
-  {
-    global $IwTbl;
+        if ($viewing_page == 'RecentChanges') {
+            static $interwiki_cache = array();
 
-    $qid = $this->dbh->query("SELECT url FROM $IwTbl WHERE prefix='$name'");
-    if(($result = $this->dbh->result($qid)))
-      { return $result[0]; }
-    return '';
-  }
+            if (!$interwiki_cache) {
+                $qid = $this->dbh->query("SELECT url, prefix " .
+                                         "FROM $IwTbl");
+                while ($result = $this->dbh->result($qid)) {
+                    $interwiki_cache[$result[1]] = $result[0];
+                }
+            }
+
+            return (isset($interwiki_cache[$name])) ?
+                $interwiki_cache[$name] : '';
+        } else {
+            $qid = $this->dbh->query("SELECT url " .
+                                     "FROM $IwTbl " .
+                                     "WHERE prefix='$name'");
+            if ($result = $this->dbh->result($qid)) {
+                return $result[0];
+            }
+            return '';
+        }
+    }
 
   // Clear all the links cached for a particular page.
   function clear_link($page)
@@ -643,30 +697,57 @@ return array();
     }
   }
 
-  // Find all twins of a page at sisterwiki sites.
-  function twinpages($page)
-  {
-    global $RemTbl, $IwTbl;
+    // Find all twins of a page at sisterwiki sites.
+    function twinpages($page, $viewing_page = '')
+    {
+        global $RemTbl, $IwTbl;
 
-    $list = array();
-    $q2 = $this->dbh->query("SELECT site, page FROM $RemTbl " .
-                            "WHERE page LIKE '$page'");
-    while(($twin = $this->dbh->result($q2)))
-      { $list[] = array($twin[0], $twin[1]); }
+        $list = array();
 
-    return $list;
-  }
+        if ($viewing_page == 'RecentChanges') {
+            static $twinpages_cache = array();
 
-  // Lock the database tables.
-  function lock()
-  {
-    global $PgTbl, $IwTbl, $SwTbl, $LkTbl, $RtTbl, $RemTbl,
-           $PaTbl, $MpTbl, $SuTbl, $LeTbl;
+            if (!$twinpages_cache) {
+                $qid = $this->dbh->query("SELECT site, page " .
+                                         "FROM $RemTbl");
+                while ($result = $this->dbh->result($qid)) {
+                    if (!isset($twinpages_cache[$result[1]])) {
+                        $twinpages_cache[$result[1]] = array();
+                    }
+                    $twinpages_cache[$result[1]][] = $result[0];
+                }
+            }
 
-    $this->dbh->query("LOCK TABLES $PgTbl WRITE, $IwTbl WRITE, $SwTbl WRITE, " .
-                      "$LkTbl WRITE, $RtTbl WRITE, $RemTbl WRITE, " .
-                      "$PaTbl WRITE, $MpTbl WRITE, $SuTbl WRITE, $LeTbl WRITE");
-  }
+            if (isset($twinpages_cache[$page])) {
+                foreach ($twinpages_cache[$page] as $site) {
+                    $list[] = array($site, $page);
+                }
+            }
+        } else {
+            $dbname = str_replace('\\', '\\\\', $page);
+            $dbname = str_replace('\'', '\\\'', $dbname);
+            $q2 = $this->dbh->query("SELECT site " .
+                                    "FROM $RemTbl " .
+                                    "WHERE page='$dbname'");
+            while ($twin = $this->dbh->result($q2)) {
+                $list[] = array($twin[0], $page);
+            }
+        }
+
+        return $list;
+    }
+
+    // Lock the database tables.
+    function lock()
+    {
+        global $CoTbl, $IwTbl, $LkTbl, $PaTbl, $PgTbl, $RemTbl, $RtTbl, $SuTbl;
+        global $SwTbl;
+
+        $this->dbh->query("LOCK TABLES $CoTbl WRITE, $IwTbl WRITE, " .
+                          "$LkTbl WRITE, $PaTbl WRITE, $PgTbl WRITE, " .
+                          "$RemTbl WRITE, $RtTbl WRITE, $SuTbl WRITE, " .
+                          "$SwTbl WRITE");
+    }
 
   // Unlock the database tables.
   function unlock()
@@ -674,150 +755,124 @@ return array();
     $this->dbh->query("UNLOCK TABLES");
   }
 
-  // Retrieve a list of all of the pages in the wiki except the ones with an
-  // empty body. This ignores the minor edits.
-  function allpages($with_page_size = false)
-  {
-        global $PgTbl, $LeTbl;
+    // Retrieve a list of all of the pages in the wiki except the ones with an
+    // empty body. This ignores the minor edits.
+    function allpages()
+    {
+        global $CoTbl, $PgTbl;
 
-/*
-        $qid = $this->dbh->query("SELECT title, MAX(version) " .
-                                 "FROM $PgTbl " .
-                                 "WHERE minoredit = 0 " .
-                                 "OR LENGTH(body) <= 1 " .
-                                 "GROUP BY title " .
-                                 "ORDER BY lower(title)");
+        $qid = $this->dbh->query("SELECT p.title, c.version, c.author, " .
+                                 "c.time, c.username, p.bodylength, " .
+                                 "c.comment, p.mutable, c.minoredit " .
+                                 "FROM $PgTbl p, $CoTbl c " .
+                                 "WHERE p.id=c.page " .
+                                 "AND p.bodylength>1 " .
+                                 "AND p.lastversion_major=c.version");
 
         $list = array();
-        while(($result = $this->dbh->result($qid)))
-        {
-            $q2 = $this->dbh->query("SELECT author, time, username, LENGTH(body), " .
-                                    "comment, mutable " .
-                                    "FROM $PgTbl " .
-                                    "WHERE title='$result[0]' " .
-                                    "AND version='$result[1]' " .
-                                    "AND LENGTH(body) > 1");
-
-            if ($auth_res = $this->dbh->result($q2))
-            {
-                $list[] = array($auth_res[1], $result[0], $auth_res[0], $auth_res[2],
-                                $auth_res[3], $auth_res[4], $auth_res[5] == 'on', $result[1]);
-            }
-        }
-*/
-
-        $page_size_column = $with_page_size ? 'LENGTH(p.body)' : '2';
-
-        $qid = $this->dbh->query("SELECT p.title, p.version, p.author, p.time, p.username, " .
-                                 "$page_size_column, p.comment, p.mutable, p.minoredit " .
-                                 "FROM $PgTbl p, $LeTbl l " .
-                                 "WHERE p.title = l.page " .
-                                 "AND p.version = l.version "
-                                 #. "AND length(substring(p.body, 2, 1)) > 0 "
-                                 #. "AND p.minoredit = 0"
-                                 );
-
         while ($result = $this->dbh->result($qid)) {
-            if ($result[8] == 0) {
-                $list[] = array($result[3], $result[0], $result[2], $result[4], $result[5],
-                                $result[6], $result[7] == 'on', $result[1]);
-            }
+            $list[] = array($result[3], $result[0], $result[2], $result[4], $result[5],
+                            $result[6], $result[7] == 'on', $result[1]);
         }
 
         return $list;
-  }
-
-  // Retrieve a list of all new pages in the wiki.
-  function newpages()
-  {
-    global $PgTbl;
-
-    $qid = $this->dbh->query("SELECT title, author, time, username, " .
-                             "LENGTH(body), comment " .
-                             "FROM $PgTbl WHERE version=1");
-
-    $list = array();
-    while(($result = $this->dbh->result($qid)))
-    {
-      $list[] = array($result[2], $result[0], $result[1], $result[3],
-                      $result[4], $result[5]);
     }
 
-    return $list;
-  }
-
-  // Return a list of all empty (deleted) pages in the wiki.
-  function emptypages()
-  {
-    global $PgTbl;
-
-    $qid = $this->dbh->query("SELECT title, MAX(version) FROM $PgTbl " .
-                             "GROUP BY title order by lower(title)");
-
-    $list = array();
-    while(($result = $this->dbh->result($qid)))
+    // Retrieve a list of all new pages in the wiki.
+    function newpages()
     {
-      $q2 = $this->dbh->query("SELECT author, time, username, comment " .
-                              "FROM $PgTbl " .
-                              "WHERE title='$result[0]' " .
-                              "AND version='$result[1]' " .
-                              "AND body=''");
-      if(($auth_res = $this->dbh->result($q2)))
-      {
-        $list[] = array($auth_res[1], $result[0], $auth_res[0],
-                        $auth_res[2], 0, $auth_res[3]);
-      }
+        global $CoTbl, $PgTbl;
+
+        $qid = $this->dbh->query("SELECT p.title, c.author, c.time, " .
+                                 "c.username, p.bodylength, c.comment " .
+                                 "FROM $PgTbl p, $CoTbl c " .
+                                 "WHERE p.id=c.page " .
+                                 "AND p.lastversion_major=1 " .
+                                 "AND c.version=1");
+
+        $list = array();
+        while ($result = $this->dbh->result($qid)) {
+            $list[] = array($result[2], $result[0], $result[1], $result[3],
+                            $result[4], $result[5]);
+        }
+
+        return $list;
     }
 
-    return $list;
-  }
-
-  // Return a list of information about a particular set of pages.
-  function givenpages($names)
-  {
-    global $PgTbl;
-
-    $list = array();
-    foreach($names as $page)
+    // Return a list of all empty (deleted) pages in the wiki.
+    function emptypages()
     {
-      $qid = $this->dbh->query("SELECT time, author, username, LENGTH(body), " .
-                               "comment FROM $PgTbl WHERE title='$page' " .
-                               "ORDER BY version DESC");
+        global $CoTbl, $PgTbl;
 
-      if(!($result = $this->dbh->result($qid)))
-        { continue; }
+        $qid = $this->dbh->query("SELECT p.title, c.author, c.time, " .
+                                 "c.username, c.comment " .
+                                 "FROM $PgTbl p, $CoTbl c " .
+                                 "WHERE p.id=c.page " .
+                                 "AND p.bodylength<2 " .
+                                 "AND p.lastversion_major=c.version");
+        $list = array();
+        while ($result = $this->dbh->result($qid)) {
+            $list[] = array($result[2], $result[0], $result[1],
+                            $result[3], 0, $result[4]);
+        }
 
-      $list[] = array($result[0], $page, $result[1], $result[2],
-                      $result[3], $result[4]);
+        return $list;
     }
 
-    return $list;
-  }
-
-  // Expire old versions of pages.
-  function maintain()
-  {
-    global $PgTbl, $RtTbl, $ExpireLen, $RatePeriod;
-
-    if ($ExpireLen)
+    // Return a list of information about a particular set of pages.
+    function givenpages($names)
     {
-        $qid = $this->dbh->query("SELECT title, MAX(version) FROM $PgTbl " .
-                                 "GROUP BY title");
+        global $CoTbl, $PgTbl;
 
-        while(($result = $this->dbh->result($qid)))
-        {
-            $this->dbh->query("DELETE FROM $PgTbl WHERE title='$result[0]' " .
-                              "AND (version < $result[1] OR LENGTH(body)<=1) " .
-                              "AND TO_DAYS(NOW()) - TO_DAYS(supercede) > $ExpireLen");
+        $list = array();
+        foreach ($names as $page) {
+            $dbname = str_replace('\\', '\\\\', $page);
+            $dbname = str_replace('\'', '\\\'', $dbname);
+
+            $qid = $this->dbh->query("SELECT c.time, c.author, c.username, " .
+                                     "p.bodylength, c.comment " .
+                                     "FROM $PgTbl p, $CoTbl c " .
+                                     "WHERE p.title='$dbname' " .
+                                     "AND p.id=c.page " .
+                                     "AND p.lastversion_major=c.version");
+
+            if (!($result = $this->dbh->result($qid))) {
+                continue;
+            }
+
+            $list[] = array($result[0], $page, $result[1], $result[2],
+                            $result[3], $result[4]);
+        }
+
+        return $list;
+    }
+
+    // Expire old versions of pages.
+    function maintain()
+    {
+        global $PgTbl, $RtTbl, $ExpireLen, $RatePeriod;
+
+        /*
+        TODO
+        This functionality is not yet supported with the new database schema.
+
+        if ($ExpireLen) {
+            $qid = $this->dbh->query("SELECT title, MAX(version) FROM $PgTbl " .
+                                     "GROUP BY title");
+
+            while ($result = $this->dbh->result($qid)) {
+                $this->dbh->query("DELETE FROM $PgTbl WHERE title='$result[0]' " .
+                                  "AND (version < $result[1] OR LENGTH(body)<=1) " .
+                                  "AND TO_DAYS(NOW()) - TO_DAYS(supercede) > $ExpireLen");
+            }
+        }
+        */
+
+        if ($RatePeriod) {
+            $this->dbh->query("DELETE FROM $RtTbl " .
+                              "WHERE ip NOT LIKE '%.*' " .
+                              "AND TO_DAYS(NOW()) > TO_DAYS(time)");
         }
     }
-
-    if($RatePeriod)
-    {
-        $this->dbh->query("DELETE FROM $RtTbl " .
-                          "WHERE ip NOT LIKE '%.*' " .
-                          "AND TO_DAYS(NOW()) > TO_DAYS(time)");
-    }
-  }
 }
 ?>

@@ -2,13 +2,20 @@
 
 function action_lock()
 {
-    global $pagestore, $page, $dbh, $PgTbl;
+    global $dbh, $page, $pagestore, $PgTbl;
 
-    $pg = $pagestore->page($page);
+    $dbname = str_replace('\\', '\\\\', $page);
+    $dbname = str_replace('\'', '\\\'', $dbname);
 
-    $sql = "UPDATE $PgTbl SET mutable='" . ( ($pg->mutable=="on") ? "off" : "on") . "' WHERE title='$page'";
+    $qry = "SELECT mutable FROM $PgTbl WHERE title='$dbname'";
+    $qid = $pagestore->dbh->query($qry);
+    $result = $pagestore->dbh->result($qid);
 
-    $pagestore->dbh->query($sql);
+    if ($result[0]) {
+        $mutable = ($result[0] == 'on') ? 'off' : 'on';
+        $qry = "UPDATE $PgTbl SET mutable='$mutable' WHERE title='$dbname'";
+        $pagestore->dbh->query($qry);
+    }
 }
 
 ?>

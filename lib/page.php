@@ -4,6 +4,7 @@
 // Abstractor to read and write wiki pages.
 class WikiPage
 {
+    var $page_id;                         // Primary Key ID of page.
     var $name = '';                       // Name of page.
     var $dbname = '';                     // Name used in DB queries.
     var $text = '';                       // Page's text in wiki markup form.
@@ -15,6 +16,8 @@ class WikiPage
     var $mutable = 1;                     // Whether page may be edited.
     var $exists = 0;                      // Whether page already exists.
     var $db;                              // Database object.
+    var $createtime;                      // Creation time of page.
+    var $updatetime;                      // Update time of page.
 
     function WikiPage($db_, $name_ = '')
     {
@@ -25,63 +28,44 @@ class WikiPage
     }
 
     // Check whether a page exists.
-    // Returns: nonzero if page exists in database.
+    // Returns: boolean if page exists in database.
     function exists()
     {
-        global $PgTbl, $LeTbl;
+        global $PgTbl, $page;
 
-        $qid = $this->db->query("SELECT LENGTH(body) " .
-                                "FROM $PgTbl, $LeTbl " .
-                                "WHERE $PgTbl.title = '$this->dbname' " .
-                                "AND $PgTbl.title = $LeTbl.page ".
-                                "AND $PgTbl.version = $LeTbl.version");
-
-/* old version
-        $qid = $this->db->query("SELECT LENGTH(body) " .
+        $qid = $this->db->query("SELECT id " .
                                 "FROM $PgTbl " .
-                                "WHERE title = '$this->dbname' " .
-                                "ORDER BY version DESC " .
-                                "LIMIT 1");
-*/
+                                "WHERE title='$this->dbname' " .
+                                "AND bodylength>1");
 
-        return !!(($result = $this->db->result($qid)) && $result[0]>1);
-
-/* older version
-        $qid = $this->db->query("SELECT MAX(version) FROM $PgTbl " .
-                                "WHERE title='$this->dbname'");
-
-        return !!(($result = $this->db->result($qid)) && $result[0]);
-*/
+        return !!($result = $this->db->result($qid));
     }
 
     // Read in a page's contents.
     // Returns: contents of the page.
     function read()
     {
-        global $PgTbl;
+        global $CoTbl, $PgTbl;
 
-        if ($this->version != -1) {
-            $qry_version = $this->version;
+        if ($this->version == -1) {
+            $qry_version = 'lastversion';
         } else {
-            $query = "SELECT max(version) FROM $PgTbl WHERE title='$this->dbname'";
-            $qid = $this->db->query($query);
-            $result = $this->db->result($qid);
-            if (!$qry_version = $result[0]) {
-                return ""; // The page doesn't exist.
-            }
+            $qry_version = $this->version;
         }
 
-        $query = "SELECT title, time, author, body, mutable, version, " .
-                 "username, comment " .
-                 "FROM $PgTbl " .
-                 "WHERE title='$this->dbname' " .
-                 "AND version=$qry_version";
+        $qry = "SELECT id, time, author, body, mutable, version, " .
+               "username, comment, createtime, updatetime " .
+               "FROM $PgTbl, $CoTbl " .
+               "WHERE title='$this->dbname' " .
+               "AND id=page " .
+               "AND version=$qry_version";
+        $qid = $this->db->query($qry);
 
-        $qid = $this->db->query($query);
+        if (!($result = $this->db->result($qid))) {
+            return '';
+        }
 
-        if(!($result = $this->db->result($qid)))
-            return "";
-
+        $this->page_id  = $result[0];
         $this->time     = $result[1];
         $this->hostname = $result[2];
         $this->exists   = 1;
@@ -90,6 +74,8 @@ class WikiPage
         $this->username = $result[6];
         $this->text     = $result[3];
         $this->comment  = $result[7];
+        $this->createtime = $result[8];
+        $this->updatetime = $result[9];
 
         return $this->text;
     }
@@ -102,46 +88,89 @@ class WikiPage
     //       Yes, this is a tiny kludge. :-)
     function write($minoredit = 0)
     {
-        global $PgTbl, $MpTbl, $LeTbl;
+        global $CoTbl, $PgTbl;
 
         // Ensure a leading and trailing spaces free text but force a new line
         // at the end.
         $this->text = trim($this->text) . "\n";
 
-        if (strlen($this->text) <= 1)
-            $insertMinorEdit = 0;         // minor edit is always disabled if body is empty
-        else
-            $insertMinorEdit = $minoredit ? 1 : 0;
+        $page_id = $this->page_id;
+        $body_length = strlen($this->text);
 
-        if ($insertMinorEdit && !trim($this->comment))
+        // minor edit is always disabled if body is empty
+        $insertMinorEdit = ($body_length <= 1) ? 0 : ($minoredit ? 1 : 0);
+
+        if ($insertMinorEdit && !trim($this->comment)) {
             $this->comment = 'Minor edit';
+        }
 
-        $this->db->query("INSERT INTO $PgTbl (title, version, time, supercede, " .
-                         "mutable, username, author, comment, body, minoredit) " .
-                         "VALUES('$this->dbname', $this->version, NULL, NULL, '" .
-                         ($this->mutable ? 'on' : 'off') . "', " .
-                         "'$this->username', '$this->hostname', " .
-                         "'$this->comment', '$this->text', $insertMinorEdit)");
+        // page table
+        if ($this->exists) {
+            // get roolback information
+            $qry = "SELECT lastversion, lastversion_major, bodylength, " .
+                   "createtime, updatetime " .
+                   "FROM $PgTbl " .
+                   "WHERE id=$page_id";
+            $qid = $this->db->query($qry);
+            $rollback = $this->db->result($qid);
 
-        if($this->version > 1)
-        {
-            $this->db->query("UPDATE $PgTbl SET time=$this->time, " .
-                             "supercede=NULL WHERE title='$this->dbname' " .
+            $qry = "UPDATE $PgTbl SET lastversion=$this->version, " .
+                   "bodylength=$body_length, " .
+                   "createtime=$this->createtime";
+            if ($insertMinorEdit) {
+                $qry .= ", updatetime=$this->updatetime";
+            } else {
+                $qry .= ", updatetime=null" .
+                        ", lastversion_major=$this->version";
+            }
+            $qry .= " WHERE id=$page_id";
+            $this->db->query($qry);
+        } else {
+            $metaphone = substr(metaphone($this->name), 0, 80);
+            $qry = "INSERT INTO $PgTbl (title, title_notbinary, " .
+                   "lastversion, lastversion_major, metaphone, bodylength, " .
+                   "mutable, createtime, updatetime) " .
+                   "VALUES ('$this->dbname', '$this->dbname', " .
+                   "$this->version, $this->version, '$metaphone', " .
+                   "$body_length, '" . ($this->mutable ? 'on' : 'off') . "', " .
+                   "null, null)";
+            $this->db->query($qry);
+            $page_id = mysql_insert_id($this->db->handle);
+            if (!$page_id) { return false; }
+        }
+
+        // content table
+        $qry = "INSERT INTO $CoTbl (page, version, time, " .
+               "supercede, username, author, comment, " .
+               "body, minoredit) " .
+               "VALUES ($page_id, $this->version, NULL, NULL, " .
+               "'$this->username', '$this->hostname', " .
+               "'$this->comment', '$this->text', $insertMinorEdit)";
+        if (!($qid = mysql_query($qry, $this->db->handle))) {
+            // Roolback previous insert/update to restore data and preserve
+            // referential integrity.
+            if ($this->exists) {
+                $qry = "UPDATE $PgTbl SET lastversion = $rollback[0], " .
+                       "lastversion_major = $rollback[1], " .
+                       "bodylength = $rollback[2], " .
+                       "createtime = $rollback[3], " .
+                       "updatetime = $rollback[4] " .
+                       "WHERE id=$page_id";
+            } else {
+                $qry = "DELETE FROM $PgTbl " .
+                       "WHERE id=$page_id";
+            }
+            $this->db->query($qry);
+            return false;
+        }
+
+        if ($this->version > 1) {
+            $this->db->query("UPDATE $CoTbl SET time=$this->time, " .
+                             "supercede=NULL WHERE page=$page_id " .
                              "AND version=" . ($this->version - 1));
-            if (!$insertMinorEdit)
-                $this->db->query("UPDATE $LeTbl SET version=$this->version " .
-                                 "WHERE page='$this->dbname'");
         }
-        else
-        {
-            $metaphone = substr(metaphone($this->dbname), 0, 80);
-            $this->db->query("DELETE FROM $MpTbl " .
-                             "WHERE page = '$this->dbname'");
-            $this->db->query("INSERT INTO $MpTbl (page, metaphone) " .
-                             "VALUES ('$this->dbname', '$metaphone')");
-            $this->db->query("INSERT INTO $LeTbl (page, version) " .
-                             "VALUES ('$this->dbname', 1)");
-        }
+
+        return true;
     }
 
     // Check if a user is subscribed to a page.
@@ -151,17 +180,13 @@ class WikiPage
 
         $query = "SELECT count(*) " .
                  "FROM $SuTbl " .
-                 "WHERE page='{$this->name}' " .
+                 "WHERE page='$this->dbname' " .
                  "AND username='$username'";
 
         $qid = $this->db->query($query);
 
-        if (!($result = $this->db->result($qid)))
-            return 0;
-        else if ($result[0] == 0)
-            return 0;
-        else
-            return 1;
+        return (($result = $this->db->result($qid)) && $result[0] > 0) ? 1 : 0;
+
     }
 
     // Toggle page subscription for a user
@@ -173,11 +198,11 @@ class WikiPage
         {
             if ($this->isSubscribed($username))
                 $this->db->query("DELETE FROM $SuTbl " .
-                                 "WHERE page = '{$this->name}' " .
+                                 "WHERE page = '$this->dbname' " .
                                  "AND username = '$username'");
             else
                 $this->db->query("INSERT INTO $SuTbl (page, username) " .
-                                 "VALUES ('{$this->name}', '$username')");
+                                 "VALUES ('$this->dbname', '$username')");
         }
 
         return;
@@ -189,7 +214,7 @@ class WikiPage
 
         $query = "SELECT username " .
                  "FROM $SuTbl " .
-                 "WHERE page='{$this->name}'";
+                 "WHERE page='$this->dbname'";
         if ($skip_username) {
             $query .= " AND username<>'$skip_username'";
         }

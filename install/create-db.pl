@@ -47,18 +47,49 @@ $qid = $dbh->prepare("CREATE TABLE " . $prefix . "links ( "
                      . "PRIMARY KEY (page, link) )");
 $qid->execute or die "Error creating table\n";
 
+#$qid = $dbh->prepare("CREATE TABLE " . $prefix . "pages ( "
+#                     . "title varchar(80) binary DEFAULT '' NOT NULL, "
+#                     . "version int(10) unsigned DEFAULT '1' NOT NULL, "
+#                     . "time timestamp(14), "
+#                     . "supercede timestamp(14), "
+#                     . "mutable set('off', 'on') DEFAULT 'on' NOT NULL, "
+#                     . "username varchar(80), "
+#                     . "author varchar(80) DEFAULT '' NOT NULL, "
+#                     . "comment varchar(80) DEFAULT '' NOT NULL, "
+#                     . "body text, "
+#                     . "minoredit tinyint DEFAULT 0 NOT NULL, "
+#                     . "PRIMARY KEY (title, version) )");
+#$qid->execute or die "Error creating table\n";
+
 $qid = $dbh->prepare("CREATE TABLE " . $prefix . "pages ( "
-                     . "title varchar(80) binary DEFAULT '' NOT NULL, "
-                     . "version int(10) unsigned DEFAULT '1' NOT NULL, "
-                     . "time timestamp(14), "
-                     . "supercede timestamp(14), "
-                     . "mutable set('off', 'on') DEFAULT 'on' NOT NULL, "
-                     . "username varchar(80), "
-                     . "author varchar(80) DEFAULT '' NOT NULL, "
-                     . "comment varchar(80) DEFAULT '' NOT NULL, "
-                     . "body text, "
-                     . "minoredit tinyint DEFAULT 0 NOT NULL, "
-                     . "PRIMARY KEY (title, version) )");
+                     . "id INT UNSIGNED NOT NULL AUTO_INCREMENT, "
+                     . "title VARCHAR(80) BINARY NOT NULL DEFAULT '', "
+                     . "title_notbinary VARCHAR(80) NOT NULL DEFAULT '', "
+                     . "lastversion INT(10) UNSIGNED NOT NULL DEFAULT '1', "
+                     . "lastversion_major INT(10) UNSIGNED NOT NULL DEFAULT '1', "
+                     . "metaphone VARCHAR(80) BINARY NOT NULL DEFAULT '', "
+                     . "bodylength SMALLINT UNSIGNED NOT NULL default '0', "
+                     . "mutable SET('off', 'on') NOT NULL DEFAULT 'on', "
+                     . "createtime TIMESTAMP(14) NOT NULL, "
+                     . "updatetime TIMESTAMP(14) NOT NULL, "
+                     . "PRIMARY KEY (id), "
+                     . "UNIQUE title_u (title), "
+                     . "INDEX title_idx (title), "
+                     . "INDEX title_notbinary_idx (title_notbinary), "
+                     . "INDEX bodylength_idx (bodylength) )");
+$qid->execute or die "Error creating table\n";
+
+$qid = $dbh->prepare("CREATE TABLE " . $prefix . "content ( "
+                     . "page INT UNSIGNED NOT NULL, "
+                     . "version INT UNSIGNED NOT NULL DEFAULT '1', "
+                     . "time TIMESTAMP(14) NOT NULL, "
+                     . "supercede TIMESTAMP(14) NOT NULL, "
+                     . "username VARCHAR(80), "
+                     . "author VARCHAR(80) NOT NULL DEFAULT '', "
+                     . "comment VARCHAR(80) NOT NULL DEFAULT '', "
+                     . "body TEXT, "
+                     . "minoredit TINYINT NOT NULL DEFAULT 0, "
+                     . "PRIMARY KEY (page, version) )");
 $qid->execute or die "Error creating table\n";
 
 $qid = $dbh->prepare("CREATE TABLE " . $prefix . "rate ( "
@@ -96,11 +127,11 @@ $qid = $dbh->prepare("CREATE TABLE " . $prefix . "parents ( "
                      . "primary key (page, parent) )");
 $qid->execute or die "Error creating table\n";
 
-$qid = $dbh->prepare("CREATE TABLE " . $prefix . "metaphone ( "
-                     . "page varchar(80) binary not null, "
-                     . "metaphone varchar(80) binary default '' not null, "
-                     . "primary key (page) )");
-$qid->execute or die "Error creating table\n";
+#$qid = $dbh->prepare("CREATE TABLE " . $prefix . "metaphone ( "
+#                     . "page varchar(80) binary not null, "
+#                     . "metaphone varchar(80) binary default '' not null, "
+#                     . "primary key (page) )");
+#$qid->execute or die "Error creating table\n";
 
 $qid = $dbh->prepare("CREATE TABLE " . $prefix . "subscribe ( "
                      . "page varchar(80) binary not null, "

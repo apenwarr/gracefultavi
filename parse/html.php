@@ -167,12 +167,16 @@ function html_ref($refPage, $appearance, $hover = '', $anchor = '', $anchor_appe
         $hover = ' title="' . $hover . '"';
     }
 
-    $p = new WikiPage($db, $refPage);
-    $p_exists = $p->exists();
+    if ($page == 'RecentChanges') {
+        $p_exists = $pagestore->page_exists($refPage);
+    } else {
+        $p = new WikiPage($db, $refPage);
+        $p_exists = $p->exists();
+    }
 
     $twintext = "";
     $onlytwin = "";
-    $twin = $pagestore->twinpages($refPage);
+    $twin = $pagestore->twinpages($refPage, $page);
     if(!$p_exists && count($twin) == 1)
     {
         $onlytwin = html_twin_x($twin[0][0], $twin[0][1], $twin[0][1]);
@@ -244,9 +248,9 @@ function html_twin($whichwiki, $ref)
 }
 function html_twin_x($whichwiki, $linktext, $ref)
 {
-  global $pagestore;
+  global $page, $pagestore;
 
-  return '<a href="' . $pagestore->interwiki($whichwiki) . $ref . '"' .
+  return '<a href="' . $pagestore->interwiki($whichwiki, $page) . $ref . '"' .
          ' title="See also: ' . $ref . ' in ' . $whichwiki . '">' .
          '<span class="twin"><em>' . $linktext . '</em></span></a>';
 }
@@ -269,7 +273,7 @@ function html_category($time, $page, $host, $user, $comment, $version,
   */
 
   if (in_array($page, $newPages))
-    $text .= '<img src="images/new.png" alt="New!" title="" width="28" height="11" border="0">';
+    $text .= '<img src="images/new.png" alt="New!" title="New!" width="28" height="11" border="0">';
 
   if ($UseHotPages && in_array($page, $hotPages))
     $text .= '<img src="images/hot.png" alt="Hot!" title="Hot!" width="16" height="15" border="0">';

@@ -9,7 +9,7 @@ class Macro_PageSize
      global $pagestore;
 
      $first = 1;
-     $list = $pagestore->allpages(true);
+     $list = $pagestore->allpages();
 
      usort($list, 'sizeSort');
 

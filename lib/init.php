@@ -13,18 +13,16 @@ require('lib/url.php');
 require('lib/messages.php');
 require('lib/pagestore.php');
 require('lib/rate.php');
-require('lib/lastedit_check.php');
 
 $PgTbl = $DBTablePrefix . 'pages';
+$CoTbl = $DBTablePrefix . 'content';
 $IwTbl = $DBTablePrefix . 'interwiki';
 $SwTbl = $DBTablePrefix . 'sisterwiki';
 $LkTbl = $DBTablePrefix . 'links';
 $RtTbl = $DBTablePrefix . 'rate';
 $RemTbl = $DBTablePrefix . 'remote_pages';
 $PaTbl = $DBTablePrefix . 'parents';
-$MpTbl = $DBTablePrefix . 'metaphone';
 $SuTbl = $DBTablePrefix . 'subscribe';
-$LeTbl = $DBTablePrefix . 'lastedit';
 // Don't forget to update pagestore->lock() when adding new tables.
 
 $pagestore = new PageStore();
@@ -129,8 +127,5 @@ if($dir=opendir("$WorkingDirectory/macros"))
     }
     closedir($dir);
 }
-
-// Check if the lastedit table has been created and is up to date.
-lastedit_check();
 
 ?>

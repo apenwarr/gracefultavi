@@ -40,8 +40,10 @@ if(!ini_get('register_globals'))
   if(isset($HTTP_POST_VARS['discard'])) $discard = $HTTP_POST_VARS['discard'];
   if(isset($HTTP_POST_VARS['document'])) $document = $HTTP_POST_VARS['document'];
   if(isset($HTTP_POST_VARS['hist'])) $hist = $HTTP_POST_VARS['hist'];
+  if(isset($HTTP_POST_VARS['hotpages'])) $hotpages = $HTTP_POST_VARS['hotpages'];
   if(isset($HTTP_POST_VARS['min'])) $min = $HTTP_POST_VARS['min'];
   if(isset($HTTP_POST_VARS['nextver'])) $nextver = $HTTP_POST_VARS['nextver'];
+  if(isset($HTTP_POST_VARS['referrer'])) $referrer = $HTTP_POST_VARS['referrer'];
   if(isset($HTTP_POST_VARS['rows'])) $rows = $HTTP_POST_VARS['rows'];
   if(isset($HTTP_POST_VARS['tzoff'])) $tzoff = $HTTP_POST_VARS['tzoff'];
   if(isset($HTTP_POST_VARS['user'])) $user = $HTTP_POST_VARS['user'];
