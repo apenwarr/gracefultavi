@@ -5,22 +5,23 @@
  * Creates a table of content based on the page's headers.
  *
  * The param is the maximum hierarchy level to display.
+ * Defaults to 9.
  *
  */
 
 $TocJavascriptFunctions = <<<JAVASCRIPT
 <script language="javascript">
 <!--
-function hideToc()
+function hideToc(i)
 {
-    document.getElementById('showtoc').style.display = 'block';
-    document.getElementById('toc').style.display = 'none';
+    document.getElementById('showtoc' + i).style.display = 'block';
+    document.getElementById('toc' + i).style.display = 'none';
 }
 
 function showToc(i)
 {
-    document.getElementById('toc').style.display = 'block';
-    document.getElementById('showtoc').style.display = 'none';
+    document.getElementById('toc' + i).style.display = 'block';
+    document.getElementById('showtoc' + i).style.display = 'none';
 }
 //-->
 </script>
@@ -33,44 +34,75 @@ class Macro_Toc
 
     function parse($max_level, $page)
     {
-        global $pagestore, $MaxHeading, $ParseEngine;
+        global $pagestore, $MaxHeading;
         global $document, $TocJavascriptFunctions;
+
+        if (!$max_level) $max_level = $MaxHeading; // maximum for the wiki
+        if (!$max_level) $max_level = 9;           // maximum in html
 
         $this->i++;
         if ($this->i > 1)
-            return '';
+            $TocJavascriptFunctions = '';
 
-        $toc = array();
-        $count = 0;
-        foreach(explode("\n", $document) as $line)
+        // find highest header level
+        $prevLevel = $max_level;
+        foreach (explode("\n", $document) as $line)
         {
             if (preg_match('/^(=+) (.*) (=+)$/', $line, $result) &&
                 strlen($result[1]) === strlen($result[3]))
             {
-                if (($level = strlen($result[1])) > $MaxHeading)
-                    $level = $MaxHeading;
+                $level = min(strlen($result[1]), $max_level);
+
+                if ($level < $prevLevel)
+                    $prevLevel = $level;
+
+            }
+        }
+        $prevLevel--;
+
+        $toc = array();
+        $count = 0;
+        foreach (explode("\n", $document) as $line)
+        {
+            if (preg_match('/^(=+) (.*) (=+)$/', $line, $result) &&
+                strlen($result[1]) === strlen($result[3]))
+            {
+                $level = strlen($result[1]);
+                $count++;
 
                 if ($level <= $max_level)
                 {
-                    $header = parseText($result[2], $ParseEngine, $page);
-                    $header = preg_replace('/<[^>]+>/i', '', $header);
-                    //$header = htmlspecialchars(trim($header));
+                    $indentIncrease = $level - $prevLevel;
+                    for ($i = 0; $i < $indentIncrease; $i++)
+                    {
+                        $toc[] = '<ol>';
+                        if ($i != ($indentIncrease - 1))
+                            $toc[] = '<li>';
+                    }
+                    for ($i = $indentIncrease; $i < 0; $i++)
+                        $toc[] = '</ol>';
 
-                    $count++;
-                    $toc[] = str_repeat(' ', $level-1) . "1.<a href=\"#toc$count\">$header</a>";
+                    $prevLevel = $level;
+
+                    $header = $result[2];
+                    $header = preg_replace('/<[^>]+>/', '', $header);
+                    $header = preg_replace('/[!\\[\\]]/', '', $header);
+
+                    $toc[] = "<li><a href=\"#toc$count\">$header</a>";
                 }
             }
         }
 
+        for ($i = 0; $i < $prevLevel; $i++)
+            $toc[] = '</ol>';
+
         $toc = implode("\n", $toc);
 
-        $toc = parseText($toc, array('parse_indents', 'parse_elements'), $page);
-
         $return_value = '<table cellspacing="0" cellpadding="3" border=0">' .
-                        '<tr id="showtoc" style="display: none;">' .
-                        '<td><b>Table of content</b> [ <a href="javascript:showToc();">show</a> ]</td></tr>' .
-                        '<tr id="toc"><td><b>Table of content</b> ' .
-                        '[ <a href="javascript:hideToc();">hide</a> ]' . $toc . '</td></tr></table>';
+                        '<tr id="showtoc' . $this->i . '" style="display: none;">' .
+                        '<td><b>Table of content</b> [ <a href="javascript:showToc(' . $this->i . ');">show</a> ]</td></tr>' .
+                        '<tr id="toc' . $this->i . '"><td><b>Table of content</b> ' .
+                        '[ <a href="javascript:hideToc(' . $this->i . ');">hide</a> ]' . $toc . '</td></tr></table>';
 
         return "$TocJavascriptFunctions\n\n$return_value";
    }
