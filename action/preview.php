@@ -21,6 +21,7 @@ function action_preview()
                                                   $ParseEngine, $page),
                          'timestamp' => $pg->time,
                          'nextver'   => $nextver,
-                         'archive'   => $archive));
+                         'archive'   => $archive,
+                         'edituser'  => $pg->username));
 }
 ?>

@@ -82,6 +82,7 @@ print '>Minor edit<br>';
                                  'edit'      => '',
                                  'editver'   => 0,
                                  'history'   => $args['page'],
+                                 'euser'     => $args['edituser'],
                                  'timestamp' => $args['timestamp']));
 }
 ?>

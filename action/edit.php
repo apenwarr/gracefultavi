@@ -29,6 +29,7 @@ function action_edit()
                       'text'      => trim($pg->text) != '' ? $pg->text : "Describe $page here...\n\nPlease provide content before saving.\n\n--[$UserName]",
                       'timestamp' => $pg->time,
                       'nextver'   => $pg->version + 1,
-                      'archive'   => $archive));
+                      'archive'   => $archive,
+                      'edituser'  => $pg->username));
 }
 ?>

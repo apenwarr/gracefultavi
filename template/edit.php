@@ -82,6 +82,7 @@ Add document to category:
                                    'edit'      => '',
                                    'editver'   => '',
                                    'history'   => $args['page'],
+                                   'euser'     => $args['edituser'],
                                    'timestamp' => $args['timestamp']));
 }
 ?>
