@@ -99,11 +99,12 @@ function bug_unfinished_list($user, $fixfor, $enddate)
     $personid = bug_person($user);
     $ffquery = bug_fixfor_query($fixfor, $enddate);
     
-    $query = "select b.ixBug,sTitle,hrsOrigEst,hrsCurrEst,hrsElapsed, " .
+    $query = "select ixStatus,b.ixBug,sTitle, " .
+             "       hrsOrigEst,hrsCurrEst,hrsElapsed, " .
              "  ifnull(f.dt, '2099/9/9') as sortdate " .
              "from Bug as b, FixFor as f " .
              "where b.ixFixFor=f.ixFixFor " .
-             "  and b.ixPersonAssignedTo=$personid and b.ixStatus=1 " .
+             "  and b.ixPersonAssignedTo=$personid " .
              $ffquery .
              "  order by sortdate, sFixFor, ixPriority, ixBug ";
     //print "(($query))<p>";
@@ -113,7 +114,16 @@ function bug_unfinished_list($user, $fixfor, $enddate)
 
     $a = array();
     while ($row = mysql_fetch_row($result))
+    {
+	$status = array_shift($row);
+	if ($status != 1)
+	{
+	    $row[1] = "VERIFY: $row[1]";
+	    $row[2] = $row[3] = 0.1;
+	    $row[4] = 0.09;
+	}
         array_push($a, $row);
+    }
     
     return $a;
 }
@@ -598,6 +608,11 @@ function sch_bug($feat, $task, $_orig, $_curr, $_elapsed, $done)
     
     if (!$done)
         $done = 0;
+    else if ($done == -1)
+    {
+	$notdone = 1;
+	$done = 0;
+    }
 
     if ($sch_need_extraline)
     {
@@ -609,11 +624,13 @@ function sch_bug($feat, $task, $_orig, $_curr, $_elapsed, $done)
     if (preg_match('/^[0-9]+$/', $feat))
     {
         $bug = bug_get($feat);
+	// $bug = (title origest currest elapsed status fixfor)
+	
         if (!$task)     $task = $bug[0];
         if (!$_orig)    $_orig = $bug[1];
         if (!$_curr)    $_curr = $bug[2];
         if (!$_elapsed) $_elapsed = $bug[3];
-        if (!$done && $bug[4] != 'ACTIVE') $done = 1;
+        if (!$done && !$notdone && $bug[4] != 'ACTIVE') $done = 1;
 	if ((!$done && $_curr != $_elapsed)
 	    || ($bug[4] != 'ACTIVE'))
 	{
@@ -762,7 +779,7 @@ function sch_extrabugs($user, $fixfor, $enddate, $only_done)
                 continue;
             }
 
-            $ret .= sch_bug($bugid, $bug[0], $bug[1], $bug[2], $bug[3], 0);
+            $ret .= sch_bug($bugid, $bug[0], $bug[1], $bug[2], $bug[3], -1);
 	    $sch_got_bug[$bugid] = 1;
         }
     }
