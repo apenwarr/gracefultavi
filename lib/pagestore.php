@@ -606,96 +606,100 @@ class PageStore
         }
     }
 
-  // Clear all the links cached for a particular page.
-  function clear_link($page)
-  {
-    global $LkTbl;
-
-    $this->dbh->query("DELETE FROM $LkTbl WHERE page='$page'");
-  }
-
-  // Clear all the interwiki definitions for a particular page.
-  function clear_interwiki($page)
-  {
-    global $IwTbl;
-
-    $this->dbh->query("DELETE FROM $IwTbl WHERE where_defined='$page'");
-  }
-
-  // Clear all the sisterwiki definitions for a particular page.
-  function clear_sisterwiki($page)
-  {
-    global $SwTbl;
-
-    $this->dbh->query("DELETE FROM $SwTbl WHERE where_defined='$page'");
-  }
-
-  // Add a link for a given page to the link table.
-  function new_link($page, $link)
-  {
-    // Assumption: this will only ever be called with one page per
-    //   script invocation.  If this assumption should change, $links should
-    //   be made a 2-dimensional array.
-
-    global $LkTbl;
-    static $links = array();
-
-    if(empty($links[$link]))
+    // Clear all the links cached for a particular page.
+    function clear_link($page)
     {
-      $this->dbh->query("INSERT INTO $LkTbl VALUES ('$page', '$link', 1)");
-      $links[$link] = 1;
+        global $LkTbl;
+
+        $this->dbh->query("DELETE FROM $LkTbl WHERE page='$page'");
     }
-    else
+
+    // Clear all the interwiki definitions for a particular page.
+    function clear_interwiki($page)
     {
-      $links[$link]++;
-      $this->dbh->query("UPDATE $LkTbl SET count=" . $links[$link] .
-                        " WHERE page='$page' AND link='$link'");
+        global $IwTbl;
+
+        $this->dbh->query("DELETE FROM $IwTbl WHERE where_defined='$page'");
     }
-  }
 
-  // Add an interwiki definition for a particular page.
-  function new_interwiki($where_defined, $prefix, $url)
-  {
-    global $IwTbl;
-
-    $url = str_replace("'", "\\'", $url);
-    $url = str_replace("&amp;", "&", $url);
-
-    $qid = $this->dbh->query("SELECT where_defined FROM $IwTbl " .
-                             "WHERE prefix='$prefix'");
-    if($this->dbh->result($qid))
+    // Clear all the sisterwiki definitions for a particular page.
+    function clear_sisterwiki($page)
     {
-      $this->dbh->query("UPDATE $IwTbl SET where_defined='$where_defined', " .
-                        "url='$url' WHERE prefix='$prefix'");
-    }
-    else
-    {
-      $this->dbh->query("INSERT INTO $IwTbl (prefix, where_defined, url) " .
-                        "VALUES('$prefix', '$where_defined', '$url')");
-    }
-  }
+        global $SwTbl;
 
-  // Add a sisterwiki definition for a particular page.
-  function new_sisterwiki($where_defined, $prefix, $url)
-  {
-    global $SwTbl;
-
-    $url = str_replace("'", "\\'", $url);
-    $url = str_replace("&amp;", "&", $url);
-
-    $qid = $this->dbh->query("SELECT where_defined FROM $SwTbl " .
-                             "WHERE prefix='$prefix'");
-    if($this->dbh->result($qid))
-    {
-      $this->dbh->query("UPDATE $SwTbl SET where_defined='$where_defined', " .
-                        "url='$url' WHERE prefix='$prefix'");
+        $this->dbh->query("DELETE FROM $SwTbl WHERE where_defined='$page'");
     }
-    else
+
+    // Add a link for a given page to the link table.
+    function new_link($page, $link)
     {
-      $this->dbh->query("INSERT INTO $SwTbl (prefix, where_defined, url) " .
-                        "VALUES ('$prefix', '$where_defined', '$url')");
+        // Assumption: this will only ever be called with one page per
+        //   script invocation.  If this assumption should change, $links
+        //   should be made a 2-dimensional array.
+
+        global $LkTbl;
+        static $links = array();
+
+        if(empty($links[$link]))
+        {
+            $this->dbh->query("INSERT INTO $LkTbl VALUES " . 
+                              "('$page', '$link', 1)");
+            $links[$link] = 1;
+        }
+        else
+        {
+            $links[$link]++;
+            $this->dbh->query("UPDATE $LkTbl SET count=" . $links[$link] .
+                              " WHERE page='$page' AND link='$link'");
+        }
     }
-  }
+
+    // Add an interwiki definition for a particular page.
+    function new_interwiki($where_defined, $prefix, $url)
+    {
+        global $IwTbl;
+
+        $url = str_replace("'", "\\'", $url);
+        $url = str_replace("&amp;", "&", $url);
+
+        $qid = $this->dbh->query("SELECT where_defined FROM $IwTbl " .
+                                 "WHERE prefix='$prefix'");
+        if($this->dbh->result($qid))
+        {
+            $this->dbh->query("UPDATE $IwTbl SET " . 
+                            "where_defined='$where_defined', " .
+                            "url='$url' WHERE prefix='$prefix'");
+        }
+        else
+        {
+          $this->dbh->query("INSERT INTO $IwTbl (prefix, where_defined, url) " .
+                            "VALUES('$prefix', '$where_defined', '$url')");
+        }
+    }
+
+    // Add a sisterwiki definition for a particular page.
+    function new_sisterwiki($where_defined, $prefix, $url)
+    {
+        global $SwTbl;
+
+        $url = str_replace("'", "\\'", $url);
+        $url = str_replace("&amp;", "&", $url);
+
+        $qid = $this->dbh->query("SELECT where_defined FROM $SwTbl " .
+                                 "WHERE prefix='$prefix'");
+        if($this->dbh->result($qid))
+        {
+            $this->dbh->query("UPDATE $SwTbl SET " . 
+                            "where_defined='$where_defined', " .
+                            "url='$url' WHERE prefix='$prefix'");
+        }
+        else
+        {
+            $this->dbh->query("INSERT INTO $SwTbl " . 
+                            "(prefix, where_defined, url) " .
+                            "VALUES ('$prefix', '$where_defined', '$url')");
+        }
+    }
 
     // Find all twins of a page at sisterwiki sites.
     function twinpages($page, $viewing_page = '')
@@ -749,11 +753,11 @@ class PageStore
                           "$SwTbl WRITE");
     }
 
-  // Unlock the database tables.
-  function unlock()
-  {
-    $this->dbh->query("UNLOCK TABLES");
-  }
+    // Unlock the database tables.
+    function unlock()
+    {
+        $this->dbh->query("UNLOCK TABLES");
+    }
 
     // Retrieve a list of all of the pages in the wiki except the ones with an
     // empty body. This ignores the minor edits.
