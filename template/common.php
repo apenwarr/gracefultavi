@@ -44,6 +44,7 @@ function template_common_prologue($args)
 <link rel="STYLESHEET" href="<?php print $StyleScript; ?>" type="text/css">
 <link rel="SHORTCUT ICON" href="<?=$shortcutIcon?>">
 <title><?php print $args['title'] . ' - ' . htmlspecialchars($WikiName); ?></title>
+<?php require_once('javascript.php'); ?>
 </head>
 
 <body>

@@ -1,6 +1,0 @@
-AuthName "NitWiki"
-AuthType Basic
-
-<Limit GET POST>
-require valid-user
-</Limit>
