@@ -231,37 +231,24 @@ function html_twin_x($whichwiki, $linktext, $ref)
          'title="See also: ' . $ref . ' in ' . $whichwiki . '">' .
          '<span class="twin"><em>' . $linktext . '</em></span></a>';
 }
-function html_category($time, $page, $host, $user, $comment, $version)
+function html_category($time, $page, $host, $user, $comment, $version, 
+                       $hotPages, $newPages, $modifiedWatchedPages)
 {
   global $pagestore, $UserName;
-  static $hotPages = '', $modifiedWatchedPages = '', $newPages = '';
-
-  if (!$hotPages)
-    $hotPages = $pagestore->getHotPages();
-
-  if (!$newPages)
-    $newPages = $pagestore->getNewPages();
-
-  if (!$modifiedWatchedPages)
-  {
-    if ($UserName == '')
-        $modifiedWatchedPages = array();
-    else
-        $modifiedWatchedPages = $pagestore->getModifiedWatchedPages($UserName);
-  }
 
   $text = '(' . html_timestamp($time) . ') (' .
           '<a href="' . historyURL($page) . '">history</a>) ' .
           html_ref($page, $page, '', "&$version");
-/*
+
+  /*
   // Skip this.  Why should twin pages show up in RecentChanges?
   if(count($twin = $pagestore->twinpages($page)))
   {
     foreach($twin as $site)
       { $text = $text . ' ' . html_twin($site[0], $site[1]); }
   }
-*/
-  
+  */
+
   if (in_array($page, $newPages))
     $text .= '<img src="images/new.png" alt="New!" title="" width="28" height="11" border="0">';
 
