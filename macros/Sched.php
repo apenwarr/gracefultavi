@@ -1244,7 +1244,7 @@ function sch_summary($fixfor)
     while ($result && $row = mysql_fetch_row($result))
       $allpeople[$row[0]] = 1;
     
-    $query = "select dtDue, sPerson, sTask " . 
+    $query = "select dtDue, sPerson, sTask, sSubTask " . 
              "  from schedulator.Task " .
              "  where fValid=1 and sFixFor='$fixfor' and fDone = 0 " .
              "  order by dtDue ";
@@ -1258,13 +1258,18 @@ function sch_summary($fixfor)
 	$due = $row[0];
 	$person = $row[1];
 	$task = $row[2];
+        $subtask = $row[3];
 	
 	# $nicedue = ereg_replace("-", " ", $due);
 	$nicedue = ereg_replace("(....)-(..)-(..)", "\\3", $due);
 	$dates[$due] = $nicedue;
 	$last_date = $due;
 	
-	$bugs[$person][$due][] = $task;
+            
+
+	$bugs[$person][$due][] = array(
+                "task" => $task, 
+                "subtask" => htmlentities($subtask, ENT_QUOTES));
 	unset($allpeople[$person]);
     }
     
@@ -1366,9 +1371,11 @@ function sch_summary($fixfor)
 		foreach ($bugs[$person][$due] as $bug)
 		{
 		    $n++;
-		    if (($bug + 0) . "" == $bug)
-		      $v .= "<a href='http://nits/fogbugz3?$bug' " . 
-		            "title='FogBugz bug #$bug'>$n</a> ";
+                    $task = $bug["task"];
+                    $subtask = $bug["subtask"];
+		    if (($task + 0) . "" == $task)
+		      $v .= "<a href='http://nits/fogbugz3?$task' " . 
+		            "title='FogBugz bug #$task - $subtask'>$n</a> ";
 		    else
 		      $v .= "$n";
 		}
