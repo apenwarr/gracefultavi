@@ -68,8 +68,6 @@ function parse_define_interwiki($text)
   {
     $pagestore->new_interwiki($page, $result[1], $result[2]);
   }
-
-  // Added by mich on Nov 11, 2002
   // Uses zwiki RemoteWikiURL syntax for interwiki pages
   else if(preg_match('/^RemoteWikiURL:\\s+(https?:[^\\s]+)/', $text, $result))
   {

@@ -9,7 +9,6 @@
 //
 //   anchor    => A string containing the name of the HTML anchor.
 
-// Modified by mich on November 21, 2002, new feature
 // Aligns the browser with an HTML anchor, showing the last added comment (or quote)
 // See: action/save.php, template/save.php, template/view.php
 

@@ -28,16 +28,10 @@ function action_save()
     $pg = $pagestore->page($page);
     $pg->read();
 
-    // Added by mich on Sept 30, 2002, fix the "Add a Comment" bug
-    // If current action is "Add a Comment", the body text currently in the
-    // database is used, instead of the one given by the "Add a Comment" form.
-    // Update: The body text given by the "Add a Comment" form (field
-    // "document") has been set to a debug value, see template/common.php.
     if ($appending)
     {
-        $document = $pg->text;          // Uses the current page body in the database, discarding the value given by the "Add a Comment" form.
-        $nextver = $pg->version + 1;    // Uses the version number in the database, the "Add a Comment" form doesn't give any version number anyway.
-                                        // This will avoid any action/conflict since we're appending, not editing.
+        $document = $pg->text;
+        $nextver = $pg->version + 1;
     }
 
     if (!$pg->mutable)                  // Edit disallowed.
@@ -54,18 +48,15 @@ function action_save()
         return;
     }
 
-    // Added/Modified by mich on October 1st, 2002, "Add a Comment" changed to
-    // "Add a Quote" for AnnoyingQuote page
+    // "Add a Comment" is "Add a Quote" for specific pages like AnnoyingQuote
     if ($quickadd && $appendingQuote)
     {
         // if we're appending a quote, instead of a comment
         $quoteAuthor = trim($quoteAuthor);
         if ($quoteAuthor)
         {
-            // Add author to quote if author provided
-
-            // Add a leading dash if needed. See strpos help for information
-            // about "=== false".
+            // Add author to quote if author provided. Add a leading dash if
+            // needed. See strpos help for information about "=== false".
             $pos = strpos($quoteAuthor, '-');
             if ($pos === false || $pos > 0)
                 { $quoteAuthor = "-- $quoteAuthor"; }
@@ -108,7 +99,6 @@ function action_save()
 
     $pg->write($minoredit);
 
-
     // Parenting stuff for new pages.
     if ($pg->version == 1)
     {
@@ -132,15 +122,12 @@ function action_save()
         }
     }
 
-
     // Editor asked page to be added to a category or categories.
     if (!empty($categories))
         add_to_category($page, $categories);
 
-    // Modified by mich on November 21, 2002, new feature
     // Aligns the browser with an HTML anchor, showing the last added comment (or quote)
     // See: action/save.php, template/save.php, template/view.php
-
     if ($quickadd)
     {
         // if Add a Comment or Add a Quote

@@ -489,15 +489,14 @@ class PageStore
                              "GROUP BY title ORDER BY lower(title)");
 
     $list = array();
-    $text = strtolower($text); // added by mich
+    $text = strtolower($text);
     while(($result = $this->dbh->result($qid)))
     {
-        // query modified by mich to add 'lower'
         $q2 = $this->dbh->query("SELECT title FROM $PgTbl " .
                                 "WHERE title='$result[0]' " .
                                 "AND version='$result[1]' " .
                                 "AND (lower(body) LIKE '%$text%' " .
-                                    "OR lower(title) LIKE '%$text%')");
+                                "OR lower(title) LIKE '%$text%')");
         if($this->dbh->result($q2))
             { $list[] = $result[0]; }
     }
