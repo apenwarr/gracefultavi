@@ -417,8 +417,8 @@ function sch_add_hours($day, $hours)
 {
     global $sch_load;
     
-    if ($hours < 0)
-      return $day;  # never subtract hours from the date!
+    #if ($hours < 0)
+    #  return $day;  # never subtract hours from the date!
     
     return $day + ($hours * $sch_load) / 8.0;
 }
@@ -500,7 +500,13 @@ function sch_genline($feat, $task, $orig, $curr, $elapsed, $left, $due)
 function sch_line($feat, $task, $orig, $curr, $elapsed, $remain, $done,
 		  $allow_red)
 {
-    global $sch_curday, $sch_elapsed_curday, $sch_bugs, $sch_got_bug;
+    global $sch_curday, $sch_elapsed_curday, $sch_elapsed_subtract;
+    global $sch_bugs, $sch_got_bug;
+    
+    if (preg_match('/^[0-9]+$/', $feat))
+      $xfeat = bug_link($feat);
+    else
+      $xfeat = $feat;
     
     if ($done)
       $sremain = 'done';
@@ -513,18 +519,28 @@ function sch_line($feat, $task, $orig, $curr, $elapsed, $remain, $done,
     $was_over_elapsed = ($sch_elapsed_curday > $today);
     
     $sch_curday = sch_add_hours($sch_curday, $curr);
-    $sch_elapsed_curday = sch_add_hours($sch_elapsed_curday, $elapsed*0.75);
+    $sch_elapsed_curday = sch_add_hours($sch_elapsed_curday, $elapsed);
+
+    $sub = $sch_elapsed_subtract[$feat];
+    if ($sub)
+    {
+	$sch_curday = sch_add_hours($sch_curday, -$sub);
+	$sch_elapsed_curday = sch_add_hours($sch_curday, -$sub);
+	$sch_elapsed_subtract[$feat] = 0; # only compensate once!
+    }
+
     $due = sch_format_day($sch_curday);
+    
     if ($allow_red && (!$curr || $remain) && !$done 
 	&& floor($sch_curday) < floor($today))
       $due = "<font color=red>$due</font>";
     
-    $ret = sch_genline($feat, $task,
+    $ret .= sch_genline($xfeat, $task,
 		       sch_period($orig), sch_period($curr),
 		       sch_period($elapsed), $sremain,
 		       $due);
     #$ret .= sch_fullline("gork: $was_over_elapsed $sch_elapsed_curday $sch_curday $today");
-    if (!$was_over_elapsed && $sch_elapsed_curday > $today)
+    if (!$was_over_elapsed && $sch_elapsed_curday - 4 > $today)
       $ret .= sch_warning("The START time, plus the time so far in your " .
 			  "ELAPSED column, puts you into the future!  " .
 			  "Either your START date is wrong, or some of " .
@@ -545,7 +561,6 @@ function sch_bug($feat, $task, $_orig, $_curr, $_elapsed, $done)
 	$sch_need_extraline = 0;
     }
     
-    $xfeat = $feat;
     $fixfor = '';
     if (preg_match('/^[0-9]+$/', $feat))
     {
@@ -557,7 +572,6 @@ function sch_bug($feat, $task, $_orig, $_curr, $_elapsed, $done)
 	if (!$_elapsed) $_elapsed = $bug[3];
 	if (!$done && $bug[4] != 'ACTIVE') $done = 1;
 	$fixfor = $bug[5];
-	$xfeat = bug_link($feat);
     }
     
     $orig = sch_parse_period($_orig);
@@ -569,7 +583,7 @@ function sch_bug($feat, $task, $_orig, $_curr, $_elapsed, $done)
     if (!$remain && $curr)
       $done = 1;
 
-    $ret .= sch_line($xfeat, $task, $orig, $curr, $elapsed, $remain, $done,
+    $ret .= sch_line($feat, $task, $orig, $curr, $elapsed, $remain, $done,
 		     true);
     if ($done && $curr != $elapsed)
       $ret .= sch_warning("This bug is done, but elapsed time is different " .
@@ -591,7 +605,7 @@ function sch_bug($feat, $task, $_orig, $_curr, $_elapsed, $done)
 
 function sch_extrabugs($user, $fixfor, $enddate, $only_done)
 {
-    global $sch_got_bug, $sch_start;
+    global $sch_got_bug, $sch_start, $sch_did_all_done, $sch_elapsed_subtract;
     
     $start = sch_format_day($sch_start);
     $today = sch_today();
@@ -602,9 +616,18 @@ function sch_extrabugs($user, $fixfor, $enddate, $only_done)
     
     $ua = bug_unfinished_list($user, $fixfor, $start, $enddate);
     if (count($ua))  # there are unfinished bugs for this release!
-      $a = bug_finished_list($user, "", $start, ""); # *all* finished bugs
+    {
+	if ($sch_did_all_done)
+	  $a = array();
+	else
+	  $a = bug_finished_list($user, "", $start, ""); # *all* finished bugs
+	$do_all_done = true;
+    }
     else
-      $a = bug_finished_list($user, $fixfor, $start, $enddate); # only some
+    {
+	$a = bug_finished_list($user, $fixfor, $start, $enddate); # only some
+	$do_all_done = false;
+    }
     
     # handle done bugs
     foreach ($a as $bugid => $bug)
@@ -626,6 +649,26 @@ function sch_extrabugs($user, $fixfor, $enddate, $only_done)
 	}
 	
 	$ret .= sch_bug($bugid, $bug[0], $bug[1], $bug[2], $bug[3], 0);
+    }
+    
+    if ($do_all_done && !$sch_did_all_done)
+    {
+	$elapsed = 0;
+	$sch_elapsed_subtract = array();
+	
+	$a = bug_unfinished_list($user, '', '', '');
+	foreach ($a as $bugid => $bug)
+	{
+	    $elapsed += $bug[3];
+	    $sch_elapsed_subtract[$bugid] = $bug[3];
+	}
+	
+	if ($elapsed > 0.1)
+	  $ret .= sch_bug("MAGIC",
+			  "Time elapsed on unfinished bugs listed below",
+			  $elapsed, $elapsed, $elapsed, true);
+	
+	$sch_did_all_done = true;
     }
     
     # handle unfinished bugs
@@ -670,24 +713,8 @@ function sch_all_done($user)
 {
     global $sch_did_all_done, $sch_elapsed_subtract;
     
-    $elapsed = 0;
-    $ret = "";
-    
     if (!$sch_did_all_done)
-    {
 	$ret .= sch_extrabugs($user, '', '', true);
-
-	$a = bug_unfinished_list($user, '', '', '');
-	foreach ($a as $bugid => $bug)
-	    $elapsed += $bug[3];
-	
-	if ($elapsed > 0.1)
-	  $ret .= sch_bug("MAGIC",
-		  "Time elapsed on unfinished bugs listed below",
-		  $elapsed, $elapsed, $elapsed, true);
-    }
-    
-    $sch_did_all_done = true;
     
     return $ret;
 }
