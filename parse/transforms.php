@@ -713,7 +713,7 @@ function parse_heading($text)
 {
   global $MaxHeading;
 
-  if(!preg_match('/^\s*(=+)([^=]*)(=+)\s*$/', $text, $result))
+  if(!preg_match('/^\s*(=+)([^=]*)(=+)(.*)$/', $text, $result))
     { return $text; }
 
   if(strlen($result[1]) != strlen($result[3]))
@@ -724,7 +724,8 @@ function parse_heading($text)
 
   return new_entity(array('head_start', $level)) .
          trim($result[2]) .
-         new_entity(array('head_end', $level));
+         new_entity(array('head_end', $level)) .
+         $result[4];
 }
 
 function parse_htmlisms($text)
