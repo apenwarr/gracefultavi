@@ -482,7 +482,7 @@ function sch_genline($feat, $task, $orig, $curr, $elapsed, $left, $due)
     $junk1 = $junk2 = '';
     if ($left == "done")
     {
-	$junk1 = "<strike><font color=grey><i>";
+	$junk1 = "<strike><font color=gray><i>";
 	$junk2 = "</i></font></strike>";
     }
     
