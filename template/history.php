@@ -77,10 +77,18 @@ else
 </div>
 
 <?php
-  template_common_epilogue(array('twin'      => $args['page'],
-                                 'edit'      => '',
-                                 'editver'   => 0,
-                                 'history'   => '',
-                                 'timestamp' => ''));
+    template_common_epilogue(array(
+        'twin'      => $args['page'],
+        'edit'      => '',
+        'editver'   => 0,
+        'history'   => '',
+        'timestamp' => '',
+
+        'headlink' => $args['page'],
+        'button_view' => 1,
+        #'timestamp' => $args['timestamp']  no diff, already specified
+        #'editver'   => $args['editver']  already specified
+        'button_backlinks' => 1
+    ));
 }
 ?>

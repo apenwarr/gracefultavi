@@ -120,10 +120,19 @@ if ($tempText)
 </form>
 
 <?php
-    template_common_epilogue(array('twin'      => '',
-                                   'edit'      => '',
-                                   'editver'   => 0,
-                                   'history'   => '',
-                                   'timestamp' => ''));
+    template_common_epilogue(array(
+        'twin'      => '',
+        'edit'      => '',
+        'editver'   => 0,
+        'history'   => '',
+        'euser'     => $args['edituser'],
+        'timestamp' => $args['timestamp'],
+
+        'headlink' => $args['page'],
+        'button_view' => 1,
+        #'timestamp' => $args['timestamp']  already specified
+        #'editver'   => $args['editver']  already specified
+        'button_backlinks' => 0
+    ));
 }
 ?>

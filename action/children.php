@@ -17,6 +17,7 @@ function action_children()
         'page'     => $page,
         'children' => $pagestore->getChildren($page),
         'timestamp' => $pg->time,
+        'edituser'  => $pg->username,
         'editver'   => ($UserName && $pg->mutable) ? 0 : -1
     ));
 }

@@ -57,6 +57,14 @@ function template_subscriptions($args)
 </form>
 
 <?php
-     template_common_epilogue(array('nosearch' => 1));
+    template_common_epilogue(array(
+        'nosearch' => 1,
+
+        'headlink' => '',
+        'button_view' => 0,
+        #'timestamp' => $args['timestamp']  no diff
+        #'editver'   => $args['editver']  no edit
+        'button_backlinks' => 0
+    ));
 }
 ?>

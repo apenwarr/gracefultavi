@@ -39,6 +39,52 @@ function toolbar_button($url, $label)
         print '<span class="buttonDisabled">'.$label.'</span> ';
 }
 
+
+function toolbar($page, $args)
+{
+    // view
+    toolbar_button($args['button_view'] ? viewURL($args['headlink']) : '', 'View');
+
+    // edit
+    $edit_label = 'Edit';
+    if ($page != 'RecentChanges' && isset($args['editver'])
+        && $args['editver'] > -1) {
+        if ($args['editver'] == 0) {
+            $edit_url = editURL($args['headlink']);
+        } else {
+            $edit_url = editURL($args['headlink'], $args['editver']);
+            $edit_label = 'Edit Archive';
+        }
+    } else {
+        $edit_url = '';
+    }
+    toolbar_button($edit_url, $edit_label);
+
+    // diff
+    $diff_url = ($page != 'RecentChanges' && isset($args['timestamp']) &&
+                $args['timestamp'] != '') ? historyURL($args['headlink']) : '';
+    toolbar_button($diff_url, 'Diff');
+
+    // backlinks
+    $backlinks_url = ($args['button_backlinks'] && $args['headlink']) ?
+                    backlinksURL($args['headlink']) : '';
+    toolbar_button($backlinks_url, 'Backlinks');
+
+    // subscribe / unsubscribe
+    /*
+    if ($EnableSubscriptions && isset($EmailSuffix) && $UserName != '') {
+        $pg = $pagestore->page($page);
+        if ($pg->isSubscribed($UserName))
+            $subscription_label = 'Unsubscribe';
+        else
+            $subscription_label = 'Subscribe';
+        $subscription_url = $args['headlink'] ?
+            pageSubscribeURL($args['headlink']) : '';
+        toolbar_button($subscription_url, $subscription_label);
+    }
+    */
+}
+
 function template_common_prologue($args)
 {
     global $AdditionalHeader, $HomePage, $MetaDescription, $MetaKeywords, $page;
@@ -192,51 +238,7 @@ if (isset($args['tree']))
 </td></tr>
 
 <tr><td>
-<?php
-// Toolbar
-
-// view
-toolbar_button($args['button_view'] ? viewURL($args['headlink']) : '', 'View');
-
-// edit
-$edit_label = 'Edit';
-if ($page != 'RecentChanges' && isset($args['editver'])
-    && $args['editver'] > -1) {
-    if ($args['editver'] == 0) {
-        $edit_url = editURL($args['headlink']);
-    } else {
-        $edit_url = editURL($args['headlink'], $args['editver']);
-        $edit_label = 'Edit Archive';
-    }
-} else {
-    $edit_url = '';
-}
-toolbar_button($edit_url, $edit_label);
-
-// diff
-$diff_url = ($page != 'RecentChanges' && isset($args['timestamp']) &&
-            $args['timestamp'] != '') ? historyURL($args['headlink']) : '';
-toolbar_button($diff_url, 'Diff');
-
-// backlinks
-$backlinks_url = ($args['button_backlinks'] && $args['headlink']) ?
-                 backlinksURL($args['headlink']) : '';
-toolbar_button($backlinks_url, 'Backlinks');
-
-// subscribe / unsubscribe
-/*
-if ($EnableSubscriptions && isset($EmailSuffix) && $UserName != '') {
-    $pg = $pagestore->page($page);
-    if ($pg->isSubscribed($UserName))
-        $subscription_label = 'Unsubscribe';
-    else
-        $subscription_label = 'Subscribe';
-    $subscription_url = $args['headlink'] ?
-        pageSubscribeURL($args['headlink']) : '';
-    toolbar_button($subscription_url, $subscription_label);
-}
-*/
-?>
+<?php toolbar($page, $args); ?>
 </td></tr>
 
 </table>
@@ -277,22 +279,20 @@ function template_common_epilogue($args)
   $pg = $pagestore->page($page);
   $pagetext = $pg->text;
 ?>
-
 </td>
 </tr>
 </table>
 <NOINDEX>
 <div id="footer">
-<table align="center" class="bottombox" border="0">
-<tr><td colspan="3">
-
+<table align="center" class="bottombox" cellspacing="0" cellpadding="0" border="0">
+<tr>
+<td>
 <small><?php
 if ($UserName)
     print("Logged in as " . html_ref($UserName, $UserName));
 else
     print("Not <a href=\"login/?$page\">logged in</a>.");
 ?></small>
-
 <?php
 if ($EnableSubscriptions && isset($EmailSuffix) && $UserName != ''
     && isset($args['subscribe']) && !empty($args['subscribe'])) {
@@ -305,13 +305,13 @@ if ($EnableSubscriptions && isset($EmailSuffix) && $UserName != ''
           $caption . '</a></small>';
 }
 ?>
-<br><br>
+</td>
+<td colspan="2" align="right"><?php toolbar($page, $args); ?></td>
+</tr>
 
-</td></tr>
-
+<tr><td colspan="3">&nbsp;</td></tr>
 
 <tr><td>
-
 <?php
 print html_ref('RecentChanges', 'RecentChanges') . ', ' .
                '<a href="' . $PrefsScript . '">UserOptions</a>';
@@ -331,7 +331,7 @@ if ($page != 'RecentChanges')
             else
                 print ' anonymously';
 
-            print ' <a href="' . historyURL($args['history']) . '">(diff)</a></i><br>';
+            print ' <a href="' . historyURL($args['history']) . '">(diff)</a></i>';
         }
     }
 
@@ -339,12 +339,12 @@ if ($page != 'RecentChanges')
     {
         if (count($twin = $pagestore->twinpages($args['twin'])))
         {
-            print 'See twins of this page in: ';
+            print '<br>See twins of this page in: ';
             for ($i = 0; $i < count($twin); $i++)
             {
                 print html_twin($twin[$i][0], $twin[$i][1]) . ' ';
             }
-            print '</td><br>';
+            print '</td>';
         }
     }
 
@@ -362,16 +362,14 @@ if ($page != 'RecentChanges')
     }
 }
 ?>
-
 </td></tr>
-
-
-<tr><td colspan="3">
 
 <?php
 if ($page != $HomePage && $page != 'RecentChanges')
 {
 ?>
+    <tr><td colspan="3">
+
     <script language="javascript">
     <!--
     function epilogue_quickadd_validate(form)
@@ -445,14 +443,16 @@ if ($page != $HomePage && $page != 'RecentChanges')
     </td>
     </tr>
     </table>
+
+    </td></tr>
 <?php
 }
 ?>
-
-</td></tr>
 </table>
 
 </div>
+
+<p>
 
 <?php
 if ($AdditionalFooter)

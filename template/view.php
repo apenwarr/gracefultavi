@@ -31,8 +31,7 @@ function template_view($args)
         'button_view' => 0,
         'timestamp' => $args['timestamp'],
         'editver'   => $args['editver'],
-        'button_backlinks' => 1,
-        'button_subscribe' => 1
+        'button_backlinks' => 1
     ));
 ?>
 
@@ -54,7 +53,13 @@ print $args['html'];
             ($args['archive'] ? $args['version'] : 0),
         'history'   => $args['page'],
         'euser'     => $args['edituser'],
-        'timestamp' => $args['timestamp']
+        'timestamp' => $args['timestamp'],
+
+        'headlink' => $args['page'],
+        'button_view' => 0,
+        #'timestamp' => $args['timestamp']  already specified
+        #'editver'   => $args['editver']  already specified
+        'button_backlinks' => 1,
     ));
 }
 ?>

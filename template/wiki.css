@@ -135,7 +135,7 @@ blockquote.cite {
 
 a.button {
     border: 1px solid black;
-    padding: 2px 4px 3px 4px;
+    padding: 3px 4px 3px 4px;
     text-align: center;
     font-size: 11pt;
     text-decoration: none;
@@ -146,7 +146,7 @@ a.button {
 }
 a.button:visited {
     border: 1px solid black;
-    padding: 2px 4px 3px 4px;
+    padding: 3px 4px 3px 4px;
     text-align: center;
     font-size: 11pt;
     text-decoration: none;
@@ -157,7 +157,7 @@ a.button:visited {
 }
 a.button:active {
     border: 1px solid black;
-    padding: 2px 4px 3px 4px;
+    padding: 3px 4px 3px 4px;
     text-align: center;
     font-size: 11pt;
     text-decoration: none;
@@ -168,7 +168,7 @@ a.button:active {
 }
 a.button:hover {
     border: 1px solid black;
-    padding: 2px 4px 3px 4px;
+    padding: 3px 4px 3px 4px;
     text-align: center;
     font-size: 11pt;
     text-decoration: none;
@@ -179,7 +179,7 @@ a.button:hover {
 }
 span.buttonDisabled {
     border: 1px solid #808080;
-    padding: 2px 4px 3px 4px;
+    padding: 3px 4px 3px 4px;
     text-align: center;
     font-size: 11pt;
     text-decoration: none;

@@ -77,11 +77,19 @@ if ($args['pages'])
 </div>
 
 <?php
-  template_common_epilogue(array('twin'      => '',
-                                 'edit'      => '',
-                                 'editver'   => 0,
-                                 'history'   => '',
-                                 'timestamp' => ''));
+    template_common_epilogue(array(
+        'twin'      => '',
+        'edit'      => '',
+        'editver'   => -1,
+        'history'   => '',
+        'timestamp' => '',
+
+        'headlink' => '',
+        'button_view' => 0,
+        #'timestamp' => $args['timestamp']  no diff, already specified
+        #'editver'   => $args['editver']  no edit, already specified
+        'button_backlinks' => 0
+    ));
 }
 
 function toolbar_find($args)

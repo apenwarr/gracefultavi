@@ -84,9 +84,17 @@ Add document to category:
 </div> <!-- Body -->
 
 <?php
-    template_common_epilogue(array('twin'      => $args['page'],
-                                   'history'   => $args['page'],
-                                   'euser'     => $args['edituser'],
-                                   'timestamp' => $args['timestamp']));
+    template_common_epilogue(array(
+        'twin'      => $args['page'],
+        'history'   => $args['page'],
+        'euser'     => $args['edituser'],
+        'timestamp' => $args['timestamp'],
+
+        'headlink' => $args['page'],
+        'button_view' => 1,
+        #'timestamp' => $args['timestamp']  already specified
+        #'editver'   => $args['editver']  no edit
+        'button_backlinks' => 1
+    ));
 }
 ?>

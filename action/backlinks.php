@@ -20,6 +20,7 @@ function action_backlinks()
         'haschildren' => $pagestore->getChildren($page) ? 1 : 0,
         'parents'   => $pagestore->getParents($page),
         'timestamp' => $pg->time,
+        'edituser'  => $pg->username,
         'editver'   => ($UserName && $pg->mutable) ? 0 : -1
     ));
 }
