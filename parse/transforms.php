@@ -497,11 +497,26 @@ function parse_indents($text)
     static $indentPrevLineIsBlank = 0;
     static $indentStealLine = 0;
 
+    // Indentation increase of more than on level will be corrected to only one.
+    $auto_fix_indent_leap = 1;
+
     // Fix notation for ordered list, changes '[0-9].' to '#'
     $text = preg_replace('/^(\s*)[0-9]{1,2}\.(.+\\n?$)/', '\\1#\\2', $text);
 
+    // Fix notation for citation
+    $cite_pattern = '^(\s*>)+';
+    if (preg_match("/$cite_pattern/", $text, $matches))
+    {
+        $auto_fix_indent_leap = 0;
+        $cite_blank_line = preg_match("/$cite_pattern\s*$/", $text);
+        $cite_level = preg_match_all('/>/', $matches[0], $dummy);
+        $text = preg_replace("/$cite_pattern/", str_repeat(' ', $cite_level-1).'>', $text);
+        if ($cite_blank_line)
+            $text = preg_replace('/^(.*)$/', '\\1<p>', $text);
+    }
+
     // Locate the indent prefix characters.
-    preg_match('/^(\s*)([:\\-\\*#])([^:\\-\\*#].*\\n?)$/', $text, $result);
+    preg_match('/^(\s*)([:\\-\\*#>])([^:\\-\\*#>].*\\n?)$/', $text, $result);
 
     $indentSpaces = $result[1];
     $indentChar = $result[2];
@@ -517,12 +532,21 @@ function parse_indents($text)
     {
         if ($indentChar)
         {
-            $indentCurLevel = min($indentPrevLevel + 1, strlen($indentSpaces), $MaxNesting);
+            if ($auto_fix_indent_leap)
+                $indentCurLevel = min($indentPrevLevel + 1, strlen($indentSpaces), $MaxNesting);
+            else
+                $indentCurLevel = min(strlen($indentSpaces), $MaxNesting);
 
             $fixup = '';
 
             if ($indentCurLevel > $indentPrevLevel)
-                $fixup .= entity_list($indentChar, 'start');
+            {
+                if ($auto_fix_indent_leap)
+                    $fixup .= entity_list($indentChar, 'start');
+                else
+                    $fixup .= str_repeat(entity_list($indentChar, 'start'),
+                                         $indentCurLevel - $indentPrevLevel);
+            }
             else
             {
                 // close previously openend levels, until current level
@@ -544,8 +568,14 @@ function parse_indents($text)
 
             $text = $fixup . $indentText;
 
+            if ($auto_fix_indent_leap || $indentCurLevel <= $indentPrevLevel)
+                $indentPrefixString = substr($indentPrefixString, 0, $indentCurLevel) .
+                                      $indentChar;
+            else
+                $indentPrefixString = substr($indentPrefixString, 0, $indentPrevLevel+1) .
+                                      str_repeat($indentChar, $indentCurLevel-$indentPrevLevel);
+
             $indentPrevLevel = $indentCurLevel;
-            $indentPrefixString = substr($indentPrefixString, 0, $indentCurLevel) . $indentChar;
         }
         else
         {
@@ -617,8 +647,8 @@ function entity_list($type, $fn)
     { return new_entity(array('indent_list_' . $fn)); }
   else if($type == '#')
     { return new_entity(array('numbered_list_' . $fn)); }
-//  else if($type == "/([0-9])")
-//    { return new_entity(array('numbered_list_' . $fn)); }
+  else if($type == '>')
+    { return new_entity(array('cite_list_' . $fn)); }
 }
 
 function entity_listitem($type, $fn)
@@ -629,6 +659,8 @@ function entity_listitem($type, $fn)
     { return new_entity(array('indent_item_' . $fn)); }
   else if($type == '#')
     { return new_entity(array('numbered_item_' . $fn)); }
+  else if($type == '>')
+    { return new_entity(array('cite_item_' . $fn)); }
 }
 
 function parse_heading($text)

@@ -62,6 +62,14 @@ function html_dt_start()
   { return '<dt>'; }
 function html_dt_end()
   { return '</dt>'; }
+function html_cite_start()
+ { return '<blockquote type="cite">'; }
+function html_cite_end()
+ { return "</blockquote>\n"; }
+function html_citeitem_start()
+ { return ''; }
+function html_citeitem_end()
+ { return ''; }
 function html_hr()
   { return "<hr>\n"; }
 function html_newline()
