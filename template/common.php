@@ -47,6 +47,7 @@ function template_common_prologue($args)
 </head>
 
 <body>
+<NOINDEX>
 
 <?php
 if ($AdditionalHeader) { include($AdditionalHeader); }
@@ -158,6 +159,7 @@ if (isset($args['tree']))
 
 </td></tr>
 </table>
+</NOINDEX>
 
 <table width="98%" align="center" border="1" bordercolor="black" cellspacing="0" bgcolor="white" cellpadding="10">
 <tr>
@@ -201,7 +203,7 @@ function template_common_epilogue($args)
 </td>
 </tr>
 </table>
-
+<NOINDEX>
 <div id="footer">
 <table align="center" class="bottombox" border="0">
 <tr><td colspan="3">
@@ -380,7 +382,7 @@ if ($page != $HomePage && $page != 'RecentChanges')
 if ($AdditionalFooter)
     include($AdditionalFooter);
 ?>
-
+</NOINDEX>
 </body>
 </html>
 
