@@ -444,8 +444,6 @@ function sch_bug($estimate)
 
     $remain = $estimate->est_remain();
 
-    $task = $estimate->isbug ? $estimate->task->ix : $estimate->task->task;
-
     // update the time.
     // we need to update the time BEFORE we put out the line
     // All unfinished bugs have had their elapsed time already accounted for
@@ -476,6 +474,7 @@ function sch_bug($estimate)
                             "elapsed time so far.  Update your estimate!");
 
     // FIXME: Call $estimate->update or something.
+    $task = $estimate->isbug ? $estimate->task->ix : $estimate->task->task;
     $resolved = $estimate->isbug && $estimate->task->isresolved();
     $buga = array($task, $title, $orig, $curr, $elapsed,
                   sch_format_day($sch_curday), $estimate->task->isdone(), 

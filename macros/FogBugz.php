@@ -411,7 +411,12 @@ class XTask
         { return 7; } // currently XTask is always low-priority
     
     function hyperlink()
-        { return $this->task; }
+    { 
+	if ($this->manual_ix > 0)
+	    return $this->task;
+	else 
+	    return "TM#".$this->ix; 
+    }
     
     function assign($personix)
     {
@@ -590,7 +595,12 @@ class Estimate
     function nice_title()
     {
 	if (!$this->isbug)
-	  return $this->task->name;
+	{
+	    if($this->task->manual_ix > 0)
+		return $this->task->name;
+	    else
+		return $this->task->task.": ".$this->task->name;
+	}
 	else if ($this->isbug && $this->task->isresolved() 
 		 && !$this->isdone())
 	  return "VERIFY: " . $this->task->name;

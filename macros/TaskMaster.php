@@ -587,7 +587,7 @@ class Macro_TaskMaster
 	    
 	    $this->form_button("Save", "Save");
 	    $this->table("table");
-	    $this->row(7, "Task", "Subtask", "FixFor",
+	    $this->row(7, "TaskID", "Task: Subtask", "FixFor",
 		       "OrigEst", "CurrEst", "Elapsed", "Remain");
 	    $this->estimate_rows($_REQUEST["filter-fixfor"]);
 	    $this->table_end();
