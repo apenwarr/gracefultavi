@@ -22,22 +22,13 @@ function lastedit_check()
 
     if ($lastedit_count <> $pages_count)
     {
-        $list = array();
-
-        // Make sure we get every page's last version, the next query
-        // misses the pages having all their entries with minoredit.
-        $qid = $pagestore->dbh->query("SELECT title, MAX(version) " .
-                                      "FROM $PgTbl " .
-                                      "GROUP BY title");
-        while(($result = $pagestore->dbh->result($qid)))
-            $list[$result[0]] = $result[1];
-
         // Gets the latest significant version of each page.
         $qid = $pagestore->dbh->query("SELECT title, MAX(version) " .
                                       "FROM $PgTbl " .
                                       "WHERE minoredit = 0 " .
                                       "OR LENGTH(body) <= 1 " .
                                       "GROUP BY title");
+        $list = array();
         while(($result = $pagestore->dbh->result($qid)))
             $list[$result[0]] = $result[1];
 
