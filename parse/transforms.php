@@ -835,12 +835,12 @@ function parse_wdiff_tags($text)
     $buffer_size = 4;
 
     $text = preg_replace("/^(.*)$/e",
-                         "'\\1' . new_entity(array('raw', '<br>'))", $text);
+                         "q1('\\1') . new_entity(array('raw', '<br>'))", $text);
 
     $ptn = '/(<\/?(DEL|INS)>)/';
     if (preg_match($ptn, $text))
     {
-        $text = preg_replace($ptn . 'e', "new_entity(array('raw', '\\1'))",
+        $text = preg_replace($ptn . 'e', "new_entity(array('raw', q1('\\1')))",
                              $text);
         if ($buffer)
         {
