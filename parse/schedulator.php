@@ -351,8 +351,14 @@ function sch_line($feat, $task, $orig, $curr, $elapsed, $remain, $done)
 
 function sch_bug($feat, $task, $_orig, $_curr, $_elapsed, $done)
 {
-    global $sch_user, $sch_curday, $sch_bugs;
+    global $sch_user, $sch_curday, $sch_bugs, $sch_need_extraline;
     global $sch_got_bug, $sch_unknown_fixfor;
+    
+    if ($sch_need_extraline)
+    {
+	$ret .= sch_fullline('&nbsp;');
+	$sch_need_extraline = 0;
+    }
     
     $xfeat = $feat;
     $fixfor = '';
@@ -378,7 +384,7 @@ function sch_bug($feat, $task, $_orig, $_curr, $_elapsed, $done)
     if (!$remain && $curr)
       $done = 1;
 
-    $ret = sch_line($xfeat, $task, $orig, $curr, $elapsed, $remain, $done);
+    $ret .= sch_line($xfeat, $task, $orig, $curr, $elapsed, $remain, $done);
     $buga = array($feat, $task, $orig, $curr, $elapsed, 
 		  sch_format_day($sch_curday), $done);
     if ($fixfor)
@@ -405,7 +411,7 @@ function sch_extrabugs($user, $fixfor, $enddate)
 
 function sch_milestone($descr, $name, $due)
 {
-    global $sch_user, $sch_load, $sch_curday;
+    global $sch_user, $sch_load, $sch_curday, $sch_need_extraline;
     
     # if no due date was given, assume it's the current date for purposes
     # of collecting extra bugs.
@@ -424,8 +430,9 @@ function sch_milestone($descr, $name, $due)
     $newday = sch_parse_day($due);
     $xdue = sch_format_day($newday);
     $slip = ($newday-$sch_curday)*8 / $sch_load;
-    $ret .= sch_line("SLIPPAGE (to $xdue)", "", 0,$slip,0,$slip, 0);
-    $ret .= sch_line("<b>$descr: $name</b><br>&nbsp;", '', 0,0,0,0, 0);
+    #$ret .= sch_line("SLIPPAGE (to $xdue)", "", 0,$slip,0,$slip, 0);
+    $ret .= sch_line("<b>$descr: $name ($xdue)</b>", '', 0,$slip,0,$slip, 0);
+    $sch_need_extraline = 1;
     
     $sch_curday = $old_curday; # slippage doesn't actually take time... right?
     
@@ -499,11 +506,11 @@ function view_macro_schedulator($text)
 	
 	$extra_due = bug_get_milestones($msname);
 	foreach ($extra_due as $xdue)
-	    $ret .= sch_milestone("BOUNCE", $msname, $xdue);
+	    $ret .= sch_milestone("ZeroBugBounce", $msname, $xdue);
 	
-	$ret .= sch_milestone($words[0], $msname, $msdue);
 	if (!$msdue)
 	  $msdue = bug_duedate($msname);
+	$ret .= sch_milestone($words[0], $msname, $msdue);
 	bug_set_release($msname, $msdue);
 	bug_add_tasks($sch_user, $msname, $sch_unknown_fixfor);
 	$sch_unknown_fixfor = array();
