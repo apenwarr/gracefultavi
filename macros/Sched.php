@@ -650,7 +650,7 @@ function bug_add_task($user, $fixfor, $t)
 		$zeroest = (abs($bug[2]) <= 0.01 && abs($bug[2]) >= 0.0001);
 		$done = ($bug[2] && $bug[3] == $bug[2]);
 		if (!$done)
-		  sch_warning("Weird: I don't know if bug #$bugid is done!");
+		      $ret .= sch_warning("Weird1: I don't know if bug #$bugid is done!");
 
 		if ($sch_got_bug[$bugid])
 			continue;
@@ -666,7 +666,7 @@ function bug_add_task($user, $fixfor, $t)
 		$ret .= sch_bug($bugid, $bug[0], $bug[1], $bug[2], $bug[3], 0);
 		}
 
-		if ($do_all_done && !$sch_did_all_done)
+		if ($do_all_done && !$fixfor_in_past && !$sch_did_all_done)
 		{
 		$elapsed = 0;
 		$sch_elapsed_subtract = array();
@@ -693,13 +693,17 @@ function bug_add_task($user, $fixfor, $t)
 		{
 			$zeroest = (abs($bug[2]) <= 0.01 && abs($bug[2]) >= 0.0001);
 			$done = ($bug[2] && $bug[3] == $bug[2]);
-			if ($done)
-			  sch_warning("Weird: I don't know if bug #$bugid is done!");
 
-			if ($sch_got_bug[$bugid])
+		        if ($sch_got_bug[$bugid])
 			  continue;
-
-			if ($zeroest)
+		    
+			if ($done)  # not actually done - adjust estimate!
+		        {
+			    # $ret .= sch_warning("Weird2: I don't know if bug #$bugid is done!");
+			    $bug[2] += 0.0001;
+			}
+		    
+			if (0 && $zeroest)
 			{
 			// the bug is done, but with a zero estimate; probably a
 			// duplicate, wontfix, or something.  Skip it.
