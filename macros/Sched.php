@@ -647,7 +647,7 @@ function sch_line($feat, $task, $orig, $curr, $elapsed, $remain, $done,
 }
 
 
-function sch_bug($feat, $task, $_orig, $_curr, $_elapsed, $done)
+function sch_bug($feat, $task, $_orig, $_curr, $_elapsed, $done, $fixfor)
 {
     global $sch_user, $sch_curday, $sch_need_extraline;
     global $sch_got_bug, $sch_unknown_fixfor;
@@ -678,7 +678,7 @@ function sch_bug($feat, $task, $_orig, $_curr, $_elapsed, $done)
         $sch_need_extraline = 0;
     }
 
-    $fixfor = '';
+    // $fixfor = ''; // now provided as a parameter...
     if (preg_match('/^[0-9]+$/', $feat))
     {
         $bug = bug_get($feat);
@@ -875,7 +875,8 @@ function sch_all_done($user)
                 foreach ($type["complete"] as $bug)
                 {
                     //print("Adding done bug $bug[0]<br>\n");
-                    $ret .= sch_bug($bug[0], $bug[1], $bug[2], $bug[3], $bug[4], 1);
+                    $ret .= sch_bug($bug[0], $bug[1], $bug[2], $bug[3],
+				    $bug[4], 1, $milestone);
                 }
             }
 
@@ -901,7 +902,7 @@ function sch_all_done($user)
     // FIXME: Should use LoadFactor member of Bug object instead of LOADFACTOR
     // "bugs"
     if ($sch_load != $oldload)
-        $ret .= sch_bug("LOADFACTOR", $oldload, "", "", "", 0);
+        $ret .= sch_bug("LOADFACTOR", $oldload, "", "", "", 0, "");
 
     return $ret;
 }
@@ -1005,7 +1006,8 @@ function sch_output_buglist($buglist, $msname, &$extra_due, $done)
         $fixfor_day = sch_parse_day($next_fixfor);
         foreach($buglist as $bug)
         {
-            $bug_line = sch_bug($bug[0], $bug[1], $bug[2], $bug[3], $bug[4], $done);
+            $bug_line = sch_bug($bug[0], $bug[1], $bug[2], $bug[3],
+				$bug[4], $done, $msname);
             while ($sch_curday > $fixfor_day && !is_null($next_fixfor))
             {
                 $ret .= sch_milestone("ZeroBugBounce", $msname, $next_fixfor);
@@ -1106,7 +1108,7 @@ function sch_create($user)
     // make sure to print initial load factor
     $tmpload = $sch_load;
     $sch_load = 1;
-    $ret .= sch_bug("LOADFACTOR", $tmpload, "", "", "", 0);
+    $ret .= sch_bug("LOADFACTOR", $tmpload, "", "", "", 0, "");
 
     $fixfors = array();
 
@@ -1446,19 +1448,20 @@ EOF;
                     $subtask = $bug["subtask"];
                     $pri = $bug["priority"];
 		    $priclass = "pri$pri";
-		    if ($bug["resolved"])
+		    $isbug = (($task + 0)."" == $task);
+		    if ($bug["resolved"] || !$isbug)
 			$bugclass = "resolved $priclass";
 		    else
 		    {
 			$bugclass = "unresolved $priclass $dateclass";
 			$num_unresolved++;
 		    }
-		    if (($task + 0) . "" == $task)
+		    if ($isbug)
 		      $v .= "<a class='$bugclass' " .
 		            "href='http://nits/fogbugz3?$task' " . 
 		            "title='Bug $task: $subtask'>$pri</a> ";
 		    else
-		      $v .= "$n";
+		      $v .= "<span class='bugclass'>$pri</span>";
 		}
 	    }
 
