@@ -1094,7 +1094,6 @@ class Macro_Sched
 
             $fixfor = '';
             $orig = $currest;
-            if (!$elapsed) $elapsed = 0;
 	    $sch_manual_ix++;
 
             $estimate = new Estimate(/* fake - not in database */ 1,
