@@ -286,11 +286,14 @@ function sch_format_day($day)
     $weeks = floor($day/5);
     $days = $day - $weeks*5;
     $frac = $days - floor($days);
-    $stamp = ($weeks*7 + $days) * 24*60*60;
+    #print "(weeks/days/frac:$weeks/$days/$frac)";
+    $stamp = ($weeks*7 + floor($days)) * 24*60*60;
     $stamp += 4*24*60*60; # the epoch was a Thursday
     $stamp += 12*60*60;   # php timezone handling is insane
     
-    return strftime("%Y/%m/%d", $stamp);# . sprintf("+%.1f", $frac);
+    $ret = strftime("%Y/%m/%d", $stamp);# . sprintf("+%.1f", $frac);
+    #print "(ret:$ret)";
+    return $ret;
 }
 
 function sch_add_hours($day, $hours)
