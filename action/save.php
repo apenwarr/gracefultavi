@@ -143,9 +143,15 @@ function action_save()
     // Handles page subscriptions in background
     if ($EnableSubscriptions && isset($EmailSuffix)) {
         if ($subscribed_users = $pg->getSubscribedUsers($UserName)) {
-            array_walk($subscribed_users, 'addSuffix', $EmailSuffix);
-            $subscribed_users = implode(' ', $subscribed_users);
-            exec("$WorkingDirectory/lib/mailnotify.sh $page $subscribed_users");
+            #array_walk($subscribed_users, 'addSuffix', $EmailSuffix);
+            #$subscribed_users = implode(' ', $subscribed_users);
+            #exec("$WorkingDirectory/lib/mailnotify.sh $page $subscribed_users");
+            foreach ($subscribed_users as $user) {
+                mail($user . $EmailSuffix, "NitWiki: $page has changed",
+                     "This is your friendly neighbourhood wiki letting you " .
+                     "know that the page $page has changed!\n\n" .
+                     "http://nitwiki/?$page", "From: webmaster@nit.ca");
+            }
         }
     }
 
