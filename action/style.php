@@ -1,12 +1,15 @@
 <?php
-// $Id: style.php,v 1.1 2002/01/08 17:31:00 smoonen Exp $
+// $Id: style.php,v 1.1.1.1 2003/03/15 03:53:58 apenwarr Exp $
 
 // This function emits the current template's stylesheet.
-
 function action_style()
 {
-  header("Content-type: text/css");
+    global $StyleSheetOverride;
 
-  require('template/wiki.css');
+    header("Content-type: text/css");
+
+    if ($StyleSheetOverride)
+        require($StyleSheetOverride);
+    else
+        require('template/wiki.css');
 }
-
