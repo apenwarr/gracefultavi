@@ -299,6 +299,7 @@ class Bug
 function bug_compare($a, $b)
 {
     $fixcmp = fixfor_compare($a->fixfor, $b->fixfor);
+    // Sort bugs I resolved in the order I resolved them
     $ares = (isset($a->resolved_byme) && $a->resolved_byme && $a->resolvedate)
 	      ? $a->resolvedate : "2099-09-09";
     $bres = (isset($b->resolved_byme) && $b->resolved_byme && $b->resolvedate)
@@ -320,6 +321,7 @@ function bug_compare($a, $b)
 class BugTable extends FogTable
 {
     var $resolved_tasks;
+    var $stolen_tasks;
     var $persons;
     var $projects;
     var $fixfors;
@@ -327,10 +329,14 @@ class BugTable extends FogTable
 
     // resolved_tasks is an array of:
     //      ixBug => (ixBug, ixPersonWhoResolved, dtResolved)
-    function BugTable($where, $_my_userix, $_resolved_tasks,
+    // stolen tasks is an array of:
+    //      ixBug => (ixBug, dtResolved)
+    // where the bug indices are for bugs that were stolen
+    function BugTable($where, $_my_userix, $_resolved_tasks, $_stolen_tasks, 
 		      $_persons, $_projects, $_fixfors)
     {
         $this->resolved_tasks = $_resolved_tasks;
+        $this->stolen_tasks = $_stolen_tasks;
         $this->persons = $_persons;
         $this->projects = $_projects;
         $this->fixfors = $_fixfors;
@@ -343,6 +349,10 @@ class BugTable extends FogTable
 	    $p[$r[0]] = $this->create_bug_from_db_row($r);
             //print_r($p[$r[0]]);
 	}
+
+        foreach ($this->stolen_tasks as $stolen)
+            $p[$stolen[0]] = $this->create_bug($stolen[0]);
+
 	uasort($p, "bug_compare");
 	$this->FogTable($p);
     }
@@ -373,14 +383,30 @@ class BugTable extends FogTable
     // query, and returns a new Bug object.
     function create_bug_from_db_row($r)
     {
-        $resolved_byme = $this->resolved_tasks[$r[0]][1];
-        $resolved_date = $this->resolved_tasks[$r[0]][2];
+        $stolen = array_key_exists($r[0], $this->stolen_tasks);
 
-        return new Bug($r[0], $r[1], $r[2], $r[3],
+        if ($stolen)
+        {
+            $title = "STOLEN: $r[3]";
+            $currEst = 0;
+            $elapsed = 0;
+            $resolved_byme = 1;
+            $resolved_date = $this->stolen_tasks[$r[0]][1];
+        }
+        else
+        {
+            $title = $r[3];
+            $currEst = $r[12];
+            $elapsed = $r[13];
+            $resolved_byme = $this->resolved_tasks[$r[0]][1];
+            $resolved_date = $this->resolved_tasks[$r[0]][2];
+        }
+
+        return new Bug($r[0], $r[1], $r[2], $title,
 		       $this->projects->a[$r[4]],
 		       $r[5], $this->persons->a[$r[6]],
 		       $this->persons->a[$r[7]], $r[8], $r[9],
-		       $this->fixfors->a[$r[10]], $r[11], $r[12], $r[13],
+		       $this->fixfors->a[$r[10]], $r[11], $currEst, $elapsed,
 		       $resolved_date, $resolved_byme != '' ? 1 : 0,
 		       $this->persons->a[$this->my_userix],
 		       $r[14]);
@@ -510,8 +536,6 @@ class Estimate
     {
 	if ($this->origest !== '')
             return $this->origest;
-	else if ($this->isbug && $this->task->isresolved() && !$this->task->resolved_byme)
-            return 0.01; // FIXME: for broken old-style schedulator weirdness
 	else if ($this->isbug)
             return $this->task->origest;
 	else
@@ -522,8 +546,6 @@ class Estimate
     {
 	if ($this->currest !== '')
             return $this->currest;
-	else if ($this->isbug && $this->task->isresolved() && !$this->task->resolved_byme)
-            return 0.01; // FIXME: for broken old-style schedulator weirdness
 	else if ($this->isbug)
             return $this->task->currest;
 	else
@@ -534,8 +556,6 @@ class Estimate
     {
 	if ($this->elapsed !== '')
             return $this->elapsed;
-	else if ($this->isbug && $this->task->isresolved() && !$this->task->resolved_byme)
-            return 0.009; // FIXME: for broken old-style schedulator weirdness
 	else if ($this->isbug)
             return $this->task->elapsed;
 	else
@@ -761,7 +781,7 @@ class FogTables
     var $bug;
     var $xtask;
     var $estimate;
-    
+
     function FogTables($userix, $fixforix, $start_date='1970-01-01')
     {
 	$this->person = new PersonTable();
@@ -799,7 +819,7 @@ class FogTables
 	{
 	    $and_user = "and ixPerson=$userix";
 	    $and_useras = "and ixPersonAssignedTo=$userix";
-	    $and_userrb = "and ixPersonResolvedBy=$userix";
+	    $and_userrb = "and ixLastPersonResolvedBy=$userix";
 	}
 	else
 	    $and_user = $and_useras = $and_userrb = "";
@@ -820,7 +840,7 @@ class FogTables
 	$q = 
 	  ("select e.ixBug, " .
 	   "   substring(max(concat(lpad(ixBugEvent,12,' '),ixPerson)),13) " .
-	   "       as ixPersonResolvedBy, " .
+	   "       as ixLastPersonResolvedBy, " .
 	   "   substring(max(concat(lpad(ixBugEvent,12,' '),dt)),13) " .
 	   "       as dtResolved " .
 	   "  from BugEvent e, Bug b " .
@@ -832,6 +852,32 @@ class FogTables
 	   "  having 1 $and_userrb" .
 	   "    $and_dtresolved ");
 	$resolved_tasks = sql_simple($q);
+
+        // Finding stolen bugs is only relevant when we have a particular
+        // person to check against.
+        if ($and_user != "")
+        {
+            // Retrieve all bugs that the user ever resolved.
+            $stolen_query = 
+               ("select e.ixBug, e.ixPerson, e.dt as dtResolved " .
+                " from BugEvent e, Bug b " .
+                " where e.ixBug = b.ixBug " .
+                "   and b.ixStatus > 1 and e.sVerb like 'RESOLVED%' " .
+                "   and sVerb != 'Resolved (Again)'" .
+                "   $and_user " . 
+                "   $and_fixfor " .
+                " having 1 $and_dtresolved" .
+                " order by e.ixBug "); 
+            $all_resolved_tasks = sql_simple($stolen_query);
+
+	    // Find all bugs that the user has resolved at some point, but was
+	    // not the most recent person to resolve.
+            $stolen_keys = array_diff(array_keys($all_resolved_tasks), 
+                array_keys($resolved_tasks));
+
+            foreach ($stolen_keys as $b)
+                $stolen_bugs[$b] = array($b, $all_resolved_tasks[$b][2]);
+        }
 	
 	$whichbugs += array_keys($resolved_tasks);
 	
@@ -850,7 +896,7 @@ class FogTables
 	  : " where 1=0";
 	
 	$this->bug = new BugTable($bugwhere, $userix, $resolved_tasks,
-				  $this->person,
+				  $stolen_bugs, $this->person,
 				  $this->project, $this->fixfor);
 	$this->xtask = new XTaskTable($taskwhere, $userix,
 				      $this->person, $this->fixfor);
