@@ -621,9 +621,12 @@ function parse_indents($text)
                     $indentPrevLevel = $i - 1;
                 }
                 else
-                    // $text will be used as is
+                {
                     // $indentChar is set here to keep the line stealing working
                     $indentChar = ' ';
+                    $text = $pending_p . $text;
+                    $pending_p = '';
+                }
             }
             else
             {
