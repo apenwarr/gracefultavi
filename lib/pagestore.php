@@ -87,6 +87,8 @@ class PageStore
                                  "from wiki_pages p1, wiki_pages p2 " .
                                  "where p1.title = p2.title " .
                                  "and p1.version = 1 " .
+                                 "and p1.minoredit = 0 " .
+                                 "and p2.minoredit = 0 " .
                                  "group by p1.title, p2.title " .
                                  "having max(unix_timestamp(p2.time)) - min(unix_timestamp(p1.time)) < 60*60*24");
 
