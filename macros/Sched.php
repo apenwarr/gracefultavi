@@ -1179,7 +1179,15 @@ function sch_summary($fixfor)
 			  "  order by sPerson ",
 			  $bug_h);
     while ($result && $row = mysql_fetch_row($result))
-      $allpeople[$row[0]] = 1;
+    {
+        $person = $row[0];
+        $schedname = strtoupper(substr($person, 0, 1)) 
+          . substr($person, 1) . "Schedule";
+        
+        $allpeople[$row[0]] = 
+            "<a href='index.php?$schedname' title=\"$person's schedulator\">" .
+            "$person</a>";
+    }
     
     $query = "select dtDue, sPerson, sTask, sSubTask " . 
              "  from schedulator.Task " .
@@ -1337,7 +1345,7 @@ function sch_summary($fixfor)
     $ret .= "</table>\n";
     
     $ret .= "<p><b>Done for this release:</b> " .
-      join(", ", array_keys($allpeople)) .
+      join(", ", array_values($allpeople)) .
       "</p>\n";
     
     return $ret;
