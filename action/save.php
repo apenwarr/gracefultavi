@@ -39,8 +39,11 @@ function action_save()
         $nextver = $pg->version + 1;
     }
 
-    if (!$pg->mutable)                  // Edit disallowed.
+    // Edit disallowed.
+    if (!$pg->mutable || (!$UserName && !isset($appending))) {
+        $pagestore->unlock();
         die($ErrorPageLocked);
+    }
 
     if ($pg->exists()                   // Page already exists.
         && $pg->version >= $nextver     // Someone has changed it.
