@@ -86,6 +86,7 @@ class Macro_ChecklistMaster
     var $done = false;
 
     var $users_list;
+    var $category_list;
     var $url_params;
 
     var $notes_parsing_rules = array('parse_elem_flag',
@@ -967,6 +968,23 @@ CALENDAR_JAVASCRIPT;
     }
 
 
+    function list_categories($id)
+    {
+        if (isset($this->category_list))
+            return $this->category_list;
+
+        $categories = chklst_query("select distinct category, category foo " .
+                                   "from chklst_checklist_details " .
+                                   "where checklist = $id " .
+                                   "order by lower(category)");
+        $categories[-1] = '';
+
+        $this->category_list = $categories;
+
+        return $categories;
+    }
+
+
 
     // *************************** users ***************************
 
@@ -1684,7 +1702,7 @@ CALENDAR_JAVASCRIPT;
         return $link;
     }
 
-    function print_edit_checklist_row($row, $users, $last_row)
+    function print_edit_checklist_row($row, $users, $last_row, $checklist_id)
     {
         $this->out('<tr>');
         if ($row['id'])
@@ -1706,6 +1724,11 @@ CALENDAR_JAVASCRIPT;
         $this->form_hidden('noteshidden'.$row['id'], $row['noteshidden']);
         $this->out('</td><td>');
         $this->form_input('category'.$row['id'], $row['category'], 35, true);
+        if ($row['id'] == '')
+        {
+            $this->form_select('categorylist', $row['category'], '',
+                               $this->list_categories($checklist_id));
+        }
         $this->out('</td><td>');
         $this->form_input('description'.$row['id'], $row['description'], 60,
                           true);
@@ -1789,12 +1812,12 @@ CALENDAR_JAVASCRIPT;
         foreach ($checklist_details as $row)
         {
             $this->print_edit_checklist_row($row, $users,
-                $i == count($checklist_details));
+                $i == count($checklist_details), $id);
             $i++;
         }
         $this->form_hidden('checklistrowids',
             implode(',', array_keys($checklist_details)));
-        $this->print_edit_checklist_row(array(), $users, false);
+        $this->print_edit_checklist_row(array(), $users, false, $id);
         $this->table_end();
 
         $this->out('<p>');
@@ -1819,6 +1842,9 @@ CALENDAR_JAVASCRIPT;
                 $before_id = -1;
             else
                 $before_id = $_REQUEST['addposid'];
+
+            if ($_REQUEST['categorylist'] != -1)
+                $_REQUEST['category'] = $_REQUEST['categorylist'];
 
             $this->save_checklist_row(null, $id, $_REQUEST['category'],
                 $_REQUEST['description'], $_REQUEST['owner'],
