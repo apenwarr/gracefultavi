@@ -1,5 +1,5 @@
 <?php
-// $Id: common.php,v 1.8 2003/04/08 00:37:42 mich Exp $
+// $Id: common.php,v 1.9 2003/04/09 16:55:23 mich Exp $
 
 // This function generates the common prologue and header
 // for the various templates.
@@ -112,7 +112,7 @@ if ( $args['headlink']
 <td></td>
 <td>
 <input type="checkbox" name="branch_search" value="<?php print htmlspecialchars($args['headlink']) ?>">
-<small>Search only children of <b><?=$args['headlink']?></b> (full-text search)</small>
+<small>Search only children of <b><?=$args['headlink']?></b></small>
 </td>
 </tr>
 <?php } ?>
