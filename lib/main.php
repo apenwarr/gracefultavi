@@ -67,7 +67,8 @@ $ActionList = array(
                 'reparent'  => array('action/reparent.php', 'action_reparent', 'edit'),
                 'content' => array('action/content.php', 'action_content', 'edit'),
                 'watch'   => array('action/watch.php', 'action_watch', 'edit'),
-                'lock'    => array('action/lock.php', 'action_lock', '')
+                'lock'    => array('action/lock.php', 'action_lock', ''),
+		'js'      => array('action/js.php', 'action_php', '')
               );
 
 // Default action and page names.
