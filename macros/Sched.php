@@ -107,7 +107,8 @@ function bug_unfinished_list($user, $fixforname, $enddate)
     {
 	if ($e->isdone()
 	    || $e->assignto->ix != $personid
-	    || ($last_fix && !$e->task->fixfor->due_before($last_fix)))
+	    || ($last_fix && !$e->task->fixfor->due_before($last_fix))
+            || $e->task->fixfor->name != $fixforname)
 	  continue;
 	
 	$a[$e->id] =
@@ -381,7 +382,7 @@ function bug_get_fixfors($user)
     
     while ($row = mysql_fetch_row($result))
     {
-        //print "((Adding fixfor $row[0] to array))";
+        //print "((Adding fixfor $row[0] to array))<br>\n";
 	$a[] = $row[0];
     }
 
@@ -1184,7 +1185,7 @@ function sch_summary($fixfor)
         $schedname = strtoupper(substr($person, 0, 1)) 
           . substr($person, 1) . "Schedule";
         
-        $allpeople[$row[0]] = 
+        $allpeople[$person] = 
             "<a href='index.php?$schedname' title=\"$person's schedulator\">" .
             "$person</a>";
     }
