@@ -1,8 +1,8 @@
 <?php
 
-/* Table Of Content generator
+/* Table Of Contents generator
  *
- * Creates a table of content based on the page's headers.
+ * Creates a table of contents based on the page's headers.
  *
  * The param is the maximum hierarchy level to display.
  * Defaults to 9.
@@ -100,8 +100,8 @@ class Macro_Toc
 
         $return_value = '<table cellspacing="0" cellpadding="3" border=0">' .
                         '<tr id="showtoc' . $this->i . '" style="display: none;">' .
-                        '<td><b>Table of content</b> [ <a href="javascript:showToc(' . $this->i . ');">show</a> ]</td></tr>' .
-                        '<tr id="toc' . $this->i . '"><td><b>Table of content</b> ' .
+                        '<td><b>Table of contents</b> [ <a href="javascript:showToc(' . $this->i . ');">show</a> ]</td></tr>' .
+                        '<tr id="toc' . $this->i . '"><td><b>Table of contents</b> ' .
                         '[ <a href="javascript:hideToc(' . $this->i . ');">hide</a> ]' . $toc . '</td></tr></table>';
 
         return "$TocJavascriptFunctions\n\n$return_value";
