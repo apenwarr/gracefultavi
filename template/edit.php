@@ -25,12 +25,13 @@ function template_edit($args)
         'heading'  => 'Editing ',
         'headlink' => $args['page'],
         'headsufx' => '',
-        'tree' => 1,
+        'tree'     => 1,
         'toolbar'  => 1,
 
-        'button_view' => 1,
-        'timestamp' => $args['timestamp'],
-        #'editver'   => $args['editver']  no edit
+        'button_selected'  => 'edit',
+        'button_view'      => 1,
+        'timestamp'        => $args['timestamp'],
+        'editver'          => $args['editver'],
         'button_backlinks' => 1
     ));
 ?>
@@ -63,7 +64,6 @@ print "<textarea name=\"document\" rows=\"$EditRows\" cols=\"$EditCols\" wrap=\"
 print htmlspecialchars($args['text']);
 print '</textarea>';
 ?>
-
 <br>
 
 <?php
@@ -76,6 +76,17 @@ Summary of change:
 
 Add document to category:
 <input type="text" name="categories" size="40" value=""><br>
+
+<input type="submit" name="Save" value="Save">
+<input type="submit" name="Preview" value="Preview">
+
+<?php
+    if($UserName != '')
+        print 'Your user name is ' . html_ref($UserName, $UserName);
+    else
+        print "Visit <a href=\"$PrefsScript\">Preferences</a> to set your user name";
+?>
+<br>
 
 </div> <!-- Class form -->
 
@@ -90,10 +101,11 @@ Add document to category:
         'euser'     => $args['edituser'],
         'timestamp' => $args['timestamp'],
 
-        'headlink' => $args['page'],
-        'button_view' => 1,
-        #'timestamp' => $args['timestamp']  already specified
-        #'editver'   => $args['editver']  no edit
+        'headlink'         => $args['page'],
+        'button_selected'  => 'edit',
+        'button_view'      => 1,
+        #'timestamp'       => $args['timestamp']  already specified
+        'editver'          => $args['editver'],
         'button_backlinks' => 1
     ));
 }

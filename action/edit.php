@@ -30,6 +30,8 @@ function action_edit()
                       'timestamp' => $pg->time,
                       'nextver'   => $pg->version + 1,
                       'archive'   => $archive,
-                      'edituser'  => $pg->username));
+                      'edituser'  => $pg->username,
+                      'editver'   => ($UserName && $pg->mutable) ?
+                                     (($version == '') ? 0 : $version) : -1));
 }
 ?>

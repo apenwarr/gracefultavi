@@ -48,7 +48,9 @@ function action_history()
         'page'    => $page,
         'history' => $text,
         'diff'    => diff_parse($diff),
-        'editver'   => ($UserName && $p2->mutable) ? 0 : -1
+        'editver'   => ($UserName && $p2->mutable) ? 0 : -1,
+        'timestamp' => $p2->time,
+        'edituser' => $p2->username
     ));
 }
 ?>

@@ -26,12 +26,13 @@ function template_preview($args)
         'heading'  => 'Previewing ',
         'headlink' => $args['page'],
         'headsufx' => '',
-        'tree' => 1,
+        'tree'     => 1,
         'toolbar'  => 1,
 
-        'button_view' => 1,
-        'timestamp' => $args['timestamp'],
-        #'editver'   => $args['editver']  no edit
+        'button_selected'  => '',
+        'button_view'      => 1,
+        'timestamp'        => $args['timestamp'],
+        #'editver'         => $args['editver']  no edit
         'button_backlinks' => 1
     ));
 ?>
@@ -61,19 +62,28 @@ user name<?php
     print $EditCols; ?>" wrap="virtual"><?php
   print str_replace('<', '&lt;', str_replace('&', '&amp;', $args['text']));
 ?></textarea><br />
-
 <?php
 print '<input type="checkbox" name="minoredit" value="1"';
 if ($minoredit) print ' CHECKED';
 print '>Minor edit<br>';
 ?>
-
   Summary of change:
   <input type="text" name="comment" size="40" value="<?php
     print $comment; ?>" /><br />
   Add document to category:
   <input type="text" name="categories" size="40" value="<?php
-    print $categories; ?>" />
+    print $categories; ?>" /><br />
+  <input type="submit" name="Save" value="Save" />
+  <input type="submit" name="Preview" value="Preview" />
+<?php
+  if($UserName != '')
+    { print 'Your user name is ' . html_ref($UserName, $UserName); }
+  else
+  {
+?>  Visit <a href="<?php print $PrefsScript; ?>">Preferences</a> to set your
+user name<?php
+  }
+?>
 <h1>Preview</h1>
 <hr />
 <?php print $args['html']; ?>
@@ -93,10 +103,11 @@ print '>Minor edit<br>';
         'euser'     => $args['edituser'],
         'timestamp' => $args['timestamp'],
 
-        'headlink' => $args['page'],
-        'button_view' => 1,
-        #'timestamp' => $args['timestamp']  already specified
-        #'editver'   => $args['editver']  no edit, already specified
+        'headlink'         => $args['page'],
+        'button_selected'  => '',
+        'button_view'      => 1,
+        #'timestamp'       => $args['timestamp']  already specified
+        #'editver'         => $args['editver']  no edit, already specified
         'button_backlinks' => 1
     ));
 }

@@ -1,5 +1,63 @@
 <?php
-// $Id: common.php,v 1.9 2003/04/09 16:55:23 mich Exp $
+
+require_once('template/tree.php');
+
+function toolbar_button($url, $label, $is_selected)
+{
+    if ($url) {
+        $class = $is_selected ? 'buttonSelected' : 'button';
+        print '<a class="'.$class.'" href="'.$url.'">'.$label.'</a> ';
+    } else {
+        print '<span class="buttonDisabled">'.$label.'</span> ';
+    }
+}
+
+function toolbar($page, $args)
+{
+    // view
+    toolbar_button($args['button_view'] ? viewURL($args['headlink']) : '',
+        'View', $args['button_selected']=='view');
+
+    // edit
+    $edit_label = 'Edit';
+    if (isset($args['editver']) && $args['editver'] > -1) {
+        if ($args['editver'] == 0) {
+            $edit_url = editURL($args['headlink']);
+        } else {
+            $edit_url = editURL($args['headlink'], $args['editver']);
+            $edit_label = 'Edit Archive';
+        }
+    } else {
+        $edit_url = '';
+    }
+    toolbar_button($edit_url, $edit_label, $args['button_selected']=='edit');
+
+    // diff
+    $diff_url = (isset($args['timestamp']) && $args['timestamp'] != '') ?
+                historyURL($args['headlink']) : '';
+    toolbar_button($diff_url, 'Diff', $args['button_selected']=='diff');
+
+    // backlinks
+    $backlinks_url = ($args['button_backlinks'] && $args['headlink']) ?
+                    backlinksURL($args['headlink']) : '';
+    toolbar_button($backlinks_url, 'Backlinks',
+        $args['button_selected']=='backlinks');
+
+    // subscribe / unsubscribe
+    /*
+    if ($EnableSubscriptions && isset($EmailSuffix) && $UserName != '') {
+        $pg = $pagestore->page($page);
+        if ($pg->isSubscribed($UserName))
+            $subscription_label = 'Unsubscribe';
+        else
+            $subscription_label = 'Subscribe';
+        $subscription_url = $args['headlink'] ?
+            pageSubscribeURL($args['headlink']) : '';
+        toolbar_button($subscription_url, $subscription_label);
+    }
+    */
+}
+
 
 // This function generates the common prologue and header
 // for the various templates.
@@ -28,62 +86,6 @@
 //                         enabled.
 //   'button_backlinks' => An integer; if nonzero, the Backlinks button will be
 //                         enabled.
-
-require_once('template/tree.php');
-
-function toolbar_button($url, $label)
-{
-    if ($url)
-        print '<a class="button" href="'.$url.'">'.$label.'</a> ';
-    else
-        print '<span class="buttonDisabled">'.$label.'</span> ';
-}
-
-
-function toolbar($page, $args)
-{
-    // view
-    toolbar_button($args['button_view'] ? viewURL($args['headlink']) : '', 'View');
-
-    // edit
-    $edit_label = 'Edit';
-    if ($page != 'RecentChanges' && isset($args['editver'])
-        && $args['editver'] > -1) {
-        if ($args['editver'] == 0) {
-            $edit_url = editURL($args['headlink']);
-        } else {
-            $edit_url = editURL($args['headlink'], $args['editver']);
-            $edit_label = 'Edit Archive';
-        }
-    } else {
-        $edit_url = '';
-    }
-    toolbar_button($edit_url, $edit_label);
-
-    // diff
-    $diff_url = ($page != 'RecentChanges' && isset($args['timestamp']) &&
-                $args['timestamp'] != '') ? historyURL($args['headlink']) : '';
-    toolbar_button($diff_url, 'Diff');
-
-    // backlinks
-    $backlinks_url = ($args['button_backlinks'] && $args['headlink']) ?
-                    backlinksURL($args['headlink']) : '';
-    toolbar_button($backlinks_url, 'Backlinks');
-
-    // subscribe / unsubscribe
-    /*
-    if ($EnableSubscriptions && isset($EmailSuffix) && $UserName != '') {
-        $pg = $pagestore->page($page);
-        if ($pg->isSubscribed($UserName))
-            $subscription_label = 'Unsubscribe';
-        else
-            $subscription_label = 'Subscribe';
-        $subscription_url = $args['headlink'] ?
-            pageSubscribeURL($args['headlink']) : '';
-        toolbar_button($subscription_url, $subscription_label);
-    }
-    */
-}
 
 function template_common_prologue($args)
 {
@@ -318,47 +320,44 @@ print html_ref('RecentChanges', 'RecentChanges') . ', ' .
 
 if ($ndfnow) print '<br><br><a href="?NowOnWednesdays"><img src="images/ndfnow.png"></a>';
 
-if ($page != 'RecentChanges')
+if (isset($args['timestamp']))
 {
-    if (isset($args['timestamp']))
+    print '<td align="center"><i>Last edited ' . html_time($args['timestamp']);
+
+    if ($args['timestamp'] != '')
     {
-        print '<td align="center"><i>Last edited ' . html_time($args['timestamp']);
-
-        if ($args['timestamp'] != '')
-        {
-            if (isset($args['euser']))
-                print ' by ' . $args['euser'];
-            else
-                print ' anonymously';
-
-            print ' <a href="' . historyURL($args['history']) . '">(diff)</a></i>';
-        }
-    }
-
-    if (isset($args['twin']) && $args['twin'] != '')
-    {
-        if (count($twin = $pagestore->twinpages($args['twin'])))
-        {
-            print '<br>See twins of this page in: ';
-            for ($i = 0; $i < count($twin); $i++)
-            {
-                print html_twin($twin[$i][0], $twin[$i][1]) . ' ';
-            }
-            print '</td>';
-        }
-    }
-
-    if (isset($args['edit']))
-    {
-        if ($args['editver'] == 0)
-            print '<td align="right"><b><a href="' . editURL($args['edit']) . '">Edit this page</a></b></td>';
-        else if ($args['editver'] == -1)
-            ; //print 'This document cannot be edited';
+        if (isset($args['euser']))
+            print ' by ' . $args['euser'];
         else
+            print ' anonymously';
+
+        print ' <a href="' . historyURL($args['history']) . '">(diff)</a></i>';
+    }
+}
+
+if (isset($args['twin']) && $args['twin'] != '')
+{
+    if (count($twin = $pagestore->twinpages($args['twin'])))
+    {
+        print '<br>See twins of this page in: ';
+        for ($i = 0; $i < count($twin); $i++)
         {
-            print '<td align="left"><a href="' . editURL($args['edit'], $args['editver']) . '">';
-            print 'Edit this <em>ARCHIVE VERSION</em> of this document</a></td>';
+            print html_twin($twin[$i][0], $twin[$i][1]) . ' ';
         }
+        print '</td>';
+    }
+}
+
+if (isset($args['edit']))
+{
+    if ($args['editver'] == 0)
+        print '<td align="right"><b><a href="' . editURL($args['edit']) . '">Edit this page</a></b></td>';
+    else if ($args['editver'] == -1)
+        ; //print 'This document cannot be edited';
+    else
+    {
+        print '<td align="left"><a href="' . editURL($args['edit'], $args['editver']) . '">';
+        print 'Edit this <em>ARCHIVE VERSION</em> of this document</a></td>';
     }
 }
 ?>

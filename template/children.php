@@ -20,9 +20,10 @@ function template_children($args)
         'headsufx' => '',
         'toolbar'  => 1,
 
-        'button_view' => 1,
-        'timestamp' => $args['timestamp'],
-        'editver'   => $args['editver'],
+        'button_selected'  => '',
+        'button_view'      => 1,
+        'timestamp'        => $args['timestamp'],
+        'editver'          => $args['editver'],
         'button_backlinks' => 1
     ));
 
@@ -66,10 +67,11 @@ if ($children) {
         'euser'     => $args['edituser'],
         'timestamp' => $args['timestamp'],
 
-        'headlink' => $args['page'],
-        'button_view' => 1,
-        #'timestamp' => $args['timestamp']  already specified
-        #'editver'   => $args['editver']  already specified
+        'headlink'         => $args['page'],
+        'button_selected'  => '',
+        'button_view'      => 1,
+        #'timestamp'       => $args['timestamp']  already specified
+        #'editver'         => $args['editver']  already specified
         'button_backlinks' => 1
     ));
 }

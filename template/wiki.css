@@ -1,5 +1,5 @@
-/* WikkiTikkiTavi default style sheet. */
-/* $Id: wiki.css,v 1.2 2003/03/28 23:03:53 mich Exp $ */
+/* GracefulTavi default style sheet. */
+
 body {
     background-color: #eeeeee;
     color:            #000000;
@@ -175,6 +175,50 @@ a.button:hover {
     color: blue;
     font-weight: bold;
     background: #eaeaff;
+    line-height: 25px;
+}
+a.buttonSelected {
+    border: 1px solid black;
+    padding: 2px 4px 3px 4px;
+    text-align: center;
+    font-size: 11pt;
+    text-decoration: none;
+    color: white;
+    font-weight: bold;
+    background: blue;
+    line-height: 25px;
+}
+a.buttonSelected:visited {
+    border: 1px solid black;
+    padding: 2px 4px 3px 4px;
+    text-align: center;
+    font-size: 11pt;
+    text-decoration: none;
+    color: white;
+    font-weight: bold;
+    background: blue;
+    line-height: 25px;
+}
+a.buttonSelected:active {
+    border: 1px solid black;
+    padding: 2px 4px 3px 4px;
+    text-align: center;
+    font-size: 11pt;
+    text-decoration: none;
+    color: white;
+    font-weight: bold;
+    background: blue;
+    line-height: 25px;
+}
+a.buttonSelected:hover {
+    border: 1px solid black;
+    padding: 2px 4px 3px 4px;
+    text-align: center;
+    font-size: 11pt;
+    text-decoration: none;
+    color: white;
+    font-weight: bold;
+    background: blue;
     line-height: 25px;
 }
 span.buttonDisabled {

@@ -20,9 +20,10 @@ function template_prefs()
         'headsufx' => '',
         'toolbar'  => 0,
 
-        'button_view' => 0,
-        #'timestamp' => $args['timestamp']  no diff
-        #'editver'   => $args['editver']  no edit
+        'button_selected'  => '',
+        'button_view'      => 0,
+        #'timestamp'       => $args['timestamp']  no diff
+        #'editver'         => $args['editver']  no edit
         'button_backlinks' => 0
     ));
 ?>
@@ -98,10 +99,11 @@ function template_prefs()
     template_common_epilogue(array(
         'nosearch' => 1,
 
-        'headlink' => '',
-        'button_view' => 0,
-        #'timestamp' => $args['timestamp']  no diff
-        #'editver'   => $args['editver']  no edit
+        'headlink'         => '',
+        'button_selected'  => '',
+        'button_view'      => 0,
+        #'timestamp'       => $args['timestamp']  no diff
+        #'editver'         => $args['editver']  no edit
         'button_backlinks' => 0
     ));
 }

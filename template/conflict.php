@@ -29,9 +29,10 @@ function template_conflict($args)
         'headsufx' => '',
         'toolbar'  => 1,
 
-        'button_view' => 1,
-        'timestamp' => $args['timestamp'],
-        #'editver'   => $args['editver']  no edit
+        'button_selected'  => '',
+        'button_view'      => 1,
+        'timestamp'        => $args['timestamp'],
+        #'editver'         => $args['editver']  no edit
         'button_backlinks' => 1
     ));
 ?>
@@ -87,10 +88,11 @@ user name<?php
         'history'   => $args['page'],
         'timestamp' => $args['timestamp'],
 
-        'headlink' => $args['page'],
-        'button_view' => 1,
-        #'timestamp' => $args['timestamp']  already specified
-        #'editver'   => $args['editver']  no edit
+        'headlink'         => $args['page'],
+        'button_selected'  => '',
+        'button_view'      => 1,
+        #'timestamp'       => $args['timestamp']  already specified
+        #'editver'         => $args['editver']  no edit
         'button_backlinks' => 1
     ));
 }

@@ -20,10 +20,11 @@ function template_backlinks($args)
         'headsufx' => '',
         'toolbar'  => 1,
 
-        'button_view' => 1,
-        'timestamp' => $args['timestamp'],
-        'editver'   => $args['editver'],
-        'button_backlinks' => 0
+        'button_selected'  => 'backlinks',
+        'button_view'      => 1,
+        'timestamp'        => $args['timestamp'],
+        'editver'          => $args['editver'],
+        'button_backlinks' => 1
     ));
 
     global $pagestore;
@@ -128,11 +129,12 @@ if ($tempText)
         'euser'     => $args['edituser'],
         'timestamp' => $args['timestamp'],
 
-        'headlink' => $args['page'],
-        'button_view' => 1,
-        #'timestamp' => $args['timestamp']  already specified
-        #'editver'   => $args['editver']  already specified
-        'button_backlinks' => 0
+        'headlink'         => $args['page'],
+        'button_selected'  => 'backlinks',
+        'button_view'      => 1,
+        #'timestamp'       => $args['timestamp']  already specified
+        #'editver'         => $args['editver']  already specified
+        'button_backlinks' => 1
     ));
 }
 ?>

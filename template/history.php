@@ -23,9 +23,10 @@ function template_history($args)
         'headsufx' => '',
         'toolbar'  => 1,
 
-        'button_view' => 1,
-        #'timestamp' => $args['timestamp']  no diff
-        'editver'   => $args['editver'],
+        'button_selected'  => 'diff',
+        'button_view'      => 1,
+        'timestamp'        => $args['timestamp'],
+        'editver'          => $args['editver'],
         'button_backlinks' => 1
     ));
 ?>
@@ -81,13 +82,15 @@ else
         'twin'      => $args['page'],
         'edit'      => '',
         'editver'   => 0,
-        'history'   => '',
-        'timestamp' => '',
+        'history'   => $args['page'],
+        'euser'     => $args['edituser'],
+        'timestamp' => $args['timestamp'],
 
-        'headlink' => $args['page'],
-        'button_view' => 1,
-        #'timestamp' => $args['timestamp']  no diff, already specified
-        #'editver'   => $args['editver']  already specified
+        'headlink'         => $args['page'],
+        'button_selected'  => 'diff',
+        'button_view'      => 1,
+        #'timestamp'       => $args['timestamp']  no diff, already specified
+        #'editver'         => $args['editver']  already specified
         'button_backlinks' => 1
     ));
 }

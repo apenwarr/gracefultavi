@@ -23,9 +23,10 @@ function template_find($args)
         'headsufx' => '',
         'toolbar'  => 1,
 
-        'button_view' => 0,
-        #'timestamp' => $args['timestamp']  no diff
-        #'editver'   => $args['editver']  no edit
+        'button_selected'  => '',
+        'button_view'      => 0,
+        #'timestamp'       => $args['timestamp']  no diff
+        #'editver'         => $args['editver']  no edit
         'button_backlinks' => 0
     ));
 ?>
@@ -84,10 +85,11 @@ if ($args['pages'])
         'history'   => '',
         'timestamp' => '',
 
-        'headlink' => '',
-        'button_view' => 0,
-        #'timestamp' => $args['timestamp']  no diff, already specified
-        #'editver'   => $args['editver']  no edit, already specified
+        'headlink'         => '',
+        'button_selected'  => '',
+        'button_view'      => 0,
+        #'timestamp'       => $args['timestamp']  no diff, already specified
+        #'editver'         => $args['editver']  no edit, already specified
         'button_backlinks' => 0
     ));
 }

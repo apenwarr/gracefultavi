@@ -20,7 +20,8 @@ function template_view($args)
     template_common_prologue(array(
         'heading'  => '',
         'headlink' => $args['page'],
-        'headsufx' => $args['archive'] ? ' (' . html_timestamp($args['timestamp']) . ')' : '',
+        'headsufx' => $args['archive'] ?
+                      ' (' . html_timestamp($args['timestamp']) . ')' : '',
         'norobots' => $args['archive'],
         'quote'    => 1,
         'redirect_from' => $args['redirect_from'],
@@ -28,9 +29,10 @@ function template_view($args)
         'toolbar'  => 1,
         'tree'     => 1,
 
-        'button_view' => 0,
-        'timestamp' => $args['timestamp'],
-        'editver'   => $args['editver'],
+        'button_selected'  => 'view',
+        'button_view'      => 1,
+        'timestamp'        => $args['timestamp'],
+        'editver'          => $args['editver'],
         'button_backlinks' => 1
     ));
 ?>
@@ -50,15 +52,16 @@ print $args['html'];
         'twin'      => $args['page'],
         'edit'      => $args['page'],
         'editver'   => !$args['editable'] ? -1 :
-            ($args['archive'] ? $args['version'] : 0),
+                       ($args['archive'] ? $args['version'] : 0),
         'history'   => $args['page'],
         'euser'     => $args['edituser'],
         'timestamp' => $args['timestamp'],
 
-        'headlink' => $args['page'],
-        'button_view' => 0,
-        #'timestamp' => $args['timestamp']  already specified
-        #'editver'   => $args['editver']  already specified
+        'headlink'         => $args['page'],
+        'button_selected'  => 'view',
+        'button_view'      => 1,
+        #'timestamp'       => $args['timestamp']  already specified
+        #'editver'         => $args['editver']  already specified
         'button_backlinks' => 1,
     ));
 }
