@@ -179,13 +179,13 @@ function bug_get($bugid)
             $mystatus = "ACTIVE";
 
         return array($b->name, $b->origest, $b->currest, $b->elapsed, 
-                $mystatus, $b->fixfor->name);
+                $mystatus, $b->fixfor->name, $b->priority);
     }
     else
     {
         bug_init();
         $result = mysql_query("select sTitle,hrsOrigEst,hrsCurrEst,hrsElapsed, " .
-                            "    sStatus,sFixFor " .
+                            "    sStatus,sFixFor,ixPriority " .
                             "from Bug as b, Status as s, FixFor as f " .
                             "where s.ixStatus=b.ixStatus " .
                             "  and f.ixFixFor=b.ixFixFor " .
@@ -286,7 +286,9 @@ function bug_get_milestones($fixfor)
     return $a;
 }
 
-
+// Format of $t:
+//   task, subtask, hrsOrigEst, hrsCurrEst, hrsElapsed, dtDue, 
+//   fDone, fResolved, ixPriority
 function bug_add_task($user, $fixfor, $t)
 {
     global $bug_h;
@@ -298,9 +300,11 @@ function bug_add_task($user, $fixfor, $t)
     $query = "insert into schedulator.Task " .
              "  (sPerson, sFixFor, " .
              "      sTask, sSubTask, " .
-             "      hrsOrigEst, hrsCurrEst, hrsElapsed, hrsRemain, dtDue, fDone) " .
+             "      hrsOrigEst, hrsCurrEst, hrsElapsed, hrsRemain, " .
+             "      dtDue, fDone, fResolved, ixPriority) " .
              "  values ('$user', '$fixfor', \"$task\", \"$subtask\", " .
-             "            $t[2], $t[3], $t[4], $remain, '$t[5]', $t[6])";
+             "            $t[2], $t[3], $t[4], $remain, " . 
+             "            '$t[5]', $t[6], '$t[7]', '$t[8]')";
     $result = mysql_query($query, $bug_h);
     if (!$result)
         print 'x-' . mysql_error($bug_h);
@@ -326,7 +330,8 @@ function bug_add_volunteer_tasks()
     if (!$result)
         print mysql_error($bug_h);
 
-    $query = "select sFullName, sFixFor, ixBug, sTitle " .
+    $query = "select sFullName, sFixFor, ixBug, sTitle, " .
+             "    b.ixStatus, ixPriority " .
              "  from Bug as b, Person as p, FixFor as f, Status as s " .
              "  where p.ixPerson=b.ixPersonAssignedTo " .
              "    and f.ixFixFor=b.ixFixFor " .
@@ -343,7 +348,10 @@ function bug_add_volunteer_tasks()
         $fixfor = $row[1];
         $bugid = $row[2];
         $title = $row[3];
-        $info = array($bugid, $title, 1000, 1000, 0, '2099/9/9', 0);
+	$resolved = ($row[4] != 1);
+	$priority = $row[5];
+        $info = array($bugid, $title, 1000, 1000, 0, '2099/9/9', 0,
+		      $resolved, $priority);
         bug_add_task($person, $fixfor, $info);
     }
 }
@@ -674,13 +682,14 @@ function sch_bug($feat, $task, $_orig, $_curr, $_elapsed, $done)
     if (preg_match('/^[0-9]+$/', $feat))
     {
         $bug = bug_get($feat);
-	// $bug = (title origest currest elapsed status fixfor)
+	// $bug = (title origest currest elapsed status fixfor priority)
 	
         if (!$task)     $task = $bug[0];
         if (!strcmp($_orig,''))    $_orig = $bug[1];
         if (!strcmp($_curr,''))    $_curr = $bug[2];
         if (!strcmp($_elapsed,'')) $_elapsed = $bug[3];
-        if (!$done && !$notdone && $bug[4] != 'ACTIVE') $done = 1;
+	$resolved = ($bug[4] != 'ACTIVE');
+        if (!$done && !$notdone && $resolved) $done = 1;
         if ((!$done && $_curr != $_elapsed)
 	    || ($bug[4] != 'ACTIVE'))
 	{
@@ -689,6 +698,7 @@ function sch_bug($feat, $task, $_orig, $_curr, $_elapsed, $done)
 	    $sch_got_bug[$feat] = 1;
 	}
         $fixfor = $bug[5];
+	$priority = $bug[6];
     }
 
     $orig = sch_parse_period($_orig);
@@ -711,7 +721,7 @@ function sch_bug($feat, $task, $_orig, $_curr, $_elapsed, $done)
         $ret .= sch_warning("This bug's current estimate is less than the " .
                             "elapsed time so far.  Update your estimate!");
     $buga = array($feat, $task, $orig, $curr, $elapsed,
-                  sch_format_day($sch_curday), $done);
+                  sch_format_day($sch_curday), $done, $resolved, $priority);
     if ($fixfor)
         bug_add_task($sch_user, $fixfor, $buga);
     else
@@ -1339,6 +1349,17 @@ function sch_summary($fixfor)
 	border-style: solid; border-width: 1px;
     }
     
+    /* bug priorities */
+    table.schedsum a.pri1,a.pri2 {
+	font-size: 150%;
+    }
+    table.schedsum a.pri3 {
+	font-size: 125%;
+    }
+    table.schedsum a.pri6,a.pri7 {
+	font-size: 80%;
+    }
+    
     /* mouseovers on bugs */
     table.schedsum a:hover:link,a:hover:visited {
 	color: white; background: green;
@@ -1423,17 +1444,18 @@ EOF;
 		    $n++;
                     $task = $bug["task"];
                     $subtask = $bug["subtask"];
+		    $priclass = "pri" . $bug["priority"];
 		    if ($bug["resolved"])
-			$bugclass = "resolved";
+			$bugclass = "resolved $priclass";
 		    else
 		    {
-			$bugclass = "unresolved $dateclass";
+			$bugclass = "unresolved $priclass $dateclass";
 			$num_unresolved++;
 		    }
 		    if (($task + 0) . "" == $task)
 		      $v .= "<a class='$bugclass' " .
 		            "href='http://nits/fogbugz3?$task' " . 
-		            "title='FogBugz bug #$task - $subtask'>$task</a> ";
+		            "title='Bug $task: $subtask'>$n</a> ";
 		    else
 		      $v .= "$n";
 		}
