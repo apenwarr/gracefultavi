@@ -29,6 +29,7 @@ global $SchedName;
 // "complete".  Each of these is itself an array of bugs.
 global $sch_bug_lists;
 // Working lists of complete and incomplete bugs (we don't know the Fixfor yet)
+// FIXME: Merge into one list of Bug objects (a BugTable?)
 global $sch_cur_incomplete_bugs;
 global $sch_cur_complete_bugs;
 
@@ -163,13 +164,30 @@ function bug_finished_list($user, $fixfor, $startdate, $enddate)
 function bug_get($bugid)
 {
     global $sch_db;
+    global $bug_h;
 
     $b = $sch_db->bug->first("ix", $bugid);
-    if (!$b)
-        return array($bugid, 0, 0, 0);
-    else
+
+    if ($b)
         return array($b->name, $b->origest, $b->currest, $b->elapsed, 
                 $b->status, $b->fixfor->name);
+    else
+    {
+        bug_init();
+        $result = mysql_query("select sTitle,hrsOrigEst,hrsCurrEst,hrsElapsed, " .
+                            "    sStatus,sFixFor " .
+                            "from Bug as b, Status as s, FixFor as f " .
+                            "where s.ixStatus=b.ixStatus " .
+                            "  and f.ixFixFor=b.ixFixFor " .
+                            "  and ixBug=" . ($bugid+0),
+                            $bug_h);
+        $row = mysql_fetch_row($result);
+         
+        if (!$row)
+            return array($bugid, 0, 0, 0);
+        else
+            return $row;
+    }
 }
 
 
@@ -617,6 +635,7 @@ function sch_bug($feat, $task, $_orig, $_curr, $_elapsed, $done)
     global $sch_got_bug, $sch_unknown_fixfor;
     global $sch_load;
 
+    // FIXME: Use Bug object, check its LoadFactor member
     if ($feat == "LOADFACTOR")
     {
         if ($task != $sch_load)
@@ -859,6 +878,8 @@ function sch_all_done($user)
 
     // Running through all these bugs can mess with our load factor, make sure
     // to reset it
+    // FIXME: Should use LoadFactor member of Bug object instead of LOADFACTOR
+    // "bugs"
     if ($sch_load != $oldload)
         $ret .= sch_bug("LOADFACTOR", $oldload, "", "", "", 0);
 
@@ -915,6 +936,8 @@ function sch_elapsed_time_unfinished($user)
         if (is_array($inc))
             foreach($inc as $bug)
             {
+                // FIXME: Should use LoadFactor member of Bug object instead
+                // of LOADFACTOR "bugs"
                 if ($bug[0] == "LOADFACTOR")
                     $local_loadfactor = $bug[1];
                 else if ($bug[4] > 0)
@@ -928,6 +951,8 @@ function sch_elapsed_time_unfinished($user)
 
 // Returns true if the given milestone has at least one incomplete bug (that
 // isn't a LoadFactor)
+// FIXME: This function might not be needed with the new flat buglist.  Let's
+// hope so, because it'll have to be rewritten.
 function sch_has_inc_bug($milestone)
 {
     global $sch_bug_lists;
@@ -1083,6 +1108,8 @@ function sch_create($user)
     // List milestones in order of release date
     asort($fixfors);
 
+    // FIXME: foreach milestone (and bugbounce), iterate over manual and
+    // FogBugz buglists until no more bugs targeted for that milestone
     foreach ($fixfors as $milestone => $msdue)
     {
         $ret .= sch_output_milestone($user, $milestone, $msnames[$milestone], 
@@ -1096,6 +1123,9 @@ function sch_create($user)
 }
 
 
+// FIXME: This function should no longer be required.  At worst, it should
+// apply a FixFor to the Bug objects in the list, and then throw them onto the
+// big flat list.
 function sch_merge_cur_bugs($fixfor)
 {
     global $sch_cur_incomplete_bugs;
@@ -1121,6 +1151,7 @@ function sch_list_merge($fixfor, $sect, $arr)
 }
 
 
+// FIXME: LoadFactors will not be separate "bugs" in the future.
 function sch_switch_loadfactor($load)
 {
     global $sch_cur_incomplete_bugs;
@@ -1422,6 +1453,9 @@ class Macro_Sched
 
             // Carry over the current LoadFactor
             // FIXME: Make this a function or something
+            // FIXME: Instead of adding a LoadFactor "bug", just set the
+            // LoadFactor global and set the LoadFactor we'll use for FogBugz
+            // targeted at this milestone somehow.
             $loadbug = array("LOADFACTOR", $sch_load, "", "", "");
             $sch_cur_incomplete_bugs[] = $loadbug;
             $sch_cur_complete_bugs[] = $loadbug;
@@ -1443,6 +1477,9 @@ class Macro_Sched
             
             // Carry over the current LoadFactor
             // FIXME: Make this a function or something
+            // FIXME: Instead of adding a LoadFactor "bug", just set the
+            // LoadFactor global and set the LoadFactor we'll use for FogBugz
+            // targeted at this milestone somehow.
             $loadbug = array("LOADFACTOR", $sch_load, "", "", "");
             $sch_cur_incomplete_bugs[] = $loadbug;
             $sch_cur_complete_bugs[] = $loadbug;
@@ -1480,8 +1517,8 @@ class Macro_Sched
             {
                 // title, origest, currest, elapsed, status, fixfor
                 $bugdata = bug_get($bugid);
-                if (!$task)    $task = $bugdata[0];
-                // Override orig estimate with one from FogBugz
+                print "task='$task'; bugdata[0]='".$bugdata[0]."'<br>\n";
+                if (!$task) $task = $bugdata[0];
                 $orig = $bugdata[1];
                 if (!strcmp($est,''))    $est = $bugdata[2];
                 if (!strcmp($elapsed,'')) $elapsed = $bugdata[3];
@@ -1499,6 +1536,7 @@ class Macro_Sched
             if (!$elapsed) $elapsed = 0;
 
             // Make an array entry to put into bug lists
+            // FIXME: Make a Bug object, set its done status and loadfactor
             $bug = array($bugid, $task, $orig, $est, $elapsed);
 
             if (!$force_done && !$done)
