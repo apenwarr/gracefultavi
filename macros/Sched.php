@@ -641,7 +641,7 @@ function sch_merge_cur_bugs($fixfor)
     global $sch_cur_complete_bugs;
     global $sch_db;
     
-    //print $fixfor . "<br>\n";
+    //print "sch_merge_cur_bugs: " . $fixfor . "<br>\n";
    
     $f = $sch_db->fixfor->first("name", $fixfor);
     if (!$f)
@@ -649,14 +649,14 @@ function sch_merge_cur_bugs($fixfor)
     foreach ($sch_cur_complete_bugs as $e)
     {
 	//print "Hello: (" .$e->task->name . ")<br>\n";
-        if (!isset($e->task->fixfor))
+        if ($e->task->fixfor == -1)
             $e->task->fixfor = $f;
         $sch_db->estimate->a[] = $e;
     }
     foreach ($sch_cur_incomplete_bugs as $e)
     {
 	//print "Hello: (" .$e->task->name . ")<br>\n";
-        if (!isset($e->task->fixfor))
+        if ($e->task->fixfor == -1)
             $e->task->fixfor = $f;
         $sch_db->estimate->a[] = $e;
     }
