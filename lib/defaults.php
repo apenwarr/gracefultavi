@@ -176,7 +176,6 @@ $ParseEngine = array(
                  'parse_freelink',
                  'parse_interwiki',
                  'parse_wikiname',
-                 'parse_singlequote',
                  'parse_teletype',
                  'parse_heading',
                  'parse_table',
@@ -186,6 +185,7 @@ $ParseEngine = array(
                  'parse_highlight',
                  'parse_italic',
                  'parse_underline',
+                 'parse_singlequote',
                  'parse_newline',
                  'parse_elements'
                );
