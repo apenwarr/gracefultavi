@@ -198,12 +198,13 @@ function bug_add_task($user, $fixfor, $t)
     
     $task = mysql_escape_string($t[0]);
     $subtask = mysql_escape_string($t[1]);
+    $remain = $t[3]-$t[4];
     $query = "insert into schedulator.Task " .
       "  (sPerson, sFixFor, " .
       "      sTask, sSubTask, " .
-      "      hrsOrigEst, hrsCurrEst, hrsElapsed, dtDue, fDone) " .
+      "      hrsOrigEst, hrsCurrEst, hrsElapsed, hrsRemain, dtDue, fDone) " .
       "  values ('$user', '$fixfor', \"$task\", \"$subtask\", " .
-      "            $t[2], $t[3], $t[4], '$t[5]', $t[6])";
+      "            $t[2], $t[3], $t[4], $remain, '$t[5]', $t[6])";
     $result = mysql_query($query, $bug_h);
     if (!$result)
       print 'x-' . mysql_error($bug_h);
@@ -213,6 +214,38 @@ function bug_add_tasks($user, $fixfor, $tasks)
 {
     foreach ($tasks as $t)
       bug_add_task($user, $fixfor, $t);
+}
+
+function bug_add_volunteer_tasks()
+{
+    global $bug_h;
+    bug_init();
+    
+    $query = "delete from schedulator.Task where sPerson like '-%-'";
+    $result = mysql_query($query, $bug_h);
+    if (!$result)
+      print mysql_error($bug_h);
+    
+    $query = "select sFullName, sFixFor, ixBug, sTitle " .
+      "  from Bug as b, Person as p, FixFor as f, Status as s " .
+      "  where p.ixPerson=b.ixPersonAssignedTo " .
+      "    and f.ixFixFor=b.ixFixFor " .
+      "    and s.ixStatus=b.ixStatus " .
+      "    and s.sStatus='ACTIVE' " .
+      "    and sFullName like '-%-' ";
+    $result = mysql_query($query, $bug_h);
+    if (!$result)
+      print mysql_error($bug_h);
+    
+    while ($row = mysql_fetch_row($result))
+    {
+	$person = $row[0];
+	$fixfor = $row[1];
+	$bugid = $row[2];
+	$title = $row[3];
+	$info = array($bugid, $title, 1000, 1000, 0, '2099/9/9', 0);
+	bug_add_task($person, $fixfor, $info);
+    }
 }
 
 function bug_start_user($user)
@@ -562,6 +595,7 @@ function view_macro_schedulator($text)
 	$ret .= sch_extrabugs($sch_user, '', '');
 	bug_add_tasks($sch_user, 'UNKNOWN', $sch_unknown_fixfor);
 	bug_finish_user($sch_user);
+	bug_add_volunteer_tasks();
 	$ret .= sch_line("END", "", 0,0,0,0, 0);
 	$ret .= "</table>";
     }
