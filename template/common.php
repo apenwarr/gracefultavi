@@ -138,47 +138,18 @@ if (isset($args['quote']))
 }
 ?>
 
-</div> <!-- header -->
-
-<?php
-/*
-if ($args['related']) {
-    global $pagestore;
-
-    $pagename = $args['headlink'];
-    $list = $pagestore->find($pagename);
-    $text = '';
-    $i = 0;
-    foreach ($list as $page) {
-        if ($page != $pagename && $i<5 ) {
-            $text .= html_ref($page, $page) . html_newline();
-        }
-        $i++;
-    }
-    if ($text) {
-        print '</td><td valign="top">';
-        print '<strong>Related Pages</strong><br>';
-        print $text;
-    }
-    if ($i>5) {
-        print "<a class=\"title\" href=\"" . findURL($args['headlink']) . "\"><ul><li>More Pages</li></a>";
-    }
-}
-*/
-?>
+</div>
 
 <?php
 if (isset($args['tree']))
 {
-    global $pagestore, $ImagesURL;
+    global $pagestore;
 
     $tree = $pagestore->getTreeFromLeaves($HomePage, $args['headlink']);
 
     if (isset($tree[$HomePage]) && count($tree[$HomePage]) > 0)
     {
-        // print '</td><td valign="top">';
-        // drawTreeOld($tree);
-        print '</td><td><img src="$ImagesURL/spacer.png" alt="" width="20" height="1" border="0">';
+        print '</td><td><img src="images/spacer.png" alt="" width="20" height="1" border="0">';
         print '</td><td valign="top" align="right">';
         drawTree($tree, true, $args['headlink']);
     }
@@ -227,12 +198,9 @@ function template_common_epilogue($args)
   $pagetext = $pg->text;
 ?>
 
-<!-- start of epilogue -->
-
 </td>
 </tr>
 </table>
-
 
 <div id="footer">
 <table align="center" class="bottombox" border="0">
@@ -269,9 +237,6 @@ if ($UserName != '' && isset($args['watch']) && !empty($args['watch']) && $page 
 <tr><td>
 
 <?php
-// if ($args['toolbar']) { print html_toolbar_bottom(); }
-//print html_toolbar_bottom();
-
 print html_ref('RecentChanges', 'RecentChanges') . ', ' .
                '<a href="' . $PrefsScript . '">UserOptions</a>';
 
@@ -340,12 +305,12 @@ if ($page != $HomePage && $page != 'RecentChanges')
         else
             return true;
     }
-    // -->
+    //-->
     </script>
 
     <table width="100%" cellspacing="0" cellpadding="0" border="0">
     <tr>
-    <td width="50%"><!-- padding empty cell--></td>
+    <td width="50%">&nbsp;</td>
     <td width="50%" align="right">
         <form method="post" action="<?php print saveURL($args['page']); ?>">
         <div class="form">
@@ -419,7 +384,6 @@ if ($AdditionalFooter)
 </body>
 </html>
 
-<!-- end of epilogue -->
 <?php
 }
 ?>
