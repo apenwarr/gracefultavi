@@ -546,7 +546,7 @@ function parse_indents($text)
         $indentText = $result[3];
 
     // No list on last line, no list on this line. Bail out:
-    if ($indentPrevLevel == -1 && !isset($indentChar) && !isset($indentStealLine))
+    if ($indentPrevLevel == -1 && !isset($indentChar) && !$indentStealLine)
         return $text; // Common case fast.
 
     $isBlankLine = ((trim($text) == '') ? 1 : 0);
