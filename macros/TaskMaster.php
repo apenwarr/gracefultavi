@@ -305,11 +305,11 @@ class Macro_TaskMaster
 	foreach ($this->db->xtask->a as $t)
 	{
 	    if ($fixfor>=0 && $t->fixfor->ix != $fixfor)
-	      continue;
+	        continue;
 	    if ($user>=0 && $t->assignto->ix != $user)
-	      continue;
+	        continue;
 	    if ($text && !strstr(strtolower($t->name), strtolower($text)))
-	      continue;
+	        continue;
 	    
 	    $tag = "task-select-" . $t->ix;
 	    $done = $t->isdone();
@@ -321,7 +321,7 @@ class Macro_TaskMaster
 	    
 	    $checked = $_REQUEST["select-all"] || $_REQUEST[$tag];
 	    if ($_REQUEST["unselect-all"])
-	      $checked = 0;
+	        $checked = 0;
 	    $this->push();
 	    $this->form_checkbox($tag, "", $checked);
 	    $this->col(1, $this->pop());
@@ -373,9 +373,9 @@ class Macro_TaskMaster
 	$this->out("For build:");
 	$bounce = $this->db->fixfor->a[$_REQUEST["filter-fixfor"]];
 	if (!$bounce)
-	  $bounce = "??";
+	    $bounce = "??";
 	else
-	  $bounce = $bounce->name . "#??";
+	    $bounce = $bounce->name . "#??";
 	$this->form_hidden("oldtestplan-bounce", $bounce);
 	$this->form_input("testplan-bounce", $bounce, 20);
 	$this->form_button("cmdTestPlans", "Create TestPlans");
@@ -459,7 +459,7 @@ class Macro_TaskMaster
 			$this->out("WARNING: Not making tasks " .
 				   "for these pages: <ul>");
 			foreach ($skip as $p)
-			  $this->out("$p ");
+			    $this->out("$p ");
 			$this->out("</ul>");
 		    }
 		    
@@ -486,7 +486,7 @@ class Macro_TaskMaster
     function estimcol($isbug, $taskid, $coltype, $value, $done)
     {
 	if ($value == 0)
-	  $value = "";
+            $value = "";
 	if ($done)
 	    $this->col(0, $value);
 	else
@@ -508,17 +508,17 @@ class Macro_TaskMaster
 	{
 	    $e = $this->db->estimate->a[$ekey];
 	    if ($fixfor>0 && $e->task->fixfor->ix != $fixfor)
-	      continue;
+	        continue;
 	    
 	    $done = $e->isdone();
 	    $isbug = $e->isbug;
 	    $taskid = $e->task->ix;
 	    
 	    if (!$e->isdone() && $e->assignto->ix != $e->task->assignto->ix)
-	      $extra_assign = " <i>(now reassigned to " .
-	          $e->task->assignto->fullname . ")</i>";
+	        $extra_assign = " <i>(now reassigned to " .
+	            $e->task->assignto->fullname . ")</i>";
 	    else
-	      $extra_assign = "";
+	        $extra_assign = "";
 
 	    $doneclass = $done ? "done" : "notdone";
 	    $this->out("<tr class='$doneclass'>");
@@ -531,9 +531,9 @@ class Macro_TaskMaster
 	    $this->estimcol($isbug, $taskid, "remain", $e->est_remain(), 1);
 	    $this->push();
 	    if (!$done)
-	      $this->form_checkbox("done-$isbug-$taskid", "Done", 0);
+	        $this->form_checkbox("done-$isbug-$taskid", "Done", 0);
 	    else
-	      $this->form_checkbox("reopen-$isbug-$taskid", "Reopen", 0);
+	        $this->form_checkbox("reopen-$isbug-$taskid", "Reopen", 0);
 	    $this->col(0, $this->pop());
 	    $this->out("</tr>");
 	}
