@@ -853,8 +853,13 @@ function view_macro_schedulator($text)
 	$task = $words[1];
 	$est = $words[2];
 	$elapsed = $words[3];
-	  
-	$ret .= sch_all_done($sch_user);
+	
+	$force_done = ($est && $est==$elapsed);
+	
+	$bugdata = bug_get($bug);
+	if (!$force_done && (!$bugdata[4] || $bugdata[4] == 'ACTIVE'))
+	  $ret .= sch_all_done($sch_user);
+	
 	$ret .= sch_bug($bug, $task, $est, $est, $elapsed, 0);
     }
 
