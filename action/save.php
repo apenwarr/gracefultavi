@@ -13,10 +13,11 @@ function addSuffix(&$value, $key, $suffix)
 // Commit an edit to the database.
 function action_save()
 {
-    global $archive, $categories, $comment, $document, $ErrorPageLocked;
+    global $Admin, $archive, $categories, $comment, $document;
+    global $EnableSubscriptions, $EmailSuffix, $ErrorPageLocked;
     global $HTTP_POST_VARS, $MaxPostLen, $minoredit, $nextver, $page, $pagefrom;
     global $pagestore, $REMOTE_ADDR, $Save, $SaveMacroEngine, $UserName;
-    global $WorkingDirectory, $EnableSubscriptions, $EmailSuffix;
+    global $WikiName, $WorkingDirectory;
 
     if(isset($HTTP_POST_VARS['quickadd'])) $quickadd = $HTTP_POST_VARS['quickadd'];
     if(isset($HTTP_POST_VARS['appending'])) $appending = $HTTP_POST_VARS['appending'];
@@ -152,8 +153,8 @@ function action_save()
                 if ($minoredit) { $msg .= "This was a minor edit.\n\n"; }
                 $msg .= "View page: http://nitwiki/?$page\n\n" .
                         "History: http://nitwiki/?action=history&page=$page";
-                mail($user . $EmailSuffix, "NitWiki: $page has changed",
-                     $msg, "From: webmaster@nit.ca");
+                mail($user . $EmailSuffix, "$WikiName: $page has changed",
+                     $msg, "From: $Admin");
             }
         }
     }
