@@ -1,28 +1,6 @@
 <?php
 
-function bug_ixperson($person)
-{
-    global $bug_h;
-    $query = "select ixPerson from Person where sEmail like '$person%' limit 1";
-    $result = mysql_query($query, $bug_h);
-    if (!$result)
-        print 'x-' . mysql_error($bug_h);
-    $row = mysql_fetch_row($result);
-    return $row[0] + 0;
-}
-
-
-function bug_ixfixfor($fixfor)
-{
-    global $bug_h;
-    $query = "select ixFixFor from FixFor where sFixFor='$fixfor' limit 1";
-    $result = mysql_query($query, $bug_h);
-    if (!$result)
-        print 'x-' . mysql_error($bug_h);
-    $row = mysql_fetch_row($result);
-    return $row[0] + 0;
-}
-
+$olderr = error_reporting(E_ALL);
 
 class Macro_TaskMaster
 {
@@ -30,6 +8,7 @@ class Macro_TaskMaster
     var $bug_h;
     var $outdata = "";
     var $outdata_push = array();
+    var $db;
     
     function push()
     {
@@ -212,6 +191,11 @@ class Macro_TaskMaster
     
     function do_filterbar()
     {
+	# save settings in cookies for convenience
+	$this->savecookie("filter-user");
+	$this->savecookie("filter-fixfor");
+	$this->savecookie("filter-text");
+	
 	$this->out("Filter: ");
 	# $this->form_checkbox("check", 1);
 	# $this->form_checkbox("check", 0);
@@ -221,6 +205,7 @@ class Macro_TaskMaster
 	$this->form_select("filter-fixfor", $_REQUEST["filter-fixfor"], "??",
 			   $this->list_fixfors("--Any FixFor--"));
 	$this->form_button("Filter", "Filter");
+	$this->out("<hr>");
     }
     
     
@@ -230,6 +215,21 @@ class Macro_TaskMaster
 	if (!$result)
 	  print 'x-' . mysql_error($this->bug_h);
 	return $result;
+    }
+    
+    
+    function savecookie($name)
+    {
+	if ($_GET[$name])
+	{
+	    setcookie($name, $_GET[$name]);
+	    $_REQUEST[$name] = $_GET[$name];
+	}
+	else if ($_POST[$name])
+	{
+	    setcookie($name, $_POST[$name]);
+	    $_REQUEST[$name] = $_POST[$name];
+	}
     }
  
     
@@ -277,9 +277,12 @@ class Macro_TaskMaster
 		     ".fooref:hover { background: yellow }\n");
     }
     
-    function do_summary($person)
+    function do_assign_form($person)
     {
 	$this->mystyle();
+	
+	# filter bar
+	$this->do_filterbar();
 	
 	# command bar
 	$this->form_button("select-all", "Select All");
@@ -304,7 +307,7 @@ class Macro_TaskMaster
 	  $this->out(mysql_error($this->bug_h));
 	
 	$this->table("table");
-	$this->row(6, "Edit?", "XTask", "Task", "Subtask",
+	$this->row(6, "(*)", "XTask", "Task", "Subtask",
 		   "FixFor", "Assigned To");
 	
 	while ($row = mysql_fetch_row($result))
@@ -334,23 +337,26 @@ class Macro_TaskMaster
 	$this->table_end();
 	
 	$assignto = $_REQUEST["assignto"];
-	$this->form_select("assignto", $assignto, "??", 
+	$this->form_select("assignto", $user ? $user : $assignto, "??", 
 			   $this->list_users("--Do Nothing--"));
 	$this->form_button("cmd", "Assign");
 	$this->out(" ");
 	$fixforto = $_REQUEST["fixforto"];
-	$this->form_select("fixforto", $fixforto, "??", 
+	$this->form_select("fixforto", $fixfor ? $fixfor : $fixforto, "??", 
 			   $this->list_fixfors("--Do Nothing--"));
 	$this->form_button("cmd", "Retarget");
     }
     
     function do_create_form()
     {
+	$this->savecookie("filter-user");
+	$this->savecookie("filter-fixfor");
+	
 	$this->out("Assign to: ");
-	$this->form_select("create-user", $_REQUEST["create-user"], "??",
+	$this->form_select("filter-user", $_REQUEST["filter-user"], "??",
 			   $this->list_users("--Choose User--"));
 	$this->out("&nbsp;&nbsp;Fix for: ");
-	$this->form_select("create-fixfor", $_REQUEST["create-fixfor"], "??",
+	$this->form_select("filter-fixfor", $_REQUEST["filter-fixfor"], "??",
 			   $this->list_fixfors("--Choose FixFor--"));
 	
 	$this->table("table");
@@ -359,10 +365,10 @@ class Macro_TaskMaster
 	{
 	    $this->out("<tr>");
 	    $this->push();
-	    $this->form_input("create-$i-task", "");
+	    $this->form_input("create-$i-task", "", 20);
 	    $this->col(0, $this->pop());
 	    $this->push();
-	    $this->form_input("create-$i-subtask", "");
+	    $this->form_input("create-$i-subtask", "", 40);
 	    $this->col(0, $this->pop());
 	    $this->out("</tr>");
 	}
@@ -372,8 +378,8 @@ class Macro_TaskMaster
     
     function do_create()
     {
-	$fixfor = $_REQUEST["create-fixfor"];
-	$user = $_REQUEST["create-user"];
+	$fixfor = $_REQUEST["filter-fixfor"];
+	$user = $_REQUEST["filter-user"];
 	
 	$this->out("<b>");
 	
@@ -412,6 +418,8 @@ class Macro_TaskMaster
 	else
 	{
 	    $this->push();
+	    if ($coltype == "currest")
+	      $this->form_hidden("hasest-$isbug-$taskid", 1);
 	    $this->form_input("$coltype-$isbug-$taskid", $value, 5);
 	    $this->col(0, $this->pop());
 	}
@@ -422,19 +430,26 @@ class Macro_TaskMaster
     {
 	while ($row = mysql_fetch_row($res))
 	{
-	    $taskid = array_shift($row);
-	    $done = $row[5];
-	    if ($row[3]!='' && $row[3] == $row[4]) // currest == elapsed?
+	    $taskid  = array_shift($row);
+	    $task    = array_shift($row);
+	    $subtask = array_shift($row);
+	    $fixfor  = array_shift($row);
+	    $origest = array_shift($row);
+	    $currest = array_shift($row);
+	    $elapsed = array_shift($row);
+	    $done    = array_shift($row);
+	    if ($currest!='' && $currest == $elapsed)
 	      $done = 1;
 	    $doneclass = $done ? "done" : "notdone";
 	    $this->out("<tr class='$doneclass'>");
 	    $this->col(1, "$prefix#$isbug-$taskid");
-	    $this->col(0, $row[0]);
-	    $this->col(0, $row[1]);
-	    $this->estimcol($isbug, $taskid, "origest", $row[2], 1);
-	    $this->estimcol($isbug, $taskid, "currest", $row[3], $done);
-	    $this->estimcol($isbug, $taskid, "elapsed", $row[4], $done);
-	    $this->estimcol($isbug, $taskid, "remain", $row[3]-$row[4], 1);
+	    $this->col(0, $task);
+	    $this->col(0, $subtask);
+	    $this->col(0, $fixfor);
+	    $this->estimcol($isbug, $taskid, "origest", $origest, 1);
+	    $this->estimcol($isbug, $taskid, "currest", $currest, $done);
+	    $this->estimcol($isbug, $taskid, "elapsed", $elapsed, $done);
+	    $this->estimcol($isbug, $taskid, "remain", $currest-$elapsed, 1);
 	    $this->push();
 	    if (!$done)
 	      $this->form_button("done-$isbug-$taskid", "Done");
@@ -448,15 +463,10 @@ class Macro_TaskMaster
     
     function do_estimate_form()
     {
-	$user = $_REQUEST["estimate-user"];
+	$user = $_REQUEST["filter-user"];
 	
 	$this->mystyle();
-	
-	$this->out("Log in: ");
-	$this->form_select("estimate-user", $user, "??",
-			   $this->list_users("--Choose User--"));
-	$this->form_button("Go", "Go");
-	$this->out("<hr>");
+	$this->do_filterbar();
 	
 	if ($user > 0)
 	{
@@ -466,11 +476,14 @@ class Macro_TaskMaster
 	       "   where ixPerson=$user");
 	    while ($row = mysql_fetch_row($res))
 	    {
-		if ($_REQUEST["currest-$row[0]-$row[1]"]!='' &&
-		    $_REQUEST["elapsed-$row[0]-$row[1]"]!='')
+		if ($_REQUEST["hasest-$row[0]-$row[1]"]!='')
 		{
-		    $cur = $_REQUEST["currest-$row[0]-$row[1]"];
-		    $elapsed = $_REQUEST["elapsed-$row[0]-$row[1]"];
+		    $cur = $_REQUEST["currest-$row[0]-$row[1]"] + 0;
+		    if ($cur == 0)
+		      $cur = 0;
+		    $elapsed = $_REQUEST["elapsed-$row[0]-$row[1]"] + 0;
+		    if ($elapsed == 0)
+		      $elapsed = 0;
 		    $this->out("Estimating task $row[0]-$row[1].<br>");
 		    $this->query
 		      ("update schedulator.Estimate " .
@@ -505,7 +518,7 @@ class Macro_TaskMaster
 	    $this->out("</b>");
 	    
 	    $this->table("table");
-	    $this->row(7, "Source", "Task", "Subtask",
+	    $this->row(8, "Source", "Task", "Subtask", "FixFor",
 		       "OrigEst", "CurrEst", "Elapsed", "Remain");
 	    
 	    $this->query
@@ -520,27 +533,32 @@ class Macro_TaskMaster
 	    
 	    $res = $this->query
 	      ("select ixTask, " .
-	       "       sTask, sSubTask, hrsOrigEst, hrsCurrEst, hrsElapsed, " .
+	       "       sTask, sSubTask, sFixFor, " .
+	       "       hrsOrigEst, hrsCurrEst, hrsElapsed, " .
 	       "       if(x.ixPersonAssignedTo=$user,0,1) as fMeDone " .
-	       "  from schedulator.XTask x, schedulator.Estimate e " .
+	       "  from schedulator.XTask x, schedulator.Estimate e, " .
+	       "       FixFor f " .
 	       "  where fIsBug=0 and e.ixTask=x.ixXTask " .
+	       "    and f.ixFixFor=x.ixFixFor " .
 	       "    and e.ixPerson=$user ");
 	    $this->estimate_rows("TM", 0, $res);
 	    
 	    $res = $this->query
 	      ("select ixTask, " .
-	       "   ixBug, sTitle, " .
+	       "   ixBug, sTitle, sFixFor, " .
 	       "   if(e.hrsOrigEst is not null,e.hrsOrigEst,b.hrsOrigEst), " .
 	       "   if(e.hrsCurrEst is not null,e.hrsCurrEst,b.hrsCurrEst), " .
 	       "   if(e.hrsElapsed is not null,e.hrsElapsed,b.hrsElapsed), " .
 	       "       if(b.ixPersonAssignedTo=$user,0,1) as fMeDone " .
-	       "  from Bug b, schedulator.Estimate e " .
+	       "  from Bug b, schedulator.Estimate e, FixFor f " .
 	       "  where fIsBug=1 and e.ixTask=b.ixBug " .
+	       "    and f.ixFixFor=b.ixFixFor " .
 	       "    and e.ixPerson=$user ");
 	    $this->estimate_rows("Bug", 1, $res);
+	    
+	    $this->table_end();
+	    $this->form_button("Save", "Save");
 	}
-	$this->table_end();
-	$this->form_button("Save", "Save");
     }
     
     // main gracefultavi entry point
@@ -551,6 +569,8 @@ class Macro_TaskMaster
 	global $bug_h;
 	bug_init();
 	$this->bug_h = $bug_h;
+	
+	$this->db = new FogTables($_REQUEST["filter-user"]);
 
         if (!preg_match_all('/"[^"]*"|[^ \t]+/', $args, $words))
             return "regmatch failed!\n";
@@ -564,40 +584,83 @@ class Macro_TaskMaster
 	
 	$this->outdata = "";
 
+	$this->out("TaskMaster $words[0]");
+	$this->form(1);
         if ($words[0] == "ESTIMATE")
 	{
-	    $this->out("TaskMaster Estimate");
-	    $this->form(1);
 	    $this->do_estimate_form();
-	    $this->form_end();
 	}
 	else if ($words[0] == "CREATE")
 	{
-	    $this->out("TaskMaster Create");
-	    $this->form(1);
 	    if ($_REQUEST["cmd"] == "Create")
 	      $this->do_create();
 	    else
 	      $this->do_create_form();
-	    $this->form_end();
+	    
+	    $ave = $this->db->person->first_prefix("username", "apenwar");
+	    $this->out("person: $ave->fullname; $ave->email; $ave->username<br>");
+	    
+	    $foo = $this->db->project->first("name", "1-Weaver");
+	    $em = $foo->owner->email;
+	    $this->out("project: $foo->ix; $foo->name; $em<br>");
+	    
+	    $foo = $this->db->fixfor->first("name", "Wv 4.0");
+	    $projname = $foo->project->name;
+	    $this->out("fixfor: $foo->ix; $foo->name; $projname<br>");
+	    
+	    $foo = $this->db->bug->first_match("name", "/crash/i");
+	    $this->out("bug: $foo->name;<br>");
+	    
+	    $foo = $this->db->estimate->a[5];
+	    $pname = $foo->assignto->fullname;
+	    $this->out("estimate: $pname;<br>");
+	    
+	    $this->table("table");
+	    $this->row(5, "XTask", "Task", "SubTask", "FixFor", "Assigned To");
+	    foreach ($this->db->xtask->a as $t)
+	    {
+		$this->row(1, $t->ix, $t->task, $t->name,
+			   $t->fixfor->name, $t->assignto->email);
+	    }
+	    $this->table_end();
+
+	    $this->table("table");
+	    $this->row(4, "Bug", "Title", "FixFor", "Assigned To");
+	    foreach ($this->db->bug->a as $t)
+	    {
+		$this->row(1,
+		   "<a href='http://nits/fogbugz3?$t->ix'>$t->ix</a>",
+		   $t->name, $t->fixfor->name, $t->assignto->email);
+	    }
+	    $this->table_end();
+
+	    $this->table("table");
+	    $this->row(8, "ix", "Person", "bug?", "task",
+		       "origest", "currest", "elapsed", "remain");
+	    foreach ($this->db->estimate->a as $e)
+	    {
+		$this->row(2, $e->id,
+			   $e->assignto->email, $e->isbug, $e->task->name,
+			   $e->origest, $e->currest, $e->elapsed,
+			   $e->remain());
+	    }
+	    $this->table_end();
 	}
 	else if ($words[0] == "ASSIGN")
 	{
-	    $this->out("TaskMaster Assign" . $_REQUEST["foo"]);
-	    $this->form(1);
-	    $this->do_filterbar();
-	    $this->out("<hr>");
 	    if ($_REQUEST["cmd"] == "Assign")
 	      $this->do_assign();
 	    if ($_REQUEST["cmd"] == "Retarget")
 	      $this->do_retarget();
-	    $this->do_summary($_REQUEST["new-user"]);
-	    $this->form_end();
+	    $this->do_assign_form($_REQUEST["new-user"]);
 	}
+	$this->form_end();
 	
 	return $this->outdata;
     }
 }
+
+error_reporting($olderr);
 
 return 1;
 ?>
