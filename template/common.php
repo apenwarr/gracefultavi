@@ -356,7 +356,7 @@ if ($page != $HomePage && $page != 'RecentChanges')
                     print "Anonymous@" . $_SERVER["REMOTE_ADDR"];
                 print " (" . date('Y/m/d') . ")</b>: ";
                 print '</textarea>';
-                print '<input type="submit" name="append" value="Add a Comment" onClick="return epilogue_quickadd_validate(this.form)">';
+                print '<br><input type="submit" name="append" value="Add a Comment" onClick="return epilogue_quickadd_validate(this.form)">';
             }
             ?>
         <?php
