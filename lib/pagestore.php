@@ -721,20 +721,5 @@ class PageStore
                           "AND TO_DAYS(NOW()) > TO_DAYS(time)");
     }
   }
-
-
-    function logview()
-    {
-        global $page, $UserName;
-
-        list($sec, $min, $hour, $mday, $month, $year, $wday, $yday, $isdst)
-            = localtime(time());
-
-        $qry = "insert ignore into wiki_viewlog (page, user, year, month, day) " .
-               "values ('$page', '$UserName', $year+1900, $month+1, $mday)";
-
-        $this->dbh->query($qry);
-
-    }
 }
 ?>

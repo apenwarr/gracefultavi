@@ -95,14 +95,6 @@ if(!empty($ActionList[$action]))
 $pagestore->maintain();
 
 
-// experimental test, log page views
-/*
-global $logviewenabled;
-if ($logviewenabled && $action == 'view')
-    $pagestore->logview();
-*/
-
-
 /*
 if ($UserName == 'mich' && $page == 'mich')
 {
