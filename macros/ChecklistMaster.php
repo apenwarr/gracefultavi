@@ -9,7 +9,8 @@ function checklist_init() {
 
     if (!$chklst_h)
     {
-        $chklst_h = mysql_connect($ChecklistServer, $ChecklistUser, $ChecklistPass);
+        $chklst_h = mysql_connect($ChecklistServer, $ChecklistUser,
+                                  $ChecklistPass);
         mysql_select_db($ChecklistName, $chklst_h);
     }
 }
@@ -73,6 +74,25 @@ function magic_quotes($text)
     }
 }
 
+function owner_sort($a, $b)
+{
+    if (strcasecmp($a['owner_name'], $b['owner_name']) == 0)
+    {
+        if ($a['torder'] < $b['torder'])
+            return -1;
+        else if ($a['torder'] > $b['torder'])
+            return 1;
+        else
+            return 0;
+    }
+    else if ($a['owner_name'] == '')
+        return 1;
+    else if ($b['owner_name'] == '')
+        return -1;
+    else
+        return strcasecmp($a['owner_name'], $b['owner_name']);
+}
+
 
 class Macro_ChecklistMaster
 {
@@ -82,6 +102,15 @@ class Macro_ChecklistMaster
     var $outdata_push = array();
     var $db;
     var $done = false;
+
+    var $users_list;
+    var $url_params;
+
+    var $notes_parsing_rules = array('parse_elem_flag',
+                                     'parse_freelink',
+                                     'parse_interwiki',
+                                     'parse_wikiname',
+                                     'parse_elements');
 
 
     function out()
@@ -239,7 +268,7 @@ class Macro_ChecklistMaster
 .table th {
     background: lightgray
 }
-tr.done {
+td.done {
     color: gray;
     font-style: italic;
     text-decoration: line-through;
@@ -293,19 +322,77 @@ td.calendar_header {
         <script language="javascript">
         <!--
 
-        function setRowStyle(row, checked)
+        function setRowStyle(rowid, checked)
         {
-            if (checked)
+            for (var i = 0; i < 4; i++)
             {
-                row.style.color = 'gray';
-                row.style.fontStyle = 'italic';
-                row.style.textDecoration = 'line-through';
+                var cell = document.getElementById('col'+i+'row'+rowid);
+
+                if (checked)
+                {
+                    cell.style.color = 'gray';
+                    cell.style.fontStyle = 'italic';
+                    cell.style.textDecoration = 'line-through';
+                }
+                else
+                {
+                    cell.style.color = 'black';
+                    cell.style.fontStyle = 'normal';
+                    cell.style.textDecoration = 'none';
+                }
             }
-            else
+        }
+
+        function editNote(noteid)
+        {
+            var viewtd = document.getElementById('notesview'+noteid);
+
+            if (viewtd.style.display != 'none')
             {
-                row.style.color = 'black';
-                row.style.fontStyle = 'normal';
-                row.style.textDecoration = 'none';
+                var form = document.forms.checklistform;
+                form['notes'+noteid].value = form['prevnotes'+noteid].value;
+                form['noteshidden'+noteid].checked =
+                    form['prevnoteshidden'+noteid].value == 1 ? true : false;
+
+                viewtd.style.display = 'none';
+
+                var edittd = document.getElementById('notesedit'+noteid);
+                edittd.style.display = 'block';
+            }
+        }
+
+        function editNoteCancel(noteid)
+        {
+            var viewtd = document.getElementById('notesview'+noteid);
+            viewtd.style.display = 'block';
+
+            var edittd = document.getElementById('notesedit'+noteid);
+            edittd.style.display = 'none';
+
+            var form = document.forms.checklistform;
+            form['notes'+noteid].value = form['prevnotes'+noteid].value;
+            form['noteshidden'+noteid].checked =
+                form['prevnoteshidden'+noteid].value == 1 ? true : false;
+        }
+
+        // unused, does not work properly
+        function showHideCompletedRows()
+        {
+            var form = document.forms.checklistform;
+            var rowids = form.checklistrowids.value.split(',');
+
+            var dowhat = -1;
+            var row;
+
+            for (var i = 0; i < rowids.length; i++)
+            {
+                if (form['status'+rowids[i]].checked)
+                {
+                    row = document.getElementById('row'+rowids[i]);
+                    if (dowhat == -1)
+                        dowhat = (row.style.display == 'none') ? 1 : 0;
+                    row.style.display = (dowhat == 0) ? 'none' : 'block';
+                }
             }
         }
 
@@ -523,7 +610,7 @@ TOOLTIP_JAVASCRIPT;
             if (dateparts[0] && !isNaN(dateparts[0])
                 && dateparts[1] && !isNaN(dateparts[1])
                 && dateparts[2] && !isNaN(dateparts[2]))
-                var d = new Date(dateparts[0], dateparts[1]-1, dateparts[2])
+                var d = new Date(dateparts[0], dateparts[1]-1, dateparts[2]);
             else
                 var d = new Date();
 
@@ -1092,6 +1179,11 @@ CALENDAR_JAVASCRIPT;
 
         $this->form_hidden('id', $id);
 
+        $this->out('<p>');
+        $this->form_button('template_apply', 'Apply');
+        $this->form_button('template_save', 'Save & Close');
+        $this->form_button('template_list', 'Cancel');
+
         $this->out('<p><b>Name:</b> ');
         $this->form_input('name', $name, 40);
 
@@ -1116,7 +1208,8 @@ CALENDAR_JAVASCRIPT;
         }
         $this->form_hidden('templaterowids',
             implode(',', array_keys($template_details)));
-        $this->print_edit_template_row(array('owner' => $last_owner), $roles, false);
+        $this->print_edit_template_row(array('owner' => $last_owner), $roles,
+                                       false);
         $this->table_end();
 
         $this->out('<p><b>Import:</b> ');
@@ -1124,10 +1217,9 @@ CALENDAR_JAVASCRIPT;
         $this->form_button('template_export', 'Export');
 
         $this->out('<p>');
-        $this->form_button('template_save', 'Submit');
-
-        $this->out('<p>');
-        $this->form_button('template_list', 'Return');
+        $this->form_button('template_apply', 'Apply');
+        $this->form_button('template_save', 'Save & Close');
+        $this->form_button('template_cancel', 'Cancel');
     }
 
     function do_template_save()
@@ -1217,8 +1309,6 @@ CALENDAR_JAVASCRIPT;
                     $category = magic_quotes(trim($line));
             }
         }
-
-        $this->redirect('template_edit');
     }
 
     function do_template_delete()
@@ -1284,13 +1374,38 @@ CALENDAR_JAVASCRIPT;
         return isset($result['id']) ? $result['id'] : false;
     }
 
-    function get_checklist_details($id)
+    function get_checklist_details($id, $sort = '')
     {
-        return chklst_query("select id, category, description, owner, " .
-                            "duedate, lastconfdate, notes, status " .
-                            "from chklst_checklist_details " .
-                            "where checklist = $id " .
-                            "order by torder");
+        switch ($sort)
+        {
+            case 'duedate':
+                $tmp_col = ", ifnull(duedate, '9999-99-99') datesort";
+                $sort_col = 'datesort, ';
+                break;
+            case 'lastconfdate':
+                $tmp_col = ", ifnull(lastconfdate, '9999-99-99') datesort";
+                $sort_col = 'datesort, ';
+                break;
+            default:
+                $tmp_col = '';
+                $sort_col = '';
+        }
+
+        $result = chklst_query("select id, category, description, owner, " .
+                               "duedate, lastconfdate, notes, noteshidden, " .
+                               "status$tmp_col " .
+                               "from chklst_checklist_details " .
+                               "where checklist = $id " .
+                               "order by ${sort_col}torder");
+
+        if ($sort == 'owner')
+        {
+            foreach ($result as $id => $row)
+                $result[$id]['owner_name'] = $this->get_uname($row['owner']);
+            uasort($result, 'owner_sort');
+        }
+
+        return $result;
     }
 
     function create_checklist($name)
@@ -1324,12 +1439,13 @@ CALENDAR_JAVASCRIPT;
     }
 
     function save_checklist_row($id, $checklist_id, $category, $description,
-        $owner_id, $duedate = '', $lastconfdate = '', $notes = '', 
-        $before_id = -1)
+        $owner_id, $duedate = '', $lastconfdate = '', $notes = '',
+        $noteshidden = 0, $before_id = -1)
     {
         $category = quote(trim($category));
         $description = quote(trim($description));
         $notes = quote(trim($notes));
+        $noteshidden = $noteshidden ? 1 : 0;
         if (!$owner_id || $owner_id == -1) $owner_id = 'null';
         $this->validate_date($duedate);
         $this->validate_date($lastconfdate);
@@ -1341,7 +1457,8 @@ CALENDAR_JAVASCRIPT;
                                "description = '$description', " .
                                "owner = $owner_id, duedate = $duedate, " .
                                "lastconfdate = $lastconfdate, " .
-                               "notes = '$notes' " .
+                               "notes = '$notes', " .
+                               "noteshidden = $noteshidden " .
                                "where id = $id " .
                                "and checklist = $checklist_id");
         }
@@ -1370,11 +1487,11 @@ CALENDAR_JAVASCRIPT;
             return chklst_insert_query("insert into chklst_checklist_details (".
                                        "checklist, category, description, " .
                                        "owner, duedate, lastconfdate, notes, " .
-                                       "torder) " .
+                                       "noteshidden, torder) " .
                                        "values ($checklist_id, '$category', " .
                                        "'$description', $owner_id, " .
                                        "$duedate, $lastconfdate, '$notes', " .
-                                       "$order)");
+                                       "$noteshidden, $order)");
         }
     }
 
@@ -1384,8 +1501,19 @@ CALENDAR_JAVASCRIPT;
                      "where id = $id");
     }
 
+    function get_uname($id)
+    {
+        if (!isset($this->users_list))
+            $this->list_users();
+
+        return isset($this->users_list[$id]) ? $this->users_list[$id] : '';
+    }
+
     function list_users()
     {
+        if (isset($this->users_list))
+            return $this->users_list;
+
         bug_init();
         $fb_users = sql_simple("select ixPerson, sEmail " .
                                "from Person " .
@@ -1401,6 +1529,8 @@ CALENDAR_JAVASCRIPT;
                 $users[$fb_user_id] = $uname;
         }
 
+        $this->users_list = $users;
+
         return $users;
     }
 
@@ -1410,6 +1540,16 @@ CALENDAR_JAVASCRIPT;
 
         chklst_query("update chklst_checklist_details " .
                      "set status = $status " .
+                     "where id = $id");
+    }
+
+    function update_checklist_notes($id, $notes = '', $noteshidden = 0)
+    {
+        $notes = quote(trim($notes));
+        $noteshidden = $noteshidden ? 1 : 0;
+        chklst_query("update chklst_checklist_details " .
+                     "set notes = '$notes', " .
+                     "noteshidden = $noteshidden " .
                      "where id = $id");
     }
 
@@ -1462,16 +1602,21 @@ CALENDAR_JAVASCRIPT;
         $this->redirect('checklist_edit');
     }
 
-    function notes_link($id, $notes)
+    // when used in edit mode, $edit_link is true
+    // when used in view mode, $edit_link is false
+    function notes_link($id, $notes, $edit_link = true)
     {
         $tooltip = ' onmouseover="var frm=document.forms.checklistform;' .
                    'if(frm.notes'.$id.'.value!=\'\'){' .
                    'tooltipLink(wrap(frm.notes'.$id.'.value));}return true;" ' .
                    'onmouseout="var frm=document.forms.checklistform;' .
                    'if(frm.notes'.$id.'.value!=\'\'){tooltipClose();}"';
-        $link = '<a href="javascript:open_window('.$id.');"' . $tooltip . '>';
+        $edit_link_js = $edit_link ? 'open_window('.$id.')' : '';
+        $link = '<a href="javascript:'.$edit_link_js.';"' . $tooltip . '>';
         $spanstyle = strlen($notes) ? '' : 'style="color: gray;"';
-        $link .= '<span id="notesspan'.$id.'"'.$spanstyle.'>Notes</span></a>';
+        $label = $edit_link ? 'Notes' : 'Hidden';
+        $link .= '<span id="notesspan'.$id.'"'.$spanstyle.'>'.$label.
+                 '</span></a>';
 
         return $link;
     }
@@ -1495,6 +1640,7 @@ CALENDAR_JAVASCRIPT;
         $this->out('</td><td>');
         $this->out($this->notes_link($row['id'], $row['notes']));
         $this->form_hidden('notes'.$row['id'], $row['notes']);
+        $this->form_hidden('noteshidden'.$row['id'], $row['noteshidden']);
         $this->out('</td><td>');
         $this->form_input('category'.$row['id'], $row['category'], 35, true);
         $this->out('</td><td>');
@@ -1555,6 +1701,12 @@ CALENDAR_JAVASCRIPT;
 
         $this->out('<p><h2>Edit Checklist</h2>');
 
+        $this->out('<p>');
+        $this->form_button('checklist_apply', 'Apply');
+        $this->form_button('checklist_save', 'Save & Close');
+        $this->form_button('checklist_delete', 'Delete Checklist', $id, true);
+        $this->form_button('checklist_use', 'Cancel');
+
         $this->out("<p><b>Name:</b> $name");
 
         $this->out('<p>');
@@ -1583,13 +1735,10 @@ CALENDAR_JAVASCRIPT;
         $this->table_end();
 
         $this->out('<p>');
-        $this->form_button('checklist_save', 'Submit');
-
-        $this->out('<p>');
+        $this->form_button('checklist_apply', 'Apply');
+        $this->form_button('checklist_save', 'Save & Close');
         $this->form_button('checklist_delete', 'Delete Checklist', $id, true);
-
-        $this->out('<p>');
-        $this->form_button('checklist_use', 'Return');
+        $this->form_button('checklist_use', 'Cancel');
     }
 
     function do_checklist_save($name)
@@ -1611,7 +1760,7 @@ CALENDAR_JAVASCRIPT;
             $this->save_checklist_row(null, $id, $_REQUEST['category'],
                 $_REQUEST['description'], $_REQUEST['owner'],
                 $_REQUEST['duedate'], $_REQUEST['lastconfdate'],
-                $_REQUEST['notes'], $before_id);
+                $_REQUEST['notes'], $_REQUEST['noteshidden'], $before_id);
         }
 
         $checklist_row_ids = explode(',', $_REQUEST['checklistrowids']);
@@ -1631,11 +1780,10 @@ CALENDAR_JAVASCRIPT;
                     $_REQUEST["owner$row_id"],
                     $_REQUEST["duedate$row_id"],
                     $_REQUEST["lastconfdate$row_id"],
-                    $_REQUEST["notes$row_id"]);
+                    $_REQUEST["notes$row_id"],
+                    $_REQUEST["noteshidden$row_id"]);
             }
         }
-
-        $this->redirect('checklist_edit');
     }
 
     function do_checklist_delete($name)
@@ -1655,9 +1803,59 @@ CALENDAR_JAVASCRIPT;
         return preg_replace($ptn, "\\1<a href=\"?\\2\">\\2</a>", $text, -1);
     }
 
+    function params_url($name = null, $value = null)
+    {
+        $params = array('hidecat', 'sort', 'hidecompleted');
+
+        $url_params = array();
+        foreach ($params as $param)
+            if (isset($_REQUEST[$param]))
+                $url_params[$param] = $_REQUEST[$param];
+        if (isset($name))
+            if (isset($value))
+                $url_params[$name] = $value;
+            else
+                unset($url_params[$name]);
+
+        $url = '';
+        foreach ($url_params as $param => $value)
+            $url .= "&$param=" . rawurlencode($value);
+
+        return $_SERVER["PHP_SELF"] . '?page=' . $_REQUEST['page'] . $url;
+    }
+
+    function show_hide_category_link($cat, $hide_cat)
+    {
+        $temp_hide_cat = $hide_cat;
+
+        if (($key = array_search($cat, $hide_cat)) === false)
+        {
+            $image = 'expanded.png';
+            $alt = 'Collapse Category';
+            $temp_hide_cat[] = $cat;
+        }
+        else
+        {
+            $image = 'collapsed.png';
+            $alt = 'Expand Category';
+            unset($temp_hide_cat[$key]);
+        }
+
+        if (!$temp_hide_cat)
+            $temp_hide_cat = null;
+        else
+            $temp_hide_cat = implode(',', $temp_hide_cat);
+
+        return '<a href="'.$this->params_url('hidecat',$temp_hide_cat).'">'.
+               '<img src="images/ChecklistMaster/'.$image.'" '.
+               'alt="'.$alt.'" hspace="2" title="'.$alt.'" '.
+               'width="9" height="9" border="0"></a>';
+    }
+
     function do_checklist_use($name)
     {
         $this->mystyle();
+        $this->tooltip_js();
         $this->checklist_js();
 
         $id = $this->get_checklist_id($name);
@@ -1667,66 +1865,137 @@ CALENDAR_JAVASCRIPT;
             return;
         }
 
-        $checklist_details = $this->get_checklist_details($id);
+        $checklist_details =
+            $this->get_checklist_details($id, $_REQUEST['sort']);
 
         $users = $this->list_users();
+
+        if (isset($_REQUEST['hidecat']))
+            $hide_cat = explode(',', $_REQUEST['hidecat']);
+        else
+            $hide_cat = array();
 
 
         $this->out("<h1>$name</h1>");
 
         $this->out('<p>');
+        $this->form_button('checklist_update', 'Submit');
         $this->form_button('checklist_edit', 'Edit Checklist');
 
         $this->out('<p>');
+        if ($_REQUEST['hidecompleted'])
+            $this->out('<a href="'.$this->params_url('hidecompleted').
+                       '">Show completed tasks</a>');
+        else
+            $this->out('<a href="'.$this->params_url('hidecompleted', 1).
+                       '">Hide completed tasks</a>');
+
+        $sort_img = '<img src="images/ChecklistMaster/sort.gif" alt="Sort" ' .
+                    'hspace="2" title="Sort" width="13" height="13" ' .
+                    'border="0">';
+        $sort_owner = ($_REQUEST['sort'] == 'owner') ? $sort_img : '';
+        $sort_due = ($_REQUEST['sort'] == 'duedate') ? $sort_img : '';
+        $sort_last = ($_REQUEST['sort'] == 'lastconfdate') ? $sort_img : '';
+        $sort_cat = (!$sort_owner && !$sort_due && !$sort_last) ? $sort_img:'';
+
+        $this->out('<p>');
         $this->table('table');
-        $this->out('<tr>
-            <td><b>Category</b></td>
-            <td></td>
-            <td><b>Description</b></td>
-            <td><b>Owner</b></td>
-            <td nowrap><b>Due Date</b></td>
-            <td nowrap><b>Last Conf. Date</b></td>
-            <td><b>Notes</b></td>
-            </tr>');
+        $this->out('<tr><td nowrap><a href="'.$this->params_url('sort').'">' .
+                   '<b>Category</b></a>'.$sort_cat.'</td><td></td><td>' .
+                   '<b>Description</b></td><td nowrap>' .
+                   '<a href="'.$this->params_url('sort','owner').'">' .
+                   '<b>Owner</b>'.$sort_owner.'</a></td><td nowrap>' .
+                   '<a href="'.$this->params_url('sort','duedate').'">' .
+                   '<b>Due Date</b>'.$sort_due.'</a></td><td nowrap>' .
+                   '<a href="'.$this->params_url('sort','lastconfdate').'">' .
+                   '<b>Last Conf. Date</b>'.$sort_last.'</a></td><td>' .
+                   '<b>Notes</b></td></tr>');
 
         $category = '';
         foreach ($checklist_details as $row)
         {
-            if ($row['category'] != $category)
+            if ($sort_cat && $row['category'] != $category)
             {
-                $this->out('<tr><td colspan="3">');
+                $this->out('<tr><td colspan="7">');
+                $this->out($this->show_hide_category_link($row['category'],
+                           $hide_cat));
                 $this->out($this->parse_wiki_links($row['category']));
-                $this->out('</td><td></td><td></td><td></td><td>');
                 $this->out('</td></tr>');
                 $category = $row['category'];
             }
 
+            if (in_array($row['category'], $hide_cat))
+                continue;
+
+            if ($_REQUEST['hidecompleted'] && $row['status'] == 1)
+                continue;
+
             $class = $row['status'] == 1 ? 'class="done"' : '';
-            $this->out('<tr id="row'.$row['id'].'" '.$class.
-                       ' valign="top"><td>');
+            $this->out('<tr valign="top" id="row'.$row['id'].'"><td>');
+            if (!$sort_cat)
+            {
+                $this->out($this->show_hide_category_link($row['category'],
+                           $hide_cat));
+                $this->out($row['category']);
+            }
             $this->out('</td><td>');
             $this->form_hidden('prevstatus'.$row['id'], $row['status']);
             $this->form_checkbox('status'.$row['id'], '', $row['status']==1,
-                'setRowStyle(document.getElementById(\'row'.$row['id'].'\'), ' .
-                'this.checked);');
-            $this->out('</td><td>');
+                'setRowStyle('.$row['id'].', this.checked);');
+            $this->out('</td><td id="col0row'.$row['id'].'" '.$class.'>');
             $this->out('<label for="status'.$row['id'].'">');
             $this->out($this->parse_wiki_links($row['description']));
-            $this->out('</label>');
-            $this->out('</td><td nowrap>');
-            $this->out('<a href="?' . $users[$row['owner']] . '">' .
-                 $users[$row['owner']] . '</a>');
+            $this->out('</label></td>');
+            $this->out('<td id="col1row'.$row['id'].'" '.$class.' nowrap>');
+            $this->out('<a href="?'.$users[$row['owner']].'">'.
+                 $users[$row['owner']].'</a>');
             $this->out('</td>');
-            $duedate = str_replace('-', '', $row['duedate']);
-            if ($duedate && $row['status'] != 1 && $duedate < date('Ymd'))
-                $this->out('<td style="color: red" nowrap>');
-            else
-                $this->out('<td nowrap>');
+
+            $tmp_date = str_replace('-', '', $row['duedate']);
+            $tmp_style = ($tmp_date && $row['status'] != 1 &&
+                          $tmp_date < date('Ymd')) ? 'style="color: red" ' : '';
+            $this->out('<td id="col2row'.$row['id'].'" '.$class.' '.
+                       $tmp_style.'nowrap>');
             $this->out($row['duedate']);
-            $this->out('</td><td nowrap>');
+            $this->out('</td>');
+
+            $tmp_date = str_replace('-', '', $row['lastconfdate']);
+            $tmp_style = ($tmp_date && $row['status'] != 1 &&
+                          $tmp_date < date('Ymd')) ? 'style="color: red" ' : '';
+            $this->out('<td id="col3row'.$row['id'].'" '.$class.' '.
+                       $tmp_style.'nowrap>');
             $this->out($row['lastconfdate']);
-            $this->out('</td><td>');
-            $this->out($row['notes']);
+            $this->out('</td><td id="col4row'.$row['id'].'">');
+
+            $this->out('<span id="notesview'.$row['id'].'">');
+            $this->out('<a href="javascript:editNote('.$row['id'].');">'.
+                       '<img src="images/ChecklistMaster/edit.gif" '.
+                       'alt="Edit notes" title="Edit notes" align="left" '.
+                       'width="13" height="14" border="0"></a>');
+            $parsed_notes = parseText($row['notes'], $this->notes_parsing_rules,
+                                      $this->page);
+            if ($row['noteshidden'])
+                $this->out($this->notes_link($row['id'], $row['notes'], false));
+            else
+                $this->out($parsed_notes);
+            $this->out('</span>');
+
+            $this->out('<span style="display: none;" id="notesedit'.
+                       $row['id'].'">');
+            $this->form_hidden('prevnotes'.$row['id'], $row['notes']);
+            $this->out('<input type="button" value="Cancel" '.
+                       'onClick="editNoteCancel('.$row['id'].')">');
+            $this->form_hidden('prevnoteshidden'.$row['id'],
+                               $row['noteshidden']);
+            $this->form_checkbox('noteshidden'.$row['id'], '',
+                                 $row['noteshidden']==1, '');
+            $this->out('<label for="noteshidden'.$row['id'].'">Hide</label>');
+            $this->out('<br><textarea name="notes'.$row['id'].'" '.
+                       'cols="40" rows="10" wrap="virtual">'.
+                       htmlspecialchars($row['notes']).
+                       '</textarea>');
+            $this->out('</span>');
+
             $this->out('</td></tr>');
         }
         $this->table_end();
@@ -1736,9 +2005,10 @@ CALENDAR_JAVASCRIPT;
 
         $this->out('<p>');
         $this->form_button('checklist_update', 'Submit');
+        $this->form_button('checklist_edit', 'Edit Checklist');
     }
 
-    function do_checklist_status_update($name)
+    function do_checklist_row_update($name)
     {
         $id = $this->get_checklist_id($name);
         if (!$id)
@@ -1753,17 +2023,54 @@ CALENDAR_JAVASCRIPT;
         {
             if ($row_id == '') continue;
 
+            // status
             $status = $_REQUEST["status$row_id"];
             $prev_status = $_REQUEST["prevstatus$row_id"];
-
             if ((isset($status) && $prev_status == 0)
                 || (!isset($status) && $prev_status == 1))
                 $this->update_checklist_status($row_id, $status);
+
+            // notes
+            $notes = $_REQUEST["notes$row_id"];
+            $prev_notes = $_REQUEST["prevnotes$row_id"];
+
+            $noteshidden = isset($_REQUEST["noteshidden$row_id"]) ? 1 : 0;
+            $prev_noteshidden = $_REQUEST["prevnoteshidden$row_id"];
+
+            if ((isset($notes) && isset($prev_notes)
+                 && $notes != $prev_notes)
+                || (isset($prev_noteshidden)
+                    && $noteshidden != $prev_noteshidden))
+                $this->update_checklist_notes($row_id, $notes, $noteshidden);
         }
 
         $this->redirect('checklist_use');
     }
 
+
+    // api function for the Toc macro
+    function getCategories($name)
+    {
+        checklist_init();
+
+        $id = $this->get_checklist_id($name);
+        if (!$id) return array();
+
+        $checklist_details = $this->get_checklist_details($id);
+
+        $categories = array();
+        $category = '';
+        foreach ($checklist_details as $row)
+        {
+            if ($row['category'] != $category)
+            {
+                $category = $row['category'];
+                $categories[] = $category;
+            }
+        }
+
+        return $categories;
+    }
 
 
     // main gracefultavi entry point
@@ -1777,7 +2084,7 @@ CALENDAR_JAVASCRIPT;
         checklist_init();
         $this->chklst_h = $chklst_h;
 
-        $this->form($_SERVER["PHP_SELF"].'?page='.$_REQUEST['page'],1);
+        $this->form($_SERVER["PHP_SELF"].'?page='.$_REQUEST['page'], 1);
         $this->form_hidden('id', '');
 
         if ($args)
@@ -1794,31 +2101,65 @@ CALENDAR_JAVASCRIPT;
                                            $roles_users);
             }
             else if ($_REQUEST['checklist_edit'])
+            {
                 $this->do_checklist_edit($args);
-            else if ($_REQUEST['checklist_save'])
+            }
+            else if ($_REQUEST['checklist_apply'])
+            {
                 $this->do_checklist_save($args);
+                $this->redirect('checklist_edit');
+            }
+            else if ($_REQUEST['checklist_save'])
+            {
+                $this->do_checklist_save($args);
+                $this->redirect('checklist_use');
+            }
             else if ($_REQUEST['checklist_delete'])
+            {
                 $this->do_checklist_delete($args);
+            }
             else if ($_REQUEST['checklist_update'])
-                $this->do_checklist_status_update($args);
+            {
+                $this->do_checklist_row_update($args);
+            }
             else if ($this->get_checklist_id($args))
+            {
                 $this->do_checklist_use($args);
+            }
             else
+            {
                 $this->do_checklist_create_form($args);
+            }
         }
         else
         {
             // Template handling
             if ($_REQUEST['template_edit'])
+            {
                 $this->do_template_edit();
-            else if ($_REQUEST['template_save'])
+            }
+            else if ($_REQUEST['template_apply'])
+            {
                 $this->do_template_save();
+                $this->redirect('template_edit');
+            }
+            else if ($_REQUEST['template_save'])
+            {
+                $this->do_template_save();
+                $this->redirect('template_list');
+            }
             else if ($_REQUEST['template_delete'])
+            {
                 $this->do_template_delete();
+            }
             else if ($_REQUEST['template_export'])
+            {
                 $this->do_template_export();
+            }
             else
+            {
                 $this->do_template_list();
+            }
         }
 
         $this->form_end();

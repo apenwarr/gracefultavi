@@ -34,8 +34,8 @@ class Macro_Toc
 
     function parse($max_level, $page)
     {
-        global $pagestore, $MaxHeading;
-        global $document, $TocJavascriptFunctions;
+        global $pagestore, $MaxHeading, $document, $TocJavascriptFunctions;
+        global $ViewMacroEngine;
 
         $document = parseText($document, array('parse_htmlpre', 'parse_nowiki'), $page);
 
@@ -47,25 +47,53 @@ class Macro_Toc
             $TocJavascriptFunctions = '';
 
         // find highest header level
-        $prevLevel = $max_level;
+        $prev_level = $max_level;
+        $found = 0;
         foreach (explode("\n", $document) as $line)
         {
             if (preg_match('/^\s*_?(=+)([^=]*)(=+)\s*$/', strip_tags($line), $result) &&
                 strlen($result[1]) === strlen($result[3]))
             {
+                $found = 1;
                 $level = min(strlen($result[1]), $max_level);
-
-                if ($level < $prevLevel)
-                    $prevLevel = $level;
-
+                if ($level < $prev_level)
+                    $prev_level = $level;
             }
         }
-        $prevLevel--;
+        if ($found)
+            $prev_level--;
+        else
+            $prev_level = 0;
 
         $toc = array();
         $count = 0;
+        $level = $prev_level;
+
         foreach (explode("\n", $document) as $line)
         {
+            // includes content of checklists in the toc
+            if ($level+1 <= $max_level
+                && isset($ViewMacroEngine['ChecklistMaster'])
+                && preg_match('/\\[\\[ChecklistMaster ([^]]+)]]/',
+                              $line, $matches))
+            {
+                $prev_level = $level+1;
+                $categories = $ViewMacroEngine['ChecklistMaster']->getCategories($matches[1]);
+                $anchor_name = str_replace(' ', '_', $matches[1]);
+                $toc[] = '<ol>';
+                $toc[] = "<li><a href=\"#$anchor_name\">$matches[1]</a>";
+                if ($level+2 <= $max_level)
+                {
+                    #$prev_level = $level+2;
+                    $toc[] = '<ol>';
+                    foreach ($categories as $id => $name)
+                        $toc[] = "<li><a href=\"#$anchor_name$id\">$name</a>";
+                    $toc[] = '</ol>';
+                }
+                #$toc[] = '</ol>';
+            }
+
+            // actual toc based on the headers
             if (preg_match('/^\s*_?(=+)([^=]*)(=+)\s*$/', strip_tags($line), $result) &&
                 strlen($result[1]) === strlen($result[3]))
             {
@@ -74,7 +102,7 @@ class Macro_Toc
 
                 if ($level <= $max_level)
                 {
-                    $indentIncrease = $level - $prevLevel;
+                    $indentIncrease = $level - $prev_level;
                     for ($i = 0; $i < $indentIncrease; $i++)
                     {
                         $toc[] = '<ol>';
@@ -84,7 +112,7 @@ class Macro_Toc
                     for ($i = $indentIncrease; $i < 0; $i++)
                         $toc[] = '</ol>';
 
-                    $prevLevel = $level;
+                    $prev_level = $level;
 
                     $header = $result[2];
                     $header = preg_replace('/<[^>]+>/', '', $header);
@@ -95,7 +123,7 @@ class Macro_Toc
             }
         }
 
-        for ($i = 0; $i < $prevLevel; $i++)
+        for ($i = 0; $i < $prev_level; $i++)
             $toc[] = '</ol>';
 
         $toc = implode("\n", $toc);
