@@ -222,7 +222,7 @@ class PageStore
 
         foreach ($branches as $branch)
         {
-            $nodes = split('/', $branch);
+            $nodes = split('%', $branch);
 
             $current = &$tree;
             foreach ($nodes as $node)
@@ -243,7 +243,7 @@ class PageStore
 
         foreach ($branches as $branch)
         {
-            $nodes = split('/', $branch);
+            $nodes = split('%', $branch);
 
             foreach ($nodes as $node)
                 if (!array_key_exists($node, $nodesList))
@@ -269,12 +269,12 @@ class PageStore
         // initialize branches at first entry
         if ($i == 0) $branches = array();
 
-        preg_match("/^(.+\/)*(.+)$/", $breadcrumb, $results);
+        preg_match("/^(.+%)*(.+)$/", $breadcrumb, $results);
 
         $path = $results[1];
-        $page = $results[2];
+        $page = preg_quote($results[2], '/');
 
-        if (!preg_match("/(^|\/)$page($|\/)/", $path))
+        if (!preg_match("/(^|%)$page($|%)/", $path))
             if ($page == $findPage)
                 $branches[] = $breadcrumb;
             else
@@ -286,7 +286,7 @@ class PageStore
                 else
                     foreach ($links as $link)
                         if ($link != $page)
-                            $this->getTree("$breadcrumb/$link", $findPage, $returnType, $i + 1);
+                            $this->getTree("$breadcrumb%$link", $findPage, $returnType, $i + 1);
             }
 
         // Returns the tree at the end of the first entry in getTree
@@ -343,12 +343,12 @@ class PageStore
         }
         else
         {
-            preg_match("/^([^\/]+)((\/[^\/]+)*)$/", $breadcrumb, $results);
+            preg_match("/^([^%]+)((%[^%]+)*)$/", $breadcrumb, $results);
 
-            $page = $results[1];
+            $page = preg_quote($results[1], '/');
             $remaining = $results[2];
 
-            if (preg_match("/(^|\/)$page($|\/)/", $remaining))
+            if (preg_match("/(^|%)$page($|%)/", $remaining))
                 $branches[] = $breadcrumb;
             else
                 if ($page == $rootPage)
@@ -361,7 +361,7 @@ class PageStore
                         $branches[] = $breadcrumb;
                     else
                         foreach ($parents as $parent)
-                            $this->getTreeFromLeaves($rootPage, '', "$parent/$breadcrumb", $i + 1);
+                            $this->getTreeFromLeaves($rootPage, '', "$parent%$breadcrumb", $i + 1);
                 }
         }
     }
