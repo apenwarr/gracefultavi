@@ -97,7 +97,7 @@ function bug_list($user, $fixfor, $startdate, $enddate)
 	{
 	    # the bug is done, so don't give it any more time remaining
 	    if (!$row[2])
-	      $row[2] = 0.01;  # nonzero so we know the 'remaining' is accurate
+	      $row[2] = 0.001;  # nonzero so we know the 'remaining' is accurate
 	    $row[3] = $row[2]; # elapsed = estimate; bug is done!
 	}
 	$a[$bug] = $row;
@@ -496,6 +496,13 @@ function sch_extrabugs($user, $fixfor, $enddate)
     $a = bug_list($user, $fixfor, $start, $enddate);
     foreach ($a as $bugid => $bug)
     {
+	if ($bug[3] == $bug[2] && abs($bug[2]) <= 0.01)
+	{
+	    # the bug is done, but with a zero estimate; probably a
+	    # duplicate, wontfix, or something.  Skip it.
+	    $sch_got_bug[$bugid] = 1;
+	    next;
+	}
 	if (!$sch_got_bug[$bugid])
 	    $ret .= sch_bug($bugid, $bug[0], $bug[1], $bug[2], $bug[3], 0);
     }
