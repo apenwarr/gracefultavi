@@ -49,9 +49,6 @@ class Macro_WikiPoll
     var $pagestore;
     var $barwidth = 200;
     var $barheight = 20;
-    var $escapees = array('\(', '\)', '\|', '\]', '<', '>', "'", '"');
-    var $replacees = array('&#40;', '&#41;', '&#124;', '&#93;', '&lt;',
-                           '&gt;', '&#39;', '&quot;');
 
     function parse($args, $page)
     {
@@ -111,12 +108,10 @@ class Macro_WikiPoll
 
         }
 
-        #$args = $this->entitize($args);
-
         // poll type
         preg_match('/^((single|multiple) )?(.*)/i', $args, $matches);
         $poll_type = (strtolower($matches[2]) == 'multiple')
-            ? POLL_MULTIPLE : POLL_SINGLE;
+                     ? POLL_MULTIPLE : POLL_SINGLE;
         $args = $matches[3];
 
         // poll title and members
@@ -148,7 +143,7 @@ class Macro_WikiPoll
             $show_vote_widgets = 0;
         } else {
             $show_results = (isset($HTTP_COOKIE_VARS['pollshowresults'])
-                    && $HTTP_COOKIE_VARS['pollshowresults']) ? 1 : 0;
+                             && $HTTP_COOKIE_VARS['pollshowresults']) ? 1 : 0;
             $show_vote_widgets = 1;
         }
 
@@ -165,11 +160,6 @@ class Macro_WikiPoll
         }
     }
 
-    function entitize($string)
-    {
-        return str_replace($this->escapees, $this->replacees, $string);
-    }
-
     function draw_poll($user, $type, $title, $members, $show_results,
                        $show_vote_widgets)
     {
@@ -177,36 +167,43 @@ class Macro_WikiPoll
 
         $query_title = addslashes($title);
 
+        // get the count for each choice, the number of users who answered and
+        // the choices of the user
         $vote_results = array();
-        $allvotes = 0;
-        foreach ($members as $choice) {
-            $choice = trim($choice);
-            $query_choice = addslashes($choice);
-            if ($show_results) {
-                $query = "SELECT COUNT(id) as total " .
-                         "FROM wiki_poll " .
-                         "WHERE title='$query_title' " .
-                         "AND choice='$query_choice'";
-                $q = $pagestore->dbh->query($query);
-                if ($result = $pagestore->dbh->result($q)) {
-                    $allvotes += $result[0];
-                    $vote_results[$choice] = $result[0];
-                }
-            } else {
-                $vote_results[$choice] = 0;
-            }
+        foreach ($members as $member){
+            $vote_results[$member] = 0;
         }
-
-        $user_choices = array();
-        if ($user && $show_results && !$show_vote_widgets) {
-            $query = "SELECT choice " .
+        if ($show_results || !$show_vote_widgets) {
+            $query = "SELECT author, choice " .
                      "FROM wiki_poll " .
-                     "WHERE title='$query_title' " .
-                     "AND author='$user'";
+                     "WHERE title='$query_title'";
             $q = $pagestore->dbh->query($query);
+
+            $allvotes = 0;
+            $allvoters = array();
+            $user_choices = array();
             while ($result = $pagestore->dbh->result($q)) {
-                $user_choices[$result[0]] = 1;
+                if (in_array($result[1], $members)) {
+                    if (isset($allvoters[$result[0]])) {
+                        $allvoters[$result[0]]++;
+                    } else {
+                        $allvoters[$result[0]] = 1;
+                    }
+
+                    if (isset($vote_results[$result[1]])) {
+                        $vote_results[$result[1]]++;
+                    } else {
+                        $vote_results[$result[1]] = 1;
+                    }
+
+                    if ($result[0] == $user) {
+                        $user_choices[$result[1]] = 1;
+                    }
+
+                    $allvotes++;
+                }
             }
+            $allvoters = count($allvoters);
         }
 
         $col_span = $show_results ? 2 : 1;
@@ -252,16 +249,22 @@ class Macro_WikiPoll
                                  '&poll_show_results=' . (1 - $show_results) .
                                  '">' . ($show_results ? 'hide' : 'show') .
                                  ' results</a>)</small>';
+            if ($show_results) {
+                $show_hide_results = ' <b>Total voted: ' . $allvoters . '</b>' .
+                                     $show_hide_results;
+            }
             $poll .= '<tr><td colspan="' . $col_span . '" align="center">' .
                      '<input type="submit" name="poll_vote" ' .
                      'value="Cast your ballot! &gt;&gt;" />' .
                      $show_hide_results . '</td></tr>';
         } else {
             $poll .= '<tr><td colspan="2"><center><b>Total voted: ' .
-                     $allvotes . '</b>&nbsp;<small>(<a href="?page=' . $page .
-                     '&poll_title=' . rawurlencode($title) .
-                     '&vote_cancel=1">cancel my vote</a>)</small></center>' .
-                     '</td></tr>';
+                     $allvoters . '</b>';
+            if ($user) {
+                $poll .= ' <small>(<a href="?page=' . $page . '&poll_title=' .
+                         rawurlencode($title) . '&vote_cancel=1">cancel my ' .
+                         'vote</a>)</small></center></td></tr>';
+            }
         }
 
         $poll .= '</table>';
