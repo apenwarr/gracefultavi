@@ -1,5 +1,5 @@
 <?php
-// $Id: find.php,v 1.2 2003/04/01 01:11:33 mich Exp $
+// $Id: find.php,v 1.3 2003/04/01 01:31:59 mich Exp $
 
 require('parse/html.php');
 require('template/find.php'); // require(TemplateDir . '/find.php');
@@ -12,7 +12,7 @@ function emptyElement($var)
 // Find a string in the database.
 function action_find()
 {
-    global $pagestore, $find, $branch_search;
+    global $pagestore, $find, $branch_search, $findFilter;
 
     // determine which 'find mode' to use
     if ($find[0] == '!')
@@ -73,6 +73,12 @@ function action_find()
         {
             $branch_nodes = $pagestore->getTree($branch_search, '', 'FLAT');
             $list = array_intersect($list, $branch_nodes);
+        }
+
+        if ($findFilter)
+        {
+            require "$findFilter.php";
+            $list = $findFilter($list, $find);
         }
 
         $text = '';
