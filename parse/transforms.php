@@ -243,7 +243,7 @@ function macro_token($macro, $trail)
 
   $fragments = explode(" ", $macro, 2);
   $cmd = $fragments[0];
-  $args = $fragments[1];
+  if(isset($fragments[1])) $args = $fragments[1]; else $args = '';
 
 //  if($ViewMacroEngine[$cmd] != '')
 //    { return new_entity(array('raw', $ViewMacroEngine[$cmd]($args))); }
@@ -592,18 +592,18 @@ function parse_indents($text)
         // Loop through and look for prefix characters in common with the
         // previous line.
         for ($i = 0;
-            $i < $MaxNesting && ($last_prefix[$i] != '' || $result[1][$i] != '');
+            $i < $MaxNesting && ((isset($last_prefix[$i]) && $last_prefix[$i] != '') || (isset($result[1][$i]) && $result[1][$i] != ''));
             $i++)
         {
-            if ($last_prefix[$i] == $result[1][$i])
+            if (isset($last_prefix[$i]) && isset($result[1][$i]) && ($last_prefix[$i] == $result[1][$i]))
                 { continue; }
-            if ($last_prefix[$i] == '')
+            if (!isset($last_prefix[$i]) || $last_prefix[$i] == '')
                 { break; }
-            if ($last_prefix[$i] != $result[1][$i])
+            if (!isset($result[1][$i]) || $last_prefix[$i] != $result[1][$i])
             {
-                // Uh-oh.  We're different.  End any dangling lists from the
+                // Uh-oh.  We're different.  End any dangling lists from the '
                 // previous line.
-                for ($j = $i; $j < $MaxNesting && $last_prefix[$j] != ''; $j++)
+                for ($j = $i; $j < $MaxNesting && (isset($last_prefix[$j]) && $last_prefix[$j] != ''); $j++)
                 {
                     $fixup = entity_listitem($last_prefix[$j], 'end')
                         . entity_list($last_prefix[$j], 'end')
@@ -619,14 +619,14 @@ function parse_indents($text)
 
         // End the preceding line's list item if we're starting another one
         // at the same level.
-        if ($i > 0 && $result[1][$i] == '')
+        if ($i > 0 && (!isset($result[1][$i]) || $result[1][$i] == ''))
             { $fixup = $fixup . entity_listitem($last_prefix[$i - 1], 'end'); }
 
         // Start fresh new lists for this line as needed.
         // We start all but the last one as *indents* (definition lists)
         // instead of what they really may appear as, since their function is
         // really just to indent.
-        for (; $i < $MaxNesting - 1 && $result[1][$i + 1] != ''; $i++)
+        for (; $i < $MaxNesting - 1 && (isset($result[1][$i+1]) && $result[1][$i + 1] != ''); $i++)
         {
             $result[1][$i] = ':';       // Pretend to be an indent.
             $fixup = $fixup
@@ -634,7 +634,7 @@ function parse_indents($text)
                 . entity_listitem(':', 'start');
         }
 
-        if ($result[1][$i] != '')
+        if (isset($result[1][$i]) && $result[1][$i] != '')
         {
             $fixup = $fixup
                 . entity_list($result[1][$i], 'start');
@@ -736,6 +736,10 @@ function parse_elements($text)
 function generate_element($text)
 {
   global $Entity, $DisplayEngine;
+
+  for ($i = 1; $i < 6; $i++)
+    if (!isset($Entity[$text][$i]))
+        $Entity[$text][$i] = '';
 
   return $DisplayEngine[$Entity[$text][0]]($Entity[$text][1],
                                            $Entity[$text][2],

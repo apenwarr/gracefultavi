@@ -227,7 +227,7 @@ class PageStore
             $current = &$tree;
             foreach ($nodes as $node)
             {
-                if (!$current[$node])
+                if (!isset($current[$node]))
                     $current[$node] = array();
                 $current = &$current[$node];
             }

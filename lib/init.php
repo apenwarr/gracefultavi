@@ -13,7 +13,6 @@ require('lib/url.php');
 require('lib/messages.php');
 require('lib/pagestore.php');
 require('lib/rate.php');
-//require('parse/schedulator.php');
 
 $PgTbl = $DBTablePrefix . 'pages';
 $IwTbl = $DBTablePrefix . 'interwiki';
@@ -35,14 +34,14 @@ $Entity = array();                      // Global parser entity list.
 
 if(get_magic_quotes_gpc())
 {
-  $document = stripslashes($document);
-  $categories = stripslashes($categories);
-  $comment = stripslashes($comment);
-  $page = stripslashes($page);
+  if(isset($document)) $document = stripslashes($document);
+  if(isset($categories)) $categories = stripslashes($categories);
+  if(isset($comment)) $comment = stripslashes($comment);
+  if(isset($page)) $page = stripslashes($page);
 }
 
 // Read username from htaccess login
-$UserName = $_SERVER["PHP_AUTH_USER"];
+if(isset($_SERVER["PHP_AUTH_USER"])) $UserName = $_SERVER["PHP_AUTH_USER"];
 /*
 $userinfo = posix_getpwnam($UserName);
 
@@ -58,7 +57,7 @@ $UserName = str_replace(" ", "", $UserName);
 //$UserInfo = posix_getpwnam($PHP_AUTH_USER);
 //    { $UserName = urldecode($result[1]); }
 
-$prefstr = $HTTP_COOKIE_VARS[$CookieName];
+if(isset($HTTP_COOKIE_VARS[$CookieName])) $prefstr = $HTTP_COOKIE_VARS[$CookieName];
 //$prefstr='';
 
 if(!empty($prefstr))
@@ -101,8 +100,8 @@ if($dir=opendir("$WorkingDirectory/macros"))
            if($pieces[count($pieces)-1]=="php")
            {
                require_once("macros/$file");
-               eval("\$ViewMacroEngine[$name]=new Macro_$name;");
-               if($ViewMacroEngine[$name]->trigger)
+               eval("\$ViewMacroEngine['$name']=new Macro_$name;");
+               if(isset($ViewMacroEngine[$name]->trigger))
                {
                   // Macro has an alternate trigger defined, use that 
                   // instead of the macro name.
@@ -120,4 +119,5 @@ if($dir=opendir("$WorkingDirectory/macros"))
     }
     closedir($dir);
 }
+
 ?>

@@ -29,7 +29,7 @@ function template_common_prologue($args)
     global $shortcutIcon, $AdditionalHeader;
     global $HomePage;
 
-    if($SeparateTitleWords) { $args['title'] = html_split_name($args['title']); }
+    if ($SeparateTitleWords) { $args['title'] = html_split_name($args['title']); }
 
     global $pagestore;
 ?>
@@ -38,7 +38,7 @@ function template_common_prologue($args)
 <head>
 <meta name="KEYWORDS" content="<?php print $MetaKeywords; ?>">
 <meta name="DESCRIPTION" content="<?php print $MetaDescription; ?>">
-<?php if($args['norobots']) {?>
+<?php if ($args['norobots']) {?>
     <meta name="ROBOTS" content="NOINDEX, NOFOLLOW">
 <?php } ?>
 <link rel="STYLESHEET" href="<?php print $StyleScript; ?>" type="text/css">
@@ -66,22 +66,22 @@ if ($AdditionalHeader) { include($AdditionalHeader); }
 
 <?php
 print '<h1>' . $args['heading'];
-if($args['headlink'] != '')
+if ($args['headlink'] != '')
 {
     print '<a class="title" href="' . backlinksURL($args['headlink']) . '">';
-    if($SeparateHeaderWords)
+    if ($SeparateHeaderWords)
         print html_split_name($args['headlink']);
     else
         print $args['headlink'];
     print '</a>';
 }
 
-if(count($twin = $pagestore->twinpages($args['headlink'])))
+if (count($twin = $pagestore->twinpages($args['headlink'])))
 {
     // point at the sisterwiki's version
     //print "See also:";
     print "<sup>";
-    foreach($twin as $site)
+    foreach ($twin as $site)
       { print " " . html_twin($site[0], $site[1]); }
     print "</sup>";
 }   
@@ -105,8 +105,7 @@ print $args['headsufx'] . '</h1>';
 if ( $args['headlink']
      && $args['headlink'] != $HomePage
      && $args['headlink'] != 'RecentChanges'
-     && $pagestore->getChildren($args['headlink'])
-     )
+     && $pagestore->getChildren($args['headlink']) )
 {
 ?>
 <tr>
@@ -123,12 +122,14 @@ if ( $args['headlink']
 </form>
 
 <?php
-if($args['quote']) {
+if (isset($args['quote']))
+{
     global $pagestore, $ParseEngine;
-    $quotepage = $pagestore->page(AnnoyingQuote);
+    $quotepage = $pagestore->page('AnnoyingQuote');
     $quote = $quotepage->read();
-    if($quotepage->exists()) {
-        foreach(explode("\n\n", $quotepage->text) as $line);
+    if ($quotepage->exists())
+    {
+        foreach (explode("\n\n", $quotepage->text) as $line);
         $yada = $line;
         print '<div align="right"><span class="quote">';
         print parseText($yada, $ParseEngine, $page);
@@ -141,25 +142,25 @@ if($args['quote']) {
 
 <?php
 /*
-if($args['related']) {
+if ($args['related']) {
     global $pagestore;
 
     $pagename = $args['headlink'];
     $list = $pagestore->find($pagename);
     $text = '';
     $i = 0;
-    foreach($list as $page) {
-        if($page != $pagename && $i<5 ) {
+    foreach ($list as $page) {
+        if ($page != $pagename && $i<5 ) {
             $text .= html_ref($page, $page) . html_newline();
         }
         $i++;
     }
-    if($text) {
+    if ($text) {
         print '</td><td valign="top">';
         print '<strong>Related Pages</strong><br>';
         print $text;
     }
-    if($i>5) {
+    if ($i>5) {
         print "<a class=\"title\" href=\"" . findURL($args['headlink']) . "\"><ul><li>More Pages</li></a>";
     }
 }
@@ -167,17 +168,17 @@ if($args['related']) {
 ?>
 
 <?php
-if($args['tree'])
+if (isset($args['tree']))
 {
-    global $pagestore;
+    global $pagestore, $ImagesURL;
 
     $tree = $pagestore->getTreeFromLeaves($HomePage, $args['headlink']);
 
-    if ($tree[$HomePage] && count($tree[$HomePage]) > 0)
+    if (isset($tree[$HomePage]) && count($tree[$HomePage]) > 0)
     {
         // print '</td><td valign="top">';
         // drawTreeOld($tree);
-        print '</td><td><img src="images/spacer.png" alt="" width="20" height="1" border="0">';
+        print '</td><td><img src="$ImagesURL/spacer.png" alt="" width="20" height="1" border="0">';
         print '</td><td valign="top" align="right">';
         drawTree($tree, true, $args['headlink']);
     }
@@ -244,7 +245,7 @@ else
 ?></small>
 
 <?php
-if ($UserName != '' && $args['watch'] != '' && $page != $HomePage && $page != 'RecentChanges')
+if ($UserName != '' && isset($args['watch']) && !empty($args['watch']) && $page != $HomePage && $page != 'RecentChanges')
 {
     if ($pg->isWatched($UserName))
         $caption = 'Remove watch';
@@ -267,7 +268,7 @@ if ($UserName != '' && $args['watch'] != '' && $page != $HomePage && $page != 'R
 <tr><td>
 
 <?php
-// if($args['toolbar']) { print html_toolbar_bottom(); }
+// if ($args['toolbar']) { print html_toolbar_bottom(); }
 //print html_toolbar_bottom();
 
 print html_ref('RecentChanges', 'RecentChanges') . ', ' .
@@ -275,11 +276,11 @@ print html_ref('RecentChanges', 'RecentChanges') . ', ' .
 
 if ($page != 'RecentChanges')
 {
-    if($args['timestamp'])
+    if (isset($args['timestamp']))
     {
         print '<td align="center"><i>Last edited ' . html_time($args['timestamp']);
 
-        if($args['euser'])
+        if (isset($args['euser']))
             print ' by ' . $args['euser'];
         else
             print ' anonymously';
@@ -287,12 +288,12 @@ if ($page != 'RecentChanges')
         print ' <a href="' . historyURL($args['history']) . '">(diff)</a></i><br>';
     }
 
-    if($args['twin'] != '')
+    if (isset($args['twin']) && $args['twin'] != '')
     {
-        if(count($twin = $pagestore->twinpages($args['twin'])))
+        if (count($twin = $pagestore->twinpages($args['twin'])))
         {
             print 'See twins of this page in: ';
-            for($i = 0; $i < count($twin); $i++)
+            for ($i = 0; $i < count($twin); $i++)
             {
                 print html_twin($twin[$i][0], $twin[$i][1]) . ' ';
             }
@@ -300,11 +301,11 @@ if ($page != 'RecentChanges')
         }
     }
 
-    if ($args['edit'])
+    if (isset($args['edit']))
     {
         if ($args['editver'] == 0)
             print '<td align="right"><b><a href="' . editURL($args['edit']) . '">Edit this page</a></b></td>';
-        else if($args['editver'] == -1)
+        else if ($args['editver'] == -1)
             ; //print 'This document cannot be edited';
         else
         {
@@ -346,7 +347,7 @@ if ($page != $HomePage && $page != 'RecentChanges')
         <form method="post" action="<?php print saveURL($args['page']); ?>">
         <div class="form">
         <?php
-        if($args['edit'])
+        if ($args['edit'])
         {
             global $document;
             $document = $pg->read();
@@ -356,7 +357,7 @@ if ($page != $HomePage && $page != 'RecentChanges')
             <input type="hidden" name="appending" value="1">
             <input type="hidden" name="page" value="<?php print $page ?>">
             <?php
-            if(!strcasecmp($page, 'annoyingquote'))
+            if (!strcasecmp($page, 'annoyingquote'))
             {
                 // Tweaked "Add a Comment" for AnnoyingQuote page
             ?>

@@ -19,7 +19,7 @@ function template_save($args) {
     // For now, we simply redirect to the view action for this page.
 
     $newLocation = viewURL($args['page']);
-    if($args['anchor'])
+    if(isset($args['anchor']))
         $newLocation .= "#" . $args['anchor'];
 
     header('Location: ' . $newLocation);

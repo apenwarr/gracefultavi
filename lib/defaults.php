@@ -251,28 +251,6 @@ $DisplayEngine = array(
                    'diff_delete'         => 'html_diff_delete'
                  );
                  
-// $ViewMacroEngine determines what macro names will be processed when
-// displaying a page. For each name, a function must be provided.
-// See parse/macros.php
-
-// Moved to init.php
-
-/*
-require_once("macros/TestMacro.php");
-
-$ViewMacroEngine = array('!'             => 'view_macro_category',
-                         'Anchor'        => 'view_macro_anchor',
-                         'Transclude'    => 'view_macro_transclude',
-                         'PageSize'      => 'view_macro_pagesize',
-                         'LinkTable'     => 'view_macro_linktab',
-                         'OrphanedPages' => 'view_macro_orphans',
-                         'WantedPages'   => 'view_macro_wanted',
-                         'PageLinks'     => 'view_macro_outlinks',
-                         'PageRefs'      => 'view_macro_refs',
-                         'Sched'         => 'view_macro_schedulator'
-                        );
-$ViewMacroEngine[TestMacro] = new Macro_TestMacro;
-*/
 // $SaveMacroEngine determines what save macros will be called after a
 // page is saved.  See parse/save.php
 $SaveMacroEngine = array('parse_define_interwiki',

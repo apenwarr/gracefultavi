@@ -14,37 +14,37 @@ if($_SERVER["PATH_INFO"])
 
 if(!ini_get('register_globals'))
 {
-  $HTTP_REFERER = $HTTP_SERVER_VARS['HTTP_REFERER'];
-  $QUERY_STRING = $HTTP_SERVER_VARS['QUERY_STRING'];
-  $REMOTE_ADDR  = $HTTP_SERVER_VARS['REMOTE_ADDR'];
+  if(isset($HTTP_SERVER_VARS['HTTP_REFERER'])) $HTTP_REFERER = $HTTP_SERVER_VARS['HTTP_REFERER'];
+  if(isset($HTTP_SERVER_VARS['QUERY_STRING'])) $QUERY_STRING = $HTTP_SERVER_VARS['QUERY_STRING'];
+  if(isset($HTTP_SERVER_VARS['REMOTE_ADDR'])) $REMOTE_ADDR  = $HTTP_SERVER_VARS['REMOTE_ADDR'];
 
-  $action       = $HTTP_GET_VARS['action'];
-  $page         = $HTTP_GET_VARS['page'];
-  $ver1         = $HTTP_GET_VARS['ver1'];
-  $ver2         = $HTTP_GET_VARS['ver2'];
-  $find         = $HTTP_GET_VARS['find'];
-  $version      = $HTTP_GET_VARS['version'];
-  $full         = $HTTP_GET_VARS['full'];
-  $branch_search= $HTTP_GET_VARS['branch_search'];
+  if(isset($HTTP_GET_VARS['action'])) $action = $HTTP_GET_VARS['action'];
+  if(isset($HTTP_GET_VARS['page'])) $page = $HTTP_GET_VARS['page'];
+  if(isset($HTTP_GET_VARS['ver1'])) $ver1 = $HTTP_GET_VARS['ver1'];
+  if(isset($HTTP_GET_VARS['ver2'])) $ver2 = $HTTP_GET_VARS['ver2'];
+  if(isset($HTTP_GET_VARS['find'])) $find = $HTTP_GET_VARS['find'];
+  if(isset($HTTP_GET_VARS['version'])) $version = $HTTP_GET_VARS['version'];
+  if(isset($HTTP_GET_VARS['full'])) $full = $HTTP_GET_VARS['full'];
+  if(isset($HTTP_GET_VARS['branch_search'])) $branch_search = $HTTP_GET_VARS['branch_search'];
 
-  $Preview      = $HTTP_POST_VARS['Preview'];
-  $Save         = $HTTP_POST_VARS['Save'];
-  $archive      = $HTTP_POST_VARS['archive'];
-  $auth         = $HTTP_POST_VARS['auth'];
-  $categories   = $HTTP_POST_VARS['categories'];
-  $cols         = $HTTP_POST_VARS['cols'];
-  $comment      = $HTTP_POST_VARS['comment'];
-  $days         = $HTTP_POST_VARS['days'];
-  $discard      = $HTTP_POST_VARS['discard'];
-  $document     = $HTTP_POST_VARS['document'];
-  $hist         = $HTTP_POST_VARS['hist'];
-  $min          = $HTTP_POST_VARS['min'];
-  $nextver      = $HTTP_POST_VARS['nextver'];
-  $rows         = $HTTP_POST_VARS['rows'];
-  $tzoff        = $HTTP_POST_VARS['tzoff'];
-  $user         = $HTTP_POST_VARS['user'];
-  $minoredit    = $HTTP_POST_VARS['minoredit'];
-  $pagefrom     = $HTTP_POST_VARS['pagefrom'];
+  if(isset($HTTP_POST_VARS['Preview'])) $Preview = $HTTP_POST_VARS['Preview'];
+  if(isset($HTTP_POST_VARS['Save'])) $Save = $HTTP_POST_VARS['Save'];
+  if(isset($HTTP_POST_VARS['archive'])) $archive = $HTTP_POST_VARS['archive'];
+  if(isset($HTTP_POST_VARS['auth'])) $auth = $HTTP_POST_VARS['auth'];
+  if(isset($HTTP_POST_VARS['categories'])) $categories = $HTTP_POST_VARS['categories'];
+  if(isset($HTTP_POST_VARS['cols'])) $cols = $HTTP_POST_VARS['cols'];
+  if(isset($HTTP_POST_VARS['comment'])) $comment = $HTTP_POST_VARS['comment'];
+  if(isset($HTTP_POST_VARS['days'])) $days = $HTTP_POST_VARS['days'];
+  if(isset($HTTP_POST_VARS['discard'])) $discard = $HTTP_POST_VARS['discard'];
+  if(isset($HTTP_POST_VARS['document'])) $document = $HTTP_POST_VARS['document'];
+  if(isset($HTTP_POST_VARS['hist'])) $hist = $HTTP_POST_VARS['hist'];
+  if(isset($HTTP_POST_VARS['min'])) $min = $HTTP_POST_VARS['min'];
+  if(isset($HTTP_POST_VARS['nextver'])) $nextver = $HTTP_POST_VARS['nextver'];
+  if(isset($HTTP_POST_VARS['rows'])) $rows = $HTTP_POST_VARS['rows'];
+  if(isset($HTTP_POST_VARS['tzoff'])) $tzoff = $HTTP_POST_VARS['tzoff'];
+  if(isset($HTTP_POST_VARS['user'])) $user = $HTTP_POST_VARS['user'];
+  if(isset($HTTP_POST_VARS['minoredit'])) $minoredit = $HTTP_POST_VARS['minoredit'];
+  if(isset($HTTP_POST_VARS['pagefrom'])) $pagefrom = $HTTP_POST_VARS['pagefrom'];
 }
 require('lib/init.php');
 require('parse/transforms.php');
@@ -96,25 +96,4 @@ if(!empty($ActionList[$action]))
 // Expire old versions, etc.
 $pagestore->maintain();
 
-
-/*
-if ($UserName == 'mich' && $page == 'mich')
-{
-    $pages = $pagestore->getAllPageNames();
-
-    foreach ($pages as $page)
-    {
-        $backlinks = $pagestore->getBacklinks($page);
-        $parents = $pagestore->getParents($page);
-
-        if ($diff = array_diff($parents, $backlinks))
-        {
-           print html_ref($page, $page) . ": ";
-           foreach ($diff as $i)
-               print "$i ";
-           print "<br>";
-        }
-    }
-}
-*/
 ?>
