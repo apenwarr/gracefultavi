@@ -1,0 +1,40 @@
+-- MySQL dump 8.22
+--
+-- Host: mai    Database: schedulator
+---------------------------------------------------------
+-- Server version	3.23.47
+
+--
+-- Table structure for table 'Milestone'
+--
+
+DROP TABLE IF EXISTS Milestone;
+CREATE TABLE Milestone (
+  ixMilestone int(11) NOT NULL auto_increment,
+  sMilestone varchar(200) NOT NULL default '',
+  nSub int(11) NOT NULL default '0',
+  dtDue date NOT NULL default '0000-00-00',
+  PRIMARY KEY  (ixMilestone)
+) TYPE=MyISAM;
+
+--
+-- Table structure for table 'Task'
+--
+
+DROP TABLE IF EXISTS Task;
+CREATE TABLE Task (
+  fValid tinyint(4) NOT NULL default '1',
+  ixTask int(11) NOT NULL auto_increment,
+  fDone tinyint(4) NOT NULL default '0',
+  sPerson varchar(64) NOT NULL default '',
+  sTask varchar(200) NOT NULL default '',
+  sSubtask varchar(200) NOT NULL default '',
+  sFixFor varchar(128) NOT NULL default '',
+  hrsOrigEst int(11) NOT NULL default '0',
+  hrsCurrEst int(11) NOT NULL default '0',
+  hrsElapsed int(11) NOT NULL default '0',
+  dtDue date NOT NULL default '0000-00-00',
+  PRIMARY KEY  (ixTask),
+  KEY sPerson (sPerson,sFixFor)
+) TYPE=MyISAM;
+

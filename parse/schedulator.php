@@ -6,6 +6,7 @@ global $sch_load;
 global $sch_bugs;
 global $sch_curday;
 global $sch_got_bug;
+global $sch_unknown_fixfor;
 global $bug_h;
 
 function bug_person($user)
@@ -61,13 +62,17 @@ function bug_list($user, $fixfor, $startdate, $enddate)
     if ($user)
     {
 	$personid = bug_person($user);
-	$userquery = "  and (b.ixPersonAssignedTo=$personid " .
-	  " or (e.ixPerson=$personid and e.sVerb like 'RESOLVED%' " .
-	  "     and e.dt >= '$startdate')) ";
+	$userquery = "  and (" .
+	  " (b.ixPersonAssignedTo=$personid and sStatus='ACTIVE') " .
+	  " or (sStatus<>'ACTIVE' and e.ixPerson=$personid " .
+	  "        and e.sVerb like 'RESOLVED%' " .
+	  "     and e.dt >= '$startdate')" .
+	  ") ";
     }
 
     $query = "select distinct " . 
-      "b.ixBug,sStatus,sTitle,hrsOrigEst,hrsCurrEst,hrsElapsed " .
+      "b.ixBug,sStatus,sTitle,hrsOrigEst,hrsCurrEst,hrsElapsed, " .
+      "  ifnull(f.dt, '2099/9/9') as sortdate " .
       "from Bug as b, BugEvent as e, FixFor as f, Status as s " .
       "where e.ixBug=b.ixBug " .
       "  and f.ixFixFor=b.ixFixFor " .
@@ -75,7 +80,7 @@ function bug_list($user, $fixfor, $startdate, $enddate)
       $endquery .
       $userquery .
       $ffquery .
-      "  order by f.dt, sFixFor, ixPriority, ixBug ";
+      "  order by sortdate, sFixFor, ixPriority, ixBug ";
     #print "(($query))<p>";
     $result = mysql_query($query, $bug_h);
     if (!$result)
@@ -105,9 +110,10 @@ function bug_get($bugid)
     
     bug_init();
     $result = mysql_query("select sTitle,hrsOrigEst,hrsCurrEst,hrsElapsed, " .
-			  "    sStatus " .
-			  "from Bug as b, Status as s " .
+			  "    sStatus,sFixFor " .
+			  "from Bug as b, Status as s, FixFor as f " .
 			  "where s.ixStatus=b.ixStatus " .
+			  "  and f.ixFixFor=b.ixFixFor " .
 			  "  and ixBug=" . ($bugid+0),
 			  $bug_h);
     $row = mysql_fetch_row($result);
@@ -123,11 +129,108 @@ function bug_link($bugid)
     return "<a href='http://nits/FogBUGZ3/?$bugid'>$bugid</a>";
 }
 
-
 function bug_title($bugid)
 {
     $bug = bug_get($bugid);
     return $bug[0];
+}
+
+function bug_set_release($fixfor, $dt)
+{
+    global $bug_h;
+    bug_init();
+    
+    $query = "delete from schedulator.Milestone " .
+         "  where sMilestone='$fixfor' and nSub=0";
+    $result = mysql_query($query, $bug_h);
+
+    $query = "insert into schedulator.Milestone " .
+         "  (sMilestone, nSub, dtDue) " .
+         "  values ('$fixfor', 0, '$dt')";
+    $result = mysql_query($query, $bug_h);
+}
+
+function bug_set_milestones($fixfor, $dates)
+{
+    global $bug_h;
+    bug_init();
+    
+    $query = "delete from schedulator.Milestone " .
+         "  where sMilestone='$fixfor' and nSub>0";
+    $result = mysql_query($query, $bug_h);
+    if (!$result)
+      print mysql_error($bug_h);
+    
+    $n = 1;
+    foreach ($dates as $d)
+    {
+	$query = "insert into schedulator.Milestone " .
+	  "  (sMilestone, nSub, dtDue) " .
+	  "  values ('$fixfor', $n, '$d')";
+	$result = mysql_query($query, $bug_h);
+	if (!$result)
+	  print mysql_error($bug_h);
+	$n++;
+    }
+}
+
+function bug_get_milestones($fixfor)
+{
+    global $bug_h;
+    bug_init();
+    
+    $query = "select distinct dtDue from schedulator.Milestone " .
+         "  where sMilestone='$fixfor' and nSub>0 order by dtDue";
+    $result = mysql_query($query, $bug_h);
+    if (!$result)
+      print mysql_error($bug_h);
+    
+    $a = array();
+    while ($row = mysql_fetch_row($result))
+	array_push($a, $row[0]);
+    return $a;
+}
+
+function bug_add_task($user, $fixfor, $t)
+{
+    global $bug_h;
+    bug_init();
+    
+    $task = mysql_escape_string($t[0]);
+    $subtask = mysql_escape_string($t[1]);
+    $query = "insert into schedulator.Task " .
+      "  (sPerson, sFixFor, " .
+      "      sTask, sSubTask, " .
+      "      hrsOrigEst, hrsCurrEst, hrsElapsed, dtDue, fDone) " .
+      "  values ('$user', '$fixfor', \"$task\", \"$subtask\", " .
+      "            $t[2], $t[3], $t[4], '$t[5]', $t[6])";
+    $result = mysql_query($query, $bug_h);
+    if (!$result)
+      print 'x-' . mysql_error($bug_h);
+}
+
+function bug_add_tasks($user, $fixfor, $tasks)
+{
+    foreach ($tasks as $t)
+      bug_add_task($user, $fixfor, $t);
+}
+
+function bug_start_user($user)
+{
+    global $bug_h;
+    bug_init();
+    
+    $query = "update schedulator.Task set fValid=0 where sPerson='$user'";
+    $result = mysql_query($query, $bug_h);
+}
+
+function bug_finish_user($user)
+{
+    global $bug_h;
+    bug_init();
+    
+    $query = "delete from schedulator.Task where fValid=0";
+    $result = mysql_query($query, $bug_h);
 }
 
 
@@ -223,10 +326,36 @@ function sch_genline($feat, $task, $orig, $curr, $elapsed, $left, $due)
       "$junk2</td></tr>";
 }
 
-function sch_line($feat, $task, $_orig, $_curr, $_elapsed, $done)
+function sch_line($feat, $task, $orig, $curr, $elapsed, $remain, $done)
 {
     global $sch_curday, $sch_bugs, $sch_got_bug;
     
+    if ($done)
+      $sremain = 'done';
+    else if (!$remain)
+      $sremain = '';
+    else
+      $sremain = sch_period($remain);
+    
+    $sch_curday = sch_add_hours($sch_curday, $curr);
+    $due = sch_format_day($sch_curday);
+    if ((!$curr || $remain) && !$done 
+	&& floor($sch_curday) < floor(time()/24/60/60))
+      $due = "<font color=red>$due</font>";
+    
+    return sch_genline($feat, $task,
+		       sch_period($orig), sch_period($curr),
+		       sch_period($elapsed), $sremain,
+		       $due);
+}
+
+function sch_bug($feat, $task, $_orig, $_curr, $_elapsed, $done)
+{
+    global $sch_user, $sch_curday, $sch_bugs;
+    global $sch_got_bug, $sch_unknown_fixfor;
+    
+    $xfeat = $feat;
+    $fixfor = '';
     if (preg_match('/^[0-9]+$/', $feat))
     {
 	$sch_got_bug[$feat] = 1;
@@ -236,7 +365,8 @@ function sch_line($feat, $task, $_orig, $_curr, $_elapsed, $done)
 	if (!$_curr)    $_curr = $bug[2];
 	if (!$_elapsed) $_elapsed = $bug[3];
 	if (!$done && $bug[4] != 'ACTIVE') $done = 1;
-	$feat = bug_link($feat);
+	$fixfor = $bug[5];
+	$xfeat = bug_link($feat);
     }
     
     $orig = sch_parse_period($_orig);
@@ -248,22 +378,14 @@ function sch_line($feat, $task, $_orig, $_curr, $_elapsed, $done)
     if (!$remain && $curr)
       $done = 1;
 
-    if ($done)
-      $sremain = 'done';
-    else if (!$remain)
-      $sremain = '';
+    $ret = sch_line($xfeat, $task, $orig, $curr, $elapsed, $remain, $done);
+    $buga = array($feat, $task, $orig, $curr, $elapsed, 
+		  sch_format_day($sch_curday), $done);
+    if ($fixfor)
+      bug_add_task($sch_user, $fixfor, $buga);
     else
-      $sremain = sch_period($remain);
-    
-    $sch_curday = sch_add_hours($sch_curday, $curr);
-    $due = sch_format_day($sch_curday);
-    if ((!$curr || $remain) && floor($sch_curday) < floor(time()/24/60/60))
-      $due = "<font color=red>$due</font>";
-    
-    return sch_genline($feat, $task,
-		       sch_period($orig), sch_period($curr),
-		       sch_period($elapsed), $sremain,
-		       $due);
+      array_push($sch_unknown_fixfor, $buga);
+    return $ret;
 }
 
 function sch_extrabugs($user, $fixfor, $enddate)
@@ -276,7 +398,7 @@ function sch_extrabugs($user, $fixfor, $enddate)
     foreach ($a as $bugid => $bug)
     {
 	if (!$sch_got_bug[$bugid])
-	    $ret .= sch_line($bugid, $bug[0], $bug[1], $bug[2], $bug[3], 0);
+	    $ret .= sch_bug($bugid, $bug[0], $bug[1], $bug[2], $bug[3], 0);
     }
     return $ret;
 }
@@ -285,15 +407,15 @@ function sch_milestone($descr, $name, $due)
 {
     global $sch_user, $sch_load, $sch_curday;
     
-    if (!$due)
-      $due = bug_duedate($name);
+    # if no due date was given, assume it's the current date for purposes
+    # of collecting extra bugs.
     if (!$due)
       $tmpdue = sch_format_day($sch_curday);
     else 
       $tmpdue = $due;
-	
     $ret .= sch_extrabugs($sch_user, $name, $tmpdue);
     
+    # if no due date was given, make it the day after the last bug finished.
     if (!$due)
       $due = sch_format_day($sch_curday+1);
     
@@ -302,8 +424,8 @@ function sch_milestone($descr, $name, $due)
     $newday = sch_parse_day($due);
     $xdue = sch_format_day($newday);
     $slip = ($newday-$sch_curday)*8 / $sch_load;
-    $ret .= sch_line("SLIPPAGE (to $xdue)", "", $slip, $slip, 0, 0);
-    $ret .= sch_line("<b>$descr: $name</b><br>&nbsp;", '', 0,0,0, 0);
+    $ret .= sch_line("SLIPPAGE (to $xdue)", "", 0,0,0,$slip, 0);
+    $ret .= sch_line("<b>$descr: $name</b><br>&nbsp;", '', 0,0,0,0, 0);
     
     $sch_curday = $old_curday; # slippage doesn't actually take time... right?
     
@@ -313,6 +435,7 @@ function sch_milestone($descr, $name, $due)
 function view_macro_schedulator($text)
 {
     global $sch_start, $sch_curday, $sch_user, $sch_load, $sch_got_bug;
+    global $sch_unknown_fixfor;
     
     $ret = "";
     
@@ -343,8 +466,10 @@ function view_macro_schedulator($text)
 	  "</th></tr>\n";
 	$sch_user = $words[1];
 	$sch_start = $sch_curday = sch_parse_day($words[2]);
+	$sch_unknown_fixfor = array();
 	$sch_load = 1.0;
-	$ret .= sch_line("START", "", '', '', '', 0);
+	$ret .= sch_line("START", "", 0,0,0,0, 0);
+	bug_start_user($sch_user);
     }
     else if ($words[0] == "LOADFACTOR")
     {
@@ -364,21 +489,31 @@ function view_macro_schedulator($text)
     {
 	$cmd = array_shift($words);
 	$msname = array_shift($words);
-	foreach ($words as $msdue)
-	    $ret .= sch_milestone("BOUNCE", $msname, $msdue);
+	bug_set_milestones($msname, $words);
     }
     else if ($words[0] == "MILESTONE" || $words[0] == "RELEASE"
 	     || $words[0] == "BOUNCE")
     {
 	$msname = $words[1];
 	$msdue = $words[2];
+	
+	$extra_due = bug_get_milestones($msname);
+	foreach ($extra_due as $xdue)
+	    $ret .= sch_milestone("BOUNCE", $msname, $xdue);
+	
 	$ret .= sch_milestone($words[0], $msname, $msdue);
+	if (!$msdue)
+	  $msdue = bug_duedate($msname);
+	bug_set_release($msname, $msdue);
+	bug_add_tasks($sch_user, $msname, $sch_unknown_fixfor);
+	$sch_unknown_fixfor = array();
     }
     else if ($words[0] == "END")
     {
 	$ret .= sch_extrabugs($sch_user, '', '');
-	
-	$ret .= sch_line("END", "", '', '', '', 0);
+	bug_add_tasks($sch_user, 'UNKNOWN', $sch_unknown_fixfor);
+	bug_finish_user($sch_user);
+	$ret .= sch_line("END", "", 0,0,0,0, 0);
 	$ret .= "</table>";
     }
     else
@@ -388,7 +523,7 @@ function view_macro_schedulator($text)
 	$est = $words[2];
 	$elapsed = $words[3];
 	  
-	$ret .= sch_line($bug, $task, $est, $est, $elapsed, 0);
+	$ret .= sch_bug($bug, $task, $est, $est, $elapsed, 0);
     }
 
     return $ret;
