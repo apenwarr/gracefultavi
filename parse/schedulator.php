@@ -53,7 +53,9 @@ function bug_list($user, $fixfor, $startdate, $enddate)
       $ffquery = "  and f.sFixFor = '$fixfor' ";
     
     # any bug opened before the end date counts toward that deadline, even
-    # if the deadline has passed and the bug isn't done.
+    # if the deadline has *now* passed and the bug isn't done.  Any bug
+    # opened *after* the end date is obviously not intended for that
+    # milestone.
     if ($enddate)
       $endquery = "  and b.dtOpened < '$enddate' ";
     
@@ -133,6 +135,21 @@ function bug_title($bugid)
 {
     $bug = bug_get($bugid);
     return $bug[0];
+}
+
+function bug_milestone_realname($name)
+{
+    global $bug_h;
+    bug_init();
+    
+    $result = mysql_query("select sFixFor from FixFor " .
+    			  "where sFixFor like '$name%' " .
+    			  "limit 1");
+    $row = mysql_fetch_row($result);
+    if (!$row)
+      return $name;
+    else
+      return $row[0];
 }
 
 function bug_set_release($fixfor, $dt)
@@ -571,13 +588,13 @@ function view_macro_schedulator($text)
     else if ($words[0] == "SETBOUNCE")
     {
 	$cmd = array_shift($words);
-	$msname = array_shift($words);
+	$msname = bug_milestone_realname(array_shift($words));
 	bug_set_milestones($msname, $words);
     }
     else if ($words[0] == "MILESTONE" || $words[0] == "RELEASE"
 	     || $words[0] == "BOUNCE")
     {
-	$msname = $words[1];
+	$msname = bug_milestone_realname($words[1]);
 	$msdue = $words[2];
 	
 	$extra_due = bug_get_milestones($msname);
