@@ -516,7 +516,7 @@ function sch_line($feat, $task, $orig, $curr, $elapsed, $remain, $done,
       $sremain = sch_period($remain);
     
     $today = sch_today();
-    $was_over_elapsed = ($sch_elapsed_curday > $today);
+    $was_over_elapsed = ($sch_elapsed_curday - 4 > $today);
     
     $sch_curday = sch_add_hours($sch_curday, $curr);
     $sch_elapsed_curday = sch_add_hours($sch_elapsed_curday, $elapsed);
