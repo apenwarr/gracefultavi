@@ -372,9 +372,11 @@ function parse_newline($text)
 
 function parse_horiz($text)
 {
-//  return preg_replace("/-{4,}(\\n(\\r)?)?/e", "new_entity(array('hr'))",
+    $text = preg_replace("/^-{4,}\s*/e", "new_entity(array('hr'))",
+                         $text, -1);
+
     return preg_replace("/&lt;hr>(\\n(\\r)?)?/e", "new_entity(array('hr'))",
-                      $text, -1);
+                        $text, -1);
 }
 
 function parse_nowiki($text)
