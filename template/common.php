@@ -1,5 +1,5 @@
 <?php
-// $Id: common.php,v 1.1.1.2 2003/03/15 03:54:58 apenwarr Exp $
+// $Id: common.php,v 1.2 2003/03/24 21:58:22 mich Exp $
 
 // This function generates the common prologue and header
 // for the various templates.
@@ -60,8 +60,6 @@ function template_common_prologue($args)
 print '<h1>' . $args['heading'];
 if($args['headlink'] != '')
 {
-    print $WikiName . ' &gt; ';
-
     print '<a class="title" href="' . backlinksURL($args['headlink']) . '">';
     if($SeparateHeaderWords)
         print html_split_name($args['headlink']);
