@@ -124,6 +124,15 @@ function html_time($timestamp)
                  substr($timestamp, 6, 2),  substr($timestamp, 0, 4));
   return date('D, d M Y H:i:s', $time + $TimeZoneOff * 60);
 }
+function html_time2($timestamp)
+{
+  global $TimeZoneOff;
+  if($timestamp == '') { return 'never'; }
+  $time = mktime(substr($timestamp, 8, 2),  substr($timestamp, 10, 2),
+                 substr($timestamp, 12, 2), substr($timestamp, 4, 2),
+                 substr($timestamp, 6, 2),  substr($timestamp, 0, 4));
+  return date('M d, Y H:i:s', $time + $TimeZoneOff * 60);
+}
 function html_gmtime($timestamp)
 {
   $time = mktime(substr($timestamp, 8, 2),  substr($timestamp, 10, 2),
@@ -313,7 +322,7 @@ function html_history_entry($page, $version, $time, $host, $user, $c1, $c2,
          "<input type=\"radio\" name=\"ver2\" value=\"$version\"" .
          ($c2 ? ' checked="checked"' : '') . " /></td>\n" .
          "<td><a href=\"" . viewURL($page, $version) . "\">" .
-         html_time($time) . "</a> . . . . " .
+         html_time2($time) . "</a> . . . . " .
          ($user == '' ? $host : html_ref($user, $user, $host)) .
          ($comment == '' ? '' :
            (' ' . html_bold_start() . '[' .
