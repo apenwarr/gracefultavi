@@ -41,7 +41,7 @@ function drawTree($tree, $smallFont = 0, $page = '', $i = 0, $previousEdges = ''
             $drawEdges = preg_replace("/([0-3])/", "<img src=\"images/tree-edge\\1.png\" alt=\"\" align=\"top\" width=\"19\" height=\"17\" border=\"0\">", $drawEdges);
 
             $output = html_ref($name, $name);
-            if ($name == $page) $output = "<a name=\"$name\"><b>$output</b></a>";
+            if ($name == $page) $output = "<a name=\"$name\"></a><b>$output</b>";
             if ($smallFont) $output = "<small>$output</small>";
             $output = "<tr><td nowrap>$drawEdges$output</td></tr>\n";
             print $output;
