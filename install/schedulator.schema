@@ -33,6 +33,7 @@ CREATE TABLE Task (
   hrsOrigEst int(11) NOT NULL default '0',
   hrsCurrEst int(11) NOT NULL default '0',
   hrsElapsed int(11) NOT NULL default '0',
+  hrsRemain  int(11) NOT NULL default '0',
   dtDue date NOT NULL default '0000-00-00',
   PRIMARY KEY  (ixTask),
   KEY sPerson (sPerson,sFixFor)
