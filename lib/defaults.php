@@ -133,9 +133,6 @@ $RateEdit   = 20;
 // $TempDir determines the location of temp files used for computing diffs.
 $TempDir = '/tmp';
 
-// $DiffCmd determines what command to run to compute diffs.
-$DiffCmd = "$DOCUMENT_ROOT/wiki/diff"; //echo - stable
-
 // $MaxPostLen determines the size, in bytes, of the largest edit allowed.
 $MaxPostLen = 204800;
 

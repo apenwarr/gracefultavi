@@ -55,26 +55,28 @@ function action_content()
     print "</head>\n";
     print "<body>";
 
-    if ($drawFrontPage)
+    if (isset($drawFrontPage))
         print '<a href="#content">Wiki content</a><br>';
-    if ($drawOutside)
+
+    if (isset($drawOutside))
         print '<a href="#outside">Singletons, lost branches and cycles</a><br>';
-    if ($drawOther)
+
+    if (isset($drawOther))
         print '<a href="#other">Other mysterious cases</a><br>';
 
-    if ($drawFrontPage)
+    if (isset($drawFrontPage))
     {
         print '<a name="content"><h3>Wiki content</h3></a>';
         drawTree($content, false, $page);
     }
 
-    if ($drawOutside)
+    if (isset($drawOutside))
     {
         print '<a name="outside"><h3>Singletons, lost branches and cycles</h3></a>';
         drawTree($tree, false, $page);
     }
 
-    if ($drawOther)
+    if (isset($drawOther))
     {
         print '<a name="other"><h3>Other mysterious cases</h3></a>';
         foreach ($otherPages as $page)

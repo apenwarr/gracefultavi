@@ -519,19 +519,19 @@ function parse_indents($text)
     // Locate the indent prefix characters.
     preg_match('/^(\s*)([:\\-\\*#>])([^:\\-\\*#>].*\\n?)$/', $text, $result);
 
-    $indentSpaces = $result[1];
-    $indentChar = $result[2];
-    $indentText = $result[3];
+    if(isset($result[1])) $indentSpaces = $result[1];
+    if(isset($result[2])) $indentChar = $result[2];
+    if(isset($result[3])) $indentText = $result[3];
 
     // No list on last line, no list on this line. Bail out:
-    if ($indentPrevLevel == -1 && !$indentChar && !$indentStealLine)
+    if ($indentPrevLevel == -1 && !isset($indentChar) && !isset($indentStealLine))
         return $text; // Common case fast.
 
     $isBlankLine = ((trim($text) == '') ? 1 : 0);
 
     if (!$indentStealLine)
     {
-        if ($indentChar)
+        if (isset($indentChar))
         {
             if ($auto_fix_indent_leap)
                 $indentCurLevel = min($indentPrevLevel + 1, strlen($indentSpaces), $MaxNesting);
@@ -542,6 +542,10 @@ function parse_indents($text)
 
             if ($indentCurLevel > $indentPrevLevel)
             {
+                // add any pending <p>
+                $fixup .= $pending_p;
+                $pending_p = '';
+
                 if ($auto_fix_indent_leap)
                     $fixup .= entity_list($indentChar, 'start');
                 else
@@ -562,7 +566,7 @@ function parse_indents($text)
                 if ($indentPrefixString[$indentCurLevel] != $indentChar)
                     $fixup .= entity_list($indentPrefixString[$indentCurLevel], 'end');
 
-                // add any pending <p> after the last list end
+                // add any pending <p>
                 $fixup .= $pending_p;
                 $pending_p = '';
 
@@ -609,7 +613,7 @@ function parse_indents($text)
                     // We're at a lower nesting level, end dangling lists up
                     // to the nesting level specified by the leading spaces
                     // and add any pending <p> after the last list end.
-                    for ($j = $i; $j <= strlen($indentPrefixString); $j++)
+                    for ($j = $i; $j < strlen($indentPrefixString); $j++)
                     {
                         $text = entity_listitem($indentPrefixString[$j], 'end') .
                                 entity_list($indentPrefixString[$j], 'end') .
@@ -639,7 +643,7 @@ function parse_indents($text)
     $indentPrevLineIsBlank = $isBlankLine;
 
     // Check if *we* have a trailing '\' to "steal" the next line.
-    if ($indentChar || $indentStealLine)
+    if (isset($indentChar) || isset($indentStealLine))
     {
         if (preg_match('/(^|[^\\\\])(\\\\\\\\)*\\\\$/', $text))
         {

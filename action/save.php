@@ -8,13 +8,17 @@ require('parse/save.php');
 // Commit an edit to the database.
 function action_save()
 {
-    global $pagestore, $comment, $categories, $archive, $quickadd, $appending;
-    global $Save, $page, $document, $nextver, $REMOTE_ADDR, $UserName;
-    global $MaxPostLen, $UserName, $SaveMacroEngine, $ErrorPageLocked;
-    global $minoredit, $pagefrom;
+    global $archive, $categories, $document, $ErrorPageLocked, $HTTP_POST_VARS;
+    global $MaxPostLen, $minoredit, $nextver, $page, $pagefrom, $pagestore;
+    global $REMOTE_ADDR, $Save, $SaveMacroEngine, $UserName;
+
+    if(isset($HTTP_POST_VARS['quickadd'])) $quickadd = $HTTP_POST_VARS['quickadd'];
+    if(isset($HTTP_POST_VARS['appending'])) $appending = $HTTP_POST_VARS['appending'];
+    if(isset($HTTP_POST_VARS['comment'])) $comment = $HTTP_POST_VARS['comment'];
 
     // added for "Add a Quote" feature for AnnoyingQuote page
-    global $appendingQuote, $quoteAuthor;
+    if(isset($HTTP_POST_VARS['quoteAuthor'])) $quoteAuthor = $HTTP_POST_VARS['quoteAuthor'];
+    if(isset($HTTP_POST_VARS['appendingQuote'])) $appendingQuote = $HTTP_POST_VARS['appendingQuote'];
 
     if (empty($Save))                   // Didn't click the save button.
     {
@@ -28,7 +32,7 @@ function action_save()
     $pg = $pagestore->page($page);
     $pg->read();
 
-    if ($appending)
+    if (isset($appending))
     {
         $document = $pg->text;
         $nextver = $pg->version + 1;
@@ -49,11 +53,11 @@ function action_save()
     }
 
     // "Add a Comment" is "Add a Quote" for specific pages like AnnoyingQuote
-    if ($quickadd && $appendingQuote)
+    if (isset($quickadd) && isset($appendingQuote))
     {
         // if we're appending a quote, instead of a comment
         $quoteAuthor = trim($quoteAuthor);
-        if ($quoteAuthor)
+        if (isset($quoteAuthor))
         {
             // Add author to quote if author provided. Add a leading dash if
             // needed. See strpos help for information about "=== false".
@@ -68,7 +72,7 @@ function action_save()
     // Silently trim string to $MaxPostLen chars.
     $document = substr($document, 0, $MaxPostLen);
 
-    if ($appending)
+    if (isset($appending))
         $document = str_replace("\\\\'", '"', $document);
 
     $document = str_replace("\\", "\\\\", $document);
@@ -78,7 +82,7 @@ function action_save()
     $comment = str_replace("\\", "\\\\", $comment);
     $comment = str_replace("'", "\\'", $comment);
 
-    if ($appending && $quickadd)
+    if (isset($appending) && isset($quickadd))
     {
         // Add new lines if document is not empty.
         if($document) $document = trim($document) . "\n\n";
@@ -128,7 +132,7 @@ function action_save()
 
     // Aligns the browser with an HTML anchor, showing the last added comment (or quote)
     // See: action/save.php, template/save.php, template/view.php
-    if ($quickadd)
+    if (isset($quickadd))
     {
         // if Add a Comment or Add a Quote
         template_save(array('page' => $page, 'text' => $document, 'anchor' => 'pageContentBottom'));
