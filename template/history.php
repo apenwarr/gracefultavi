@@ -1,8 +1,6 @@
 <?php
-// $Id: history.php,v 1.11 2002/01/10 01:31:04 smoonen Exp $
 
 require_once('template/common.php');
-#require_once(TemplateDir . '/common.php');
 
 // The history template is passed an associative array with the following
 // elements:
@@ -13,7 +11,7 @@ require_once('template/common.php');
 
 function template_history($args)
 {
-    global $DiffScript, $full, $ver1;
+    global $DiffScript, $EnableWordDiff, $full, $ver1;
 
     template_common_prologue(array(
         'norobots' => 1,
@@ -29,6 +27,17 @@ function template_history($args)
         'editver'          => $args['editver'],
         'button_backlinks' => 1
     ));
+
+    if ($args['diff_mode'] == 1)
+    {
+        $regular_diff_checked = '';
+        $word_diff_checked = ' checked';
+    }
+    else
+    {
+        $regular_diff_checked = ' checked';
+        $word_diff_checked = '';
+    }
 ?>
 
 <div id="body">
@@ -49,10 +58,15 @@ if ($full)
 <td></td>
 </tr>
 <?php print $args['history']; ?>
-<tr><td colspan="3"><input type="submit" value="Compute Difference"></td></tr>
+<tr><td colspan="3">
+    <input type="submit" value="Compute Difference">
+    <?php if ($EnableWordDiff) : ?>
+    <input type="radio" id="regular_diff" name="diff_mode" value="0"<?=$regular_diff_checked?>><label for="regular_diff">Regular diff</label>
+    <input type="radio" id="word_diff" name="diff_mode" value="1"<?=$word_diff_checked?>><label for="word_diff">Word diff</label>
+    <?php endif; ?>
+</td></tr>
 </table>
 </div>
-
 </form>
 
 <hr><br>
@@ -69,13 +83,11 @@ if ($args['diff'])
 {
     print '<div class="diff">';
     print $args['diff'];
-    print '<div class="diff">';
+    print '</div';
 }
 else
     print 'There were no differences between the selected versions.';
 ?>
-
-</div>
 
 <?php
     template_common_epilogue(array(

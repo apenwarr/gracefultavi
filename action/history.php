@@ -11,7 +11,8 @@ require('lib/headers.php');
 // Display the known history of a page's edits.
 function action_history()
 {
-    global $full, $HistMax, $page, $pagestore, $UserName, $ver1, $ver2;
+    global $diff_mode, $DiffModeCookieName, $EnableWordDiff, $full, $HistMax;
+    global $HTTP_COOKIE_VARS, $page, $pagestore, $UserName, $ver1, $ver2;
 
     $history = $pagestore->history($page);
 
@@ -42,15 +43,39 @@ function action_history()
     $p2 = $pagestore->page($page);
     $p2->version = $latest_ver;
 
-    $diff = diff_compute($p1->read(), $p2->read());
+    if ($EnableWordDiff)
+    {
+        if (!isset($diff_mode))
+            if (isset($HTTP_COOKIE_VARS[$DiffModeCookieName]))
+                $diff_mode = $HTTP_COOKIE_VARS[$DiffModeCookieName];
+            else
+                $diff_mode = 0;
+        if (!isset($HTTP_COOKIE_VARS[$DiffModeCookieName]) ||
+            $diff_mode != $HTTP_COOKIE_VARS[$DiffModeCookieName])
+            setcookie($DiffModeCookieName, $diff_mode, time() + 157680000, "/", false);
+    }
+    else
+        $diff_mode = 0;
+
+    if ($diff_mode == 1)
+    {
+        $diff = wdiff_compute($p1->read(), $p2->read());
+        $diff = wdiff_parse($diff);
+    }
+    else
+    {
+        $diff = diff_compute($p1->read(), $p2->read());
+        $diff = diff_parse($diff);
+    }
 
     template_history(array(
-        'page'    => $page,
-        'history' => $text,
-        'diff'    => diff_parse($diff),
+        'page'      => $page,
+        'history'   => $text,
+        'diff'      => $diff,
         'editver'   => ($UserName && $p2->mutable) ? 0 : -1,
         'timestamp' => $p2->time,
-        'edituser' => $p2->username
+        'edituser'  => $p2->username,
+        'diff_mode' => $diff_mode
     ));
 }
 ?>

@@ -71,6 +71,16 @@ td.diff-removed {
     /* font-color:       red; */
     /* text-decoration:  line-through; */
 }
+ins {
+    background-color: #ccffcc;
+    color:            #000000;
+    text-decoration:  none;
+}
+del {
+    background-color: #ffaaaa;
+    color:            #000000;
+    text-decoration:  none;
+}
 h1 {
     margin-bottom: 0;
 }

@@ -3,9 +3,6 @@
 //   be removed from the database.
 $ExpireLen = 0;
 
-// $DiffCmd determines what command to run to compute diffs.
-$DiffCmd = "/home/nitwiki/Files/diff";
-
 // $UrlPtn establishes the format for URLs in this wiki.
 //   Note that changing this requires a change to parse/transforms.php so
 //   that parse_hyperlinkxxx know how many parentheses are included in $UrlPtn.
@@ -66,7 +63,6 @@ $ParseEngine = array(
 $DiffEngine = array(
                 'parse_elem_flag',
                 'parse_diff_skip',
-//                'parse_diff_message',
                 'parse_diff_color',
                 'parse_htmlisms',
 /*

@@ -28,6 +28,7 @@ if(!ini_get('register_globals'))
   if(isset($HTTP_GET_VARS['branch_search'])) $branch_search = $HTTP_GET_VARS['branch_search'];
   if(isset($HTTP_GET_VARS['redirect_from'])) $redirect_from = $HTTP_GET_VARS['redirect_from'];
   if(isset($HTTP_GET_VARS['no_redirect'])) $no_redirect = $HTTP_GET_VARS['no_redirect'];
+  if(isset($HTTP_GET_VARS['diff_mode'])) $diff_mode = $HTTP_GET_VARS['diff_mode'];
 
   if(isset($HTTP_POST_VARS['Preview'])) $Preview = $HTTP_POST_VARS['Preview'];
   if(isset($HTTP_POST_VARS['Save'])) $Save = $HTTP_POST_VARS['Save'];

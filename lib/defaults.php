@@ -79,6 +79,15 @@ $SeparateLinkWords = 0;
 //   (like user name, etc.) are stored in.
 $CookieName = 'prefs';
 
+// If $EnableWordDiff is set to 1, the "word diff" feature will be enabled. This
+//   uses the external "wdiff" executable to perform the diff instead of the
+//   regular internal diff.
+$EnableWordDiff = 0;
+
+// When $EnableWordDiff is set to 1, $DiffModeCookieName determines the name of
+//   the cookie to store the diff mode preference.
+$DiffModeCookieName = 'diffmode';
+
 // $EditRows and $EditCols determine the default dimensions of the wiki edit
 //   box for users that have not set their preferences.
 $EditRows = 20;
@@ -197,7 +206,6 @@ $ParseEngine = array(
 $DiffEngine = array(
                 'parse_elem_flag',
                 'parse_diff_skip',
-                'parse_diff_message',
                 'parse_diff_color',
                 'parse_htmlisms',
                 'parse_nowiki',
@@ -214,6 +222,15 @@ $DiffEngine = array(
                 'parse_newline',
                 'parse_elements'
               );
+
+// $WdiffEngine indicates what parsing rules will be run when using word diff to
+//   display differences between versions.
+$WdiffEngine = array(
+                 'parse_elem_flag',
+                 'parse_wdiff_tags',
+                 'parse_htmlisms',
+                 'parse_elements'
+               );
 
 // $DisplayEngine indicates what functions will be used to translate wiki
 //   markup elements into actual HTML.  See parse/html.php

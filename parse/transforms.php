@@ -825,22 +825,58 @@ function parse_diff_color($text)
   return $text;
 }
 
-function parse_diff_message($text)
+function parse_wdiff_tags($text)
 {
-  return $text;
+    static $buffer = array();
+    static $hr_done = true;
+    static $is_after = false;
+    static $after_count = 0;
 
-/*
-  global $FlgChr;
+    $buffer_size = 4;
 
-  $text = preg_replace('/(^(' . $FlgChr . '\\d+' . $FlgChr . ')?)\\d[0-9,]*c[0-9,]*$/e',
-                       "q1('\\1').new_entity(array('diff_change'))", $text, -1);
-  $text = preg_replace('/(^(' . $FlgChr . '\\d+' . $FlgChr . ')?)\\d[0-9,]*a[0-9,]*$/e',
-                       "q1('\\1').new_entity(array('diff_add'))", $text, -1);
-  $text = preg_replace('/(^(' . $FlgChr . '\\d+' . $FlgChr . ')?)\\d[0-9,]*d[0-9,]*$/e',
-                       "q1('\\1').new_entity(array('diff_delete'))", $text, -1);
+    $text = preg_replace("/^(.*)$/e",
+                         "'\\1' . new_entity(array('raw', '<br>'))", $text);
 
-  return $text;
-*/
+    $ptn = '/(<\/?(DEL|INS)>)/';
+    if (preg_match($ptn, $text))
+    {
+        $text = preg_replace($ptn . 'e', "new_entity(array('raw', '\\1'))",
+                             $text);
+        if ($buffer)
+        {
+            $text = implode(' ', $buffer) . $text;
+            $buffer = array();
+        }
+        $is_after = true;
+        return $text;
+    }
+    else if ($is_after)
+    {
+        $after_count++;
+        if ($after_count > $buffer_size)
+        {
+            $is_after = false;
+            $after_count = 0;
+            $hr_done = false;
+            return '';
+        }
+        else
+            return $text;
+    }
+    else
+    {
+        array_push($buffer, $text);
+        if (count($buffer) > $buffer_size)
+        {
+            array_shift($buffer);
+            if (!$hr_done)
+            {
+                $hr_done = true;
+                return new_entity(array('raw', '<hr>'));
+            }
+        }
+        return '';
+    }
 }
 
 function parse_table($text)

@@ -3,12 +3,41 @@ require_once("lib/difflib.php");
 
 function diff_compute($text1, $text2)
 {
-    $text1 = explode("\n", $text1);
-    $text2 = explode("\n", $text2);
+    $text1 = explode("\n", "\n".$text1);
+    $text2 = explode("\n", "\n".$text2);
     $diff = new Diff($text1, $text2);
     $formatter = new UnifiedDiffFormatter;
 
     return $formatter->format($diff);
+}
+
+function wdiff_compute($text1, $text2)
+{
+    global $TempDir;
+
+    $num = posix_getpid();  // Comment if running on Windows.
+    // $num = rand();       // Uncomment if running on Windows.
+
+    $temp1 = $TempDir . '/wiki_' . $num . '_1.txt';
+    $temp2 = $TempDir . '/wiki_' . $num . '_2.txt';
+
+    if(!($h1 = fopen($temp1, 'w')) || !($h2 = fopen($temp2, 'w')))
+        { die("ErrorCreatingTemp"); }
+
+    if(fwrite($h1, $text1) < 0 || fwrite($h2, $text2) < 0)
+        { die("ErrorWritingTemp"); }
+
+    fclose($h1);
+    fclose($h2);
+
+    exec('wdiff -n --start-delete="<DEL>" --end-delete="</DEL>" --start-insert="<INS>" --end-insert="</INS>" ' . $temp1 . ' ' . $temp2, $output);
+
+    unlink($temp1);
+    unlink($temp2);
+
+    $output = implode("\n", $output);
+
+    return $output;
 }
 
 function diff_parse($text)
@@ -16,6 +45,13 @@ function diff_parse($text)
   global $DiffEngine;
 
   return parseText($text, $DiffEngine, '');
+}
+
+function wdiff_parse($text)
+{
+  global $WdiffEngine;
+
+  return parseText($text, $WdiffEngine, '');
 }
 
 function timestampToSeconds($timestamp)
