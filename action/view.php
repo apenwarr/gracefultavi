@@ -11,7 +11,7 @@ require('lib/headers.php');
 function action_view()
 {
     global $page, $pagestore, $ParseEngine, $version, $UserName;
-    global $document, $redirect_from;
+    global $document, $redirect_from, $view_source;
 
     $pg = $pagestore->page($page);
 
@@ -36,9 +36,17 @@ function action_view()
 
     gen_headers($pg->time);
 
+    if ($view_source) {
+        $html = wordwrap($pg->text, 80, "\n", true);
+        $html = '<pre>' . htmlspecialchars($html) . '</pre>';
+    } else {
+        $html = parseText($pg->text, $ParseEngine, $page);
+    }
+
     template_view(array(
         'page'      => $page,
-        'html'      => parseText($pg->text, $ParseEngine, $page),
+        'html'      => $html,
+        'view_source' => $view_source,
         'editable'  => $UserName && $pg->mutable,
         'timestamp' => $pg->time,
         'archive'   => $version != '',

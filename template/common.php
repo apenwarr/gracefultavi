@@ -286,14 +286,14 @@ function template_common_epilogue($args)
 </table>
 <NOINDEX>
 <div id="footer">
-<table align="center" class="bottombox" cellspacing="0" cellpadding="0" border="0">
+<table align="center" class="bottombox" border="0">
 <tr>
 <td>
 <small><?php
 if ($UserName)
     print("Logged in as " . html_ref($UserName, $UserName));
 else
-    print("Not <a href=\"login/?$page\">logged in</a>.");
+    print("Not <a href=\"login/?$page\">logged in</a>");
 ?></small>
 <?php
 if ($EnableSubscriptions && isset($EmailSuffix) && $UserName != ''
@@ -305,6 +305,11 @@ if ($EnableSubscriptions && isset($EmailSuffix) && $UserName != ''
 
     print ' | <small><a href="' . pageSubscribeURL($args['subscribe']) . '">' .
           $caption . '</a></small>';
+}
+?>
+<?php
+if (!$UserName) {
+    print ' | <small><a href="' . viewURL($page) . '&view_source=1">View source</a></small>';
 }
 ?>
 </td>

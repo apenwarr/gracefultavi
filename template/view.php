@@ -29,7 +29,7 @@ function template_view($args)
         'toolbar'  => 1,
         'tree'     => 1,
 
-        'button_selected'  => 'view',
+        'button_selected'  => $args['view_source'] ? '' : 'view',
         'button_view'      => 1,
         'timestamp'        => $args['timestamp'],
         'editver'          => $args['editver'],
@@ -58,7 +58,7 @@ print $args['html'];
         'timestamp' => $args['timestamp'],
 
         'headlink'         => $args['page'],
-        'button_selected'  => 'view',
+        'button_selected'  => $args['view_source'] ? '' : 'view',
         'button_view'      => 1,
         #'timestamp'       => $args['timestamp']  already specified
         #'editver'         => $args['editver']  already specified
