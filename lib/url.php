@@ -8,38 +8,35 @@
 // config.php.  Those functions that are redefined will not be
 // redefined here.
 if(!isset($ViewBase))
-  { $ViewBase    = $ScriptBase . '?page='; }
+  { $ViewBase    = $ScriptName . '?page='; }
 if(!isset($EditBase))
-  { $EditBase    = $ScriptBase . '?action=edit&amp;page='; }
+  { $EditBase    = $ScriptName . '?action=edit&amp;page='; }
 if(!isset($HistoryBase))
-  { $HistoryBase = $ScriptBase . '?action=history&amp;page='; }
+  { $HistoryBase = $ScriptName . '?action=history&amp;page='; }
 if(!isset($FindScript))
-  { $FindScript  = $ScriptBase . '?action=find'; }
+  { $FindScript  = $ScriptName . '?action=find'; }
 if(!isset($FindBase))
   { $FindBase    = $FindScript . '&amp;find=!'; }
 if(!isset($SaveBase))
-  { $SaveBase    = $ScriptBase . '?action=save&amp;page='; }
+  { $SaveBase    = $ScriptName . '?action=save&amp;page='; }
 if(!isset($DiffScript))
-{
-//    $DiffScript  = $ScriptBase . '?action=diff';
-    $DiffScript  = $ScriptBase . '?action=history';
-}
+  { $DiffScript  = $ScriptName . '?action=history'; } // '?action=diff'
 if(!isset($PrefsScript))
-  { $PrefsScript = $ScriptBase . '?action=prefs'; }
+  { $PrefsScript = $ScriptName . '?action=prefs'; }
 if(!isset($StyleScript))
-  { $StyleScript = $ScriptBase . '?action=style'; }
+  { $StyleScript = $ScriptName . '?action=style'; }
 if(!isset($BacklinksBase))
-  { $BacklinksBase = $ScriptBase . '?action=backlinks&amp;page='; }
+  { $BacklinksBase = $ScriptName . '?action=backlinks&amp;page='; }
 if(!isset($ReparentBase))
-  { $ReparentBase = $ScriptBase . '?action=reparent&amp;page='; }
+  { $ReparentBase = $ScriptName . '?action=reparent&amp;page='; }
 if(!isset($ContentBase))
-  { $ContentBase = $ScriptBase . '?action=content&amp;page='; }
+  { $ContentBase = $ScriptName . '?action=content&amp;page='; }
 if(!isset($PageSubscribeBase))
-  { $PageSubscribeBase = $ScriptBase . '?action=subscribe&amp;page='; }
+  { $PageSubscribeBase = $ScriptName . '?action=subscribe&amp;page='; }
 if(!isset($SubscriptionsScript))
-  { $SubscriptionsScript = $ScriptBase . '?action=subscriptions'; }
+  { $SubscriptionsScript = $ScriptName . '?action=subscriptions'; }
 if(!isset($ChildrenBase))
-  { $ChildrenBase = $ScriptBase . '?action=children&amp;page='; }
+  { $ChildrenBase = $ScriptName . '?action=children&amp;page='; }
 
 if(!function_exists('viewURL'))
 {

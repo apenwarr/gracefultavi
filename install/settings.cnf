@@ -110,6 +110,14 @@ For example, you might enter 'http://example.com/wiki/index.php'.
 // $ScriptBase determines the location of your wiki script.  It should indicate
 // the full URL of the main index.php script itself.
 ----
+string $ScriptName 'index.php'
+Enter the name of the main wiki script.
+
+This value is most likely to be an empty string. Depending on your system
+configuration, you might need to set it to 'index.php'.
+// $ScriptName determines the name of your wiki script.  It should indicate
+// either '' or 'index.php'.
+----
 string $AdminScript ''
 Enter the fully-qualified URL for the administration script for this wiki.
 

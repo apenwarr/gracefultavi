@@ -5,11 +5,6 @@ require('template/save.php');
 require('lib/category.php');
 require('parse/save.php');
 
-function addSuffix(&$value, $key, $suffix)
-{
-   $value = $value . $suffix;
-}
-
 // Commit an edit to the database.
 function action_save()
 {
@@ -17,7 +12,7 @@ function action_save()
     global $EnableSubscriptions, $EmailSuffix, $ErrorPageLocked;
     global $HTTP_POST_VARS, $MaxPostLen, $minoredit, $nextver, $page, $pagefrom;
     global $pagestore, $REMOTE_ADDR, $Save, $SaveMacroEngine, $UserName;
-    global $WikiName, $WorkingDirectory;
+    global $WorkingDirectory;
 
     if(isset($HTTP_POST_VARS['quickadd'])) $quickadd = $HTTP_POST_VARS['quickadd'];
     if(isset($HTTP_POST_VARS['appending'])) $appending = $HTTP_POST_VARS['appending'];
@@ -152,15 +147,13 @@ function action_save()
     // Handles page subscriptions in background
     if ($EnableSubscriptions && isset($EmailSuffix)) {
         if ($subscribed_users = $pg->getSubscribedUsers($UserName)) {
-            #array_walk($subscribed_users, 'addSuffix', $EmailSuffix);
-            #$subscribed_users = implode(' ', $subscribed_users);
-            #exec("$WorkingDirectory/lib/mailnotify.sh $page $subscribed_users");
+            global $ScriptBase, $WikiName;
             foreach ($subscribed_users as $user) {
-                $msg = "This is your friendly neighbourhood wiki letting you " .
-                       "know that the page $page has changed!\n\n";
+                $msg = "This is your friendly neighbourhood wiki ($WikiName) " .
+                       "letting you know that the page $page has changed!\n\n";
                 if ($minoredit) { $msg .= "This was a minor edit.\n\n"; }
-                $msg .= "View page: http://nitwiki/?$page\n\n" .
-                        "History: http://nitwiki/?action=history&page=$page";
+                $msg .= "View page: $ScriptBase?$page\n\n" .
+                        "History: $ScriptBase?action=history&page=$page";
                 mail($user . $EmailSuffix, "$WikiName: $page has changed",
                      $msg, "From: $Admin");
             }
