@@ -525,7 +525,7 @@ function sch_line($feat, $task, $orig, $curr, $elapsed, $remain, $done,
     if ($sub)
     {
 	$sch_curday = sch_add_hours($sch_curday, -$sub);
-	$sch_elapsed_curday = sch_add_hours($sch_curday, -$sub);
+	$sch_elapsed_curday = sch_add_hours($sch_elapsed_curday, -$sub);
 	$sch_elapsed_subtract[$feat] = 0; # only compensate once!
     }
 
