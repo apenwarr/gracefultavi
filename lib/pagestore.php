@@ -46,7 +46,7 @@ class PageStore
         global $PgTbl;
 
         $qid = $this->dbh->query("SELECT title, username, version " .
-                                 "FROM wiki_pages " .
+                                 "FROM $PgTbl " .
                                  "WHERE (unix_timestamp(sysdate()) - unix_timestamp(time)) < (7*24*60*60) " .
                                  "AND minoredit = 0 " .
                                  "ORDER BY title, version");
@@ -84,7 +84,7 @@ class PageStore
         global $PgTbl;
 
         $qid = $this->dbh->query("select p1.title " .
-                                 "from wiki_pages p1, wiki_pages p2 " .
+                                 "from $PgTbl p1, $PgTbl p2 " .
                                  "where p1.title = p2.title " .
                                  "and p1.version = 1 " .
                                  "and p1.minoredit = 0 " .
@@ -103,10 +103,10 @@ class PageStore
     // Return modified watched pages of a user.
     function getModifiedWatchedPages($userName)
     {
-        global $PgTbl;
+        global $PgTbl, $PwTbl;
 
         $qid = $this->dbh->query("SELECT DISTINCT title " .
-                                 "FROM wiki_pages p, wiki_pageswatch w " .
+                                 "FROM $PgTbl p, $PwTbl w " .
                                  "WHERE p.title = w.page " .
                                  "AND p.time > w.time " .
                                  "AND p.minoredit = 0 " .

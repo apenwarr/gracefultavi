@@ -239,15 +239,25 @@ function parse_macros($text)
 
 function macro_token($macro, $trail)
 {
-  global $ViewMacroEngine;
+  global $ViewMacroEngine, $page;
 
-  $cmd  = strtok($macro, ' ');
-  $args = strtok('');
+  $fragments = explode(" ", $macro, 2);
+  $cmd = $fragments[0];
+  $args = $fragments[1];
 
-  if($ViewMacroEngine[$cmd] != '')
-    { return new_entity(array('raw', $ViewMacroEngine[$cmd]($args))); }
-  else
-    { return '[[' . $macro . ']]' . ($trail == "\n" ? $trail : ''); }
+//  if($ViewMacroEngine[$cmd] != '')
+//    { return new_entity(array('raw', $ViewMacroEngine[$cmd]($args))); }
+//  else
+//    { return '[[' . $macro . ']]' . ($trail == "\n" ? $trail : ''); }
+   if (array_key_exists($cmd, $ViewMacroEngine))
+   {
+     eval("\$result=\$ViewMacroEngine[\$cmd]->parse(\$args, \$page);");
+     return new_entity(array('raw', $result));
+   }
+   else
+   {
+     return '[[' . $macro . ']]' . ($trail == "\n" ? $trail : '');
+   }
 }
 
 function parse_transclude($text)

@@ -1,0 +1,142 @@
+// Old versions of pages will be deleted after $ExpireLen days.  If $ExpireLen
+//   is set to 0, old versions of pages (and pages set to empty) will never
+//   be removed from the database.
+$ExpireLen = 0;
+
+// $DiffCmd determines what command to run to compute diffs.
+$DiffCmd = "/home/nitwiki/Files/diff";
+
+// $UrlPtn establishes the format for URLs in this wiki.
+//   Note that changing this requires a change to parse/transforms.php so
+//   that parse_hyperlinkxxx know how many parentheses are included in $UrlPtn.
+$UrlPtn  = "(http:|mailto:|https:|ftp:|gopher:|news:)" .
+           "([^ \\/\"\'<>\|\\$FlgChr]*\\/)*[^ \\t\\n\\/\"\'<>\|\\$FlgChr]*[A-Za-z0-9\\/?=&~]";
+
+// $InterWikiPtn establishes the format for InterWiki links in this wiki.
+//   Note that changing this requires a change to parse/transforms.php so
+//   that parse_interwiki knows how many parentheses are in $InterwikiPtn.
+$InterwikiPtn = "([A-Za-z0-9]+):" .
+                "(([^ \\/\"\'<>\|]*\\/)*[^ \\t\\n\\/\"\'<>\|]*[\\/=&~A-Za-z0-9])";
+
+// $ParseEngine indicates what parsing rules will be run when displaying a
+//   wiki page.  To disable a particular rule, you can place a comment at the
+//   beginning of its line.  The order of this list is important.
+// Note that free links and wiki names are disabled above, using config
+//   variables.  This is because wiki names are parsed in other places than
+//   just the wiki page.
+// Raw HTML parsing is turned off by default, since this is a potential
+//   security hole.
+
+$ParseEngine = array(
+                 'parse_elem_flag',
+//                 'parse_raw_html',
+                 'parse_htmlpre',    // implements missing <pre> support
+//                 'parse_htmlisms',
+//                 'parse_code',
+                 'parse_nowiki',
+                 'parse_htmlanchor',
+                 'parse_htmltags',
+
+                 'parse_hyperlink_ref',
+                 'parse_hyperlink_description',
+                 'parse_hyperlink',
+                 'parse_macros',
+                 'parse_transclude',
+                 'parse_freelink',
+                 'parse_interwiki',
+                 'parse_wikiname',
+                 'parse_bold',
+                 'parse_highlight',
+                 'parse_italic',
+                 'parse_underline',
+                 'parse_singlequote',
+                 'parse_teletype',
+                 'parse_heading',
+                 'parse_table',
+                 'parse_horiz',
+                 'parse_indents',
+                 'parse_newline',
+                 'parse_elements'
+               );
+
+// $DiffEngine indicates what parsing rules will be run to display differences
+//   between versions.  This should be a shorter list than $ParseEngine,
+//   since we just want minimal things like bold and italic and wiki links.
+$DiffEngine = array(
+                'parse_elem_flag',
+                'parse_diff_skip',
+//                'parse_diff_message',
+                'parse_diff_color',
+                'parse_htmlisms',
+/*
+                'parse_nowiki',
+                'parse_htmlanchor', // fix the case when <a href="url">url</a>
+                'parse_hyperlink_ref',
+                'parse_hyperlink_description',
+                'parse_hyperlink',
+                'parse_freelink',
+                'parse_interwiki',
+                'parse_wikiname',
+                'parse_bold',
+                'parse_italic',
+                'parse_underline',
+                'parse_singlequote',
+                'parse_highlight',
+                'parse_teletype',
+                'parse_newline',
+*/
+                'parse_elements'
+              );
+
+// $DisplayEngine indicates what functions will be used to translate wiki
+//   markup elements into actual HTML.  See parse/html.php
+$DisplayEngine = array(
+                   'bold_start'   => 'html_bold_start',
+                   'bold_end'     => 'html_bold_end',
+                   'italic_start' => 'html_italic_start',
+                   'italic_end'   => 'html_italic_end',
+                   'underline_start' => 'html_underline_start',
+                   'underline_end'   => 'html_underline_end',
+                   'singlequote_start' => 'html_singlequote_start',
+                   'singlequote_end'   => 'html_singlequote_end',
+                   'tt_start'     => 'html_tt_start',
+                   'tt_end'       => 'html_tt_end',
+                   'head_start'   => 'html_head_start',
+                   'head_end'     => 'html_head_end',
+                   'newline'      => 'html_newline',
+                   'ref'          => 'html_ref',
+                   'url'          => 'html_url',
+                   'interwiki'    => 'html_interwiki',
+                   'raw'          => 'html_raw',
+                   'code'         => 'html_code',
+                   'hr'           => 'html_hr',
+                   'nowiki'       => 'html_nowiki',
+                   'anchor'       => 'html_anchor',
+                   'highlight_start'     => 'html_highlight_start',
+                   'highlight_end'       => 'html_highlight_end',
+                   'highlightpass_start' => 'html_highlightpass_start',
+                   'highlightpass_end'   => 'html_highlightpass_end',
+                   'highlightfail_start' => 'html_highlightfail_start',
+                   'highlightfail_end'   => 'html_highlightfail_end',
+                   'bullet_list_start'   => 'html_ul_start',
+                   'bullet_list_end'     => 'html_ul_end',
+                   'bullet_item_start'   => 'html_li_start',
+                   'bullet_item_end'     => 'html_li_end',
+                   'indent_list_start'   => 'html_dl_start',
+                   'indent_list_end'     => 'html_dl_end',
+                   'indent_item_start'   => 'html_dd_start',
+                   'indent_item_end'     => 'html_dd_end',
+                   'term_item_start'     => 'html_dt_start',
+                   'term_item_end'       => 'html_dt_end',
+                   'numbered_list_start' => 'html_ol_start',
+                   'numbered_list_end'   => 'html_ol_end',
+                   'numbered_item_start' => 'html_li_start',
+                   'numbered_item_end'   => 'html_li_end',
+                   'diff_old_start'      => 'html_diff_old_start',
+                   'diff_old_end'        => 'html_diff_end',
+                   'diff_new_start'      => 'html_diff_new_start',
+                   'diff_new_end'        => 'html_diff_end',
+                   'diff_change'         => 'html_diff_change',
+                   'diff_add'            => 'html_diff_add',
+                   'diff_delete'         => 'html_diff_delete'
+                 );

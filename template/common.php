@@ -27,6 +27,7 @@ function template_common_prologue($args)
     global $WikiName, $HomePage, $WikiLogo, $MetaKeywords, $MetaDescription;
     global $StyleScript, $SeparateTitleWords, $SeparateHeaderWords, $UserName;
     global $shortcutIcon, $AdditionalHeader;
+    global $HomePage;
 
     if($SeparateTitleWords) { $args['title'] = html_split_name($args['title']); }
 
@@ -102,7 +103,7 @@ print $args['headsufx'] . '</h1>';
 
 <?php
 if ( $args['headlink']
-     && $args['headlink'] != 'FrontPage'
+     && $args['headlink'] != $HomePage
      && $args['headlink'] != 'RecentChanges'
      && $pagestore->getChildren($args['headlink'])
      )
@@ -170,9 +171,9 @@ if($args['tree'])
 {
     global $pagestore;
 
-    $tree = $pagestore->getTreeFromLeaves('FrontPage', $args['headlink']);
+    $tree = $pagestore->getTreeFromLeaves($HomePage, $args['headlink']);
 
-    if ($tree['FrontPage'] && count($tree['FrontPage']) > 0)
+    if ($tree[$HomePage] && count($tree[$HomePage]) > 0)
     {
         // print '</td><td valign="top">';
         // drawTreeOld($tree);
@@ -218,6 +219,7 @@ function template_common_epilogue($args)
 {
   global $FindScript, $pagestore, $page, $UserName, $PrefsScript;
   global $AdditionalFooter;
+  global $HomePage;
 
   $pg = $pagestore->page($page);
   $pagetext = $pg->text;
@@ -242,7 +244,7 @@ else
 ?></small>
 
 <?php
-if ($UserName != '' && $args['watch'] != '' && $page != 'FrontPage' && $page != 'RecentChanges')
+if ($UserName != '' && $args['watch'] != '' && $page != $HomePage && $page != 'RecentChanges')
 {
     if ($pg->isWatched($UserName))
         $caption = 'Remove watch';
@@ -319,7 +321,7 @@ if ($page != 'RecentChanges')
 <tr><td colspan="3">
 
 <?php
-if ($page != 'FrontPage' && $page != 'RecentChanges')
+if ($page != $HomePage && $page != 'RecentChanges')
 {
 ?>
     <script language="javascript">

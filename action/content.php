@@ -23,21 +23,21 @@ function getAllNodesNames($tree, $i = 0)
 // Display all nodes.
 function action_content()
 {
-    global $page, $pagestore;
+    global $page, $pagestore, $HomePage;
 
     // get all branches
-    $tree = $pagestore->getTreeFromLeaves('FrontPage');
+    $tree = $pagestore->getTreeFromLeaves($HomePage);
 
     // get other nodes that could not fit in a branch
     $allPages = $pagestore->getAllPageNames();
     $treePages = getAllNodesNames($tree);
     $otherPages = array_diff($allPages, $treePages);
 
-    if ($tree['FrontPage'])
+    if ($tree[$HomePage])
     {
         $content = array();
-        $content['FrontPage'] = $tree['FrontPage'];
-        unset ($tree['FrontPage']);
+        $content[$HomePage] = $tree[$HomePage];
+        unset ($tree[$HomePage]);
         $drawFrontPage = 1;
     }
 

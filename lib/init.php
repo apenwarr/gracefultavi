@@ -13,7 +13,7 @@ require('lib/url.php');
 require('lib/messages.php');
 require('lib/pagestore.php');
 require('lib/rate.php');
-require('parse/schedulator.php');
+//require('parse/schedulator.php');
 
 $PgTbl = $DBTablePrefix . 'pages';
 $IwTbl = $DBTablePrefix . 'interwiki';
@@ -86,4 +86,38 @@ if(!empty($prefstr))
 
 if($Charset != '')
   { header("Content-Type: text/html; charset=$Charset"); }
+
+$ViewMacroEngine=array();
+$SaveMacroEngine=array();
+
+if($dir=opendir("$WorkingDirectory/macros"))
+{
+    while($file=readdir($dir))
+    {
+        if ($file != ".." && $file != ".")
+        {
+           $pieces=explode(".", $file);
+           $name=$pieces[0];
+           if($pieces[count($pieces)-1]=="php")
+           {
+               require_once("macros/$file");
+               eval("\$ViewMacroEngine[$name]=new Macro_$name;");
+               if($ViewMacroEngine[$name]->trigger)
+               {
+                  // Macro has an alternate trigger defined, use that 
+                  // instead of the macro name.
+
+                  $ViewMacroEngine[$ViewMacroEngine[$name]->trigger]=$ViewMacroEngine[$pieces[0]];
+                  $name=$ViewMacroEngine[$name]->trigger;
+                  unset($ViewMacroEngine[$pieces[0]]);
+               }
+               if(method_exists($ViewMacroEngine[$name], "save"))
+               {
+                  array_push($SaveMacroEngine, $name);
+               }
+           }
+        }
+    }
+    closedir($dir);
+}
 ?>

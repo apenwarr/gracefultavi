@@ -87,6 +87,8 @@ sub do_variable
 
 if(!(open SETTINGS , "settings.cnf"))
   { die "Error opening settings.cnf!\n"; }
+if(!(open DEFAULTS , "defaults.cnf"))
+  { die "Error opening settings.cnf!\n"; }
 if(!(open CONFIG , ">$ARGV[0]"))
   { die "Error opening configuration file for writing!\n"; }
 
@@ -105,7 +107,7 @@ while(<SETTINGS>)
     $prompt  = '';
     $comment = '';
   }
-  elsif(/^\/\//)                        # Comment for variablle.
+  elsif(/^\/\//)                        # Comment for variable.
     { $comment = $comment . $_; }
   else                                  # Prompt for variable.
     { $prompt = $prompt . $_; }
@@ -113,6 +115,10 @@ while(<SETTINGS>)
 
 if($descriptor ne '')
   { do_variable($descriptor, $prompt, $comment); }
+  
+while(<DEFAULTS>) {
+   print CONFIG $_;
+}
 
 print CONFIG "?>";
 close SETTINGS;

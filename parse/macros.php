@@ -34,7 +34,7 @@ function view_macro_category($args)
   usort($list, 'catSort');
 
   $now = time();
- 
+
   for($i = 0; $i < count($list); $i++)
   {
     $editTime = mktime(substr($list[$i][0], 8, 2),  substr($list[$i][0], 10, 2),
@@ -56,15 +56,6 @@ function view_macro_category($args)
 
   return $text;
 }
-
-function catSort($p1, $p2)
-  { return strcmp($p2[0], $p1[0]); }
-
-function sizeSort($p1, $p2)
-  { return $p2[4] - $p1[4]; }
-
-function nameSort($p1, $p2)
-  { return strcmp($p1[1], $p2[1]); }
 
 // Prepare a list of pages sorted by size.
 function view_macro_pagesize()

@@ -4,12 +4,13 @@
 // If register_globals is off, we need to harvest the script parameters
 // at this point.
 
-
+/*
 if($_SERVER["PATH_INFO"])
 {
   header('Location: ' . $_SERVER["SCRIPT_NAME"] . '?' . substr($_SERVER["PATH_INFO"], 1));
   exit;
 }
+*/
 
 if(!ini_get('register_globals'))
 {
@@ -65,7 +66,8 @@ $ActionList = array(
                 'backlinks' => array('action/backlinks.php', 'action_backlinks', 'view'),
                 'reparent'  => array('action/reparent.php', 'action_reparent', 'edit'),
                 'content' => array('action/content.php', 'action_content', 'edit'),
-                'watch'   => array('action/watch.php', 'action_watch', 'edit')
+                'watch'   => array('action/watch.php', 'action_watch', 'edit'),
+                'lock'    => array('action/lock.php', 'action_lock', '')
               );
 
 // Default action and page names.

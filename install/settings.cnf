@@ -163,3 +163,12 @@ noprompt_var $AdminEnabled 0
 //   If you do not do so, any visitor to your wiki will be able to lock pages
 //   and block others from accessing the wiki.
 // If $AdminEnabled is set to 0, administrator control will be disallowed.
+----
+string $WorkingDirectory ''
+Enter the complete working directory for your wiki files without trailing slashes.
+
+To get the current working directory, type 'pwd' at a shell prompt.
+
+For example, /home/mich/wiki/gracefultavi
+             /usr/bin/gracefultavi
+// Complete working directory of the wiki files, no trailing slashes

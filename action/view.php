@@ -13,13 +13,27 @@ function action_view()
     global $page, $pagestore, $ParseEngine, $version, $UserName;
 
     $pg = $pagestore->page($page);
-    if($version != '')
-        $pg->version = $version;
-    $pg->read();
+
+    if (file_exists("modules/" . $page . ".php"))
+    {
+        require_once("modules/" . $page . ".php");
+
+        if (function_exists($page . "_content"))
+        {
+            eval("\$pg->text=" . $page . "_content();");
+        }
+        $pg->mutable = 0;
+    }
+    else
+    {
+        if($version != '')
+            $pg->version = $version;
+        $pg->read();
+    }
 
     // Saves user's access to the page if it's marked to be watched for that
     // user.
-    if($pg->isWatched($UserName))
+    if ($pg->isWatched($UserName))
         $pg->updateAccessTime($UserName);
 
     gen_headers($pg->time);
