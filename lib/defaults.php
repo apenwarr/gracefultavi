@@ -87,6 +87,11 @@ $EnableWordDiff = 0;
 // $WdiffCmd determines what command to run to compute word diffs.
 #$WdiffCmd = "/home/nitwiki/Files/wdiff";
 
+// When $WdiffLibrary is set to 1, the LD_LIBRARY_PATH environment variable will
+//   be set to /disk before executing wdiff. This value is hardcoded to avoid
+//   security issues.
+$WdiffLibrary = 0;
+
 // When $EnableWordDiff is set to 1, $DiffModeCookieName determines the name of
 //   the cookie to store the diff mode preference.
 $DiffModeCookieName = 'diffmode';
