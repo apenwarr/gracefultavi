@@ -63,7 +63,7 @@ function html_dt_start()
 function html_dt_end()
   { return '</dt>'; }
 function html_cite_start()
- { return '<blockquote type="cite">'; }
+ { return '<blockquote class="cite">'; }
 function html_cite_end()
  { return "</blockquote>\n"; }
 function html_citeitem_start()

@@ -118,3 +118,8 @@ pre {
 }
 .backlinksHeader { background: #eeeeff; }
 .notBacklinksHeader { background: #ffcfcf; }
+blockquote.cite {
+    border-left: 1px solid blue;
+    margin: 0px 0px 0px 0px;
+    padding: 0px 0px 0px 15px;
+}

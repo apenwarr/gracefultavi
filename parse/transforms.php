@@ -496,6 +496,7 @@ function parse_indents($text)
     static $indentPrefixString = '';
     static $indentPrevLineIsBlank = 0;
     static $indentStealLine = 0;
+    static $pending_p = '';
 
     // Indentation increase of more than on level will be corrected to only one.
     $auto_fix_indent_leap = 1;
@@ -552,15 +553,22 @@ function parse_indents($text)
                 // close previously openend levels, until current level
                 for ($i = $indentPrevLevel; $i > $indentCurLevel; $i--)
                     $fixup .= entity_listitem($indentPrefixString[$i], 'end') .
-                            entity_list($indentPrefixString[$i], 'end');
+                              entity_list($indentPrefixString[$i], 'end');
 
                 // close previous list item
                 $fixup .= entity_listitem($indentPrefixString[$indentCurLevel], 'end');
 
                 // if the indent type ([:#-*]) is different from previous at same level
                 if ($indentPrefixString[$indentCurLevel] != $indentChar)
-                    $fixup .= entity_list($indentPrefixString[$indentCurLevel], 'end') .
-                            entity_list($indentChar, 'start');
+                    $fixup .= entity_list($indentPrefixString[$indentCurLevel], 'end');
+
+                // add any pending <p> after the last list end
+                $fixup .= $pending_p;
+                $pending_p = '';
+
+                // if the indent type ([:#-*]) is different from previous at same level
+                if ($indentPrefixString[$indentCurLevel] != $indentChar)
+                    $fixup .= entity_list($indentChar, 'start');
             }
 
             // open new list item
@@ -599,12 +607,15 @@ function parse_indents($text)
                 if ($i < strlen($indentPrefixString))
                 {
                     // We're at a lower nesting level, end dangling lists up
-                    // to the nesting level specified by the leading spaces.
+                    // to the nesting level specified by the leading spaces
+                    // and add any pending <p> after the last list end.
                     for ($j = $i; $j <= strlen($indentPrefixString); $j++)
                     {
                         $text = entity_listitem($indentPrefixString[$j], 'end') .
                                 entity_list($indentPrefixString[$j], 'end') .
+                                $pending_p .
                                 $text;
+                        $pending_p = '';
                     }
                     $indentPrefixString = substr($indentPrefixString, 0, $i);
                     $indentPrevLevel = $i - 1;
@@ -634,6 +645,12 @@ function parse_indents($text)
         }
         else
             $indentStealLine = 0;
+    }
+
+    // holds any single <p> and prints it later, see above
+    if ($text == '<p>') {
+        $pending_p = $text;
+        $text = '';
     }
 
     return $text;
