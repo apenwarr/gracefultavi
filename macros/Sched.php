@@ -350,7 +350,6 @@ function bug_add_task($user, $fixfor, $t)
              "      hrsOrigEst, hrsCurrEst, hrsElapsed, hrsRemain, dtDue, fDone) " .
              "  values ('$user', '$fixfor', \"$task\", \"$subtask\", " .
              "            $t[2], $t[3], $t[4], $remain, '$t[5]', $t[6])";
-    
     $result = mysql_query($query, $bug_h);
     if (!$result)
         print 'x-' . mysql_error($bug_h);
