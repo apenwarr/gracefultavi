@@ -40,7 +40,7 @@ class PageStore
     }
 
     // Return hot pages, i.e. pages modified at least 5 times during the last
-    // week.
+    // week. Ignores minor edits and multiple subsequent updates by the same user.
     function getHotPages()
     {
         global $PgTbl;
@@ -73,6 +73,27 @@ class PageStore
                 $count++;
             }
         }
+
+        return $list;
+    }
+
+    // Return new pages, i.e. pages having their most recent edit less than 24 hours
+    // before the first edit.
+    function getNewPages()
+    {
+        global $PgTbl;
+
+        $qid = $this->dbh->query("select p1.title " .
+                                 "from wiki_pages p1, wiki_pages p2 " .
+                                 "where p1.title = p2.title " .
+                                 "and p1.version = 1 " .
+                                 "group by p1.title, p2.title " .
+                                 "having max(unix_timestamp(p2.time)) - min(unix_timestamp(p1.time)) < 60*60*24");
+
+        $list = array();
+
+        while (($result = $this->dbh->result($qid)))
+            $list[] = $result[0];
 
         return $list;
     }

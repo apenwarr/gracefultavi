@@ -234,10 +234,13 @@ function html_twin_x($whichwiki, $linktext, $ref)
 function html_category($time, $page, $host, $user, $comment, $version)
 {
   global $pagestore, $UserName;
-  static $hotPages = '', $modifiedWatchedPages = '';
+  static $hotPages = '', $modifiedWatchedPages = '', $newPages = '';
 
   if (!$hotPages)
     $hotPages = $pagestore->getHotPages();
+
+  if (!$newPages)
+    $newPages = $pagestore->getNewPages();
 
   if (!$modifiedWatchedPages)
   {
@@ -258,7 +261,8 @@ function html_category($time, $page, $host, $user, $comment, $version)
       { $text = $text . ' ' . html_twin($site[0], $site[1]); }
   }
 */
-  if ($version == 1)
+  
+  if (in_array($page, $newPages))
     $text .= '<img src="images/new.png" alt="New!" title="" width="28" height="11" border="0">';
 
   if (in_array($page, $hotPages))
