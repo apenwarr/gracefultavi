@@ -39,8 +39,8 @@ $ParseEngine = array(
 
                  'parse_hyperlink_ref',
                  'parse_hyperlink_description',
-                 'parse_hyperlink',
                  'parse_macros',
+                 'parse_hyperlink',
                  'parse_transclude',
                  'parse_freelink',
                  'parse_interwiki',
