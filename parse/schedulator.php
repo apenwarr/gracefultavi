@@ -522,22 +522,42 @@ function sch_extrabugs($user, $fixfor, $enddate)
     global $sch_got_bug, $sch_start;
     
     $start = sch_format_day($sch_start);
+    $today = sch_today();
+    $fixfor_in_past = (sch_parse_day($enddate) < $today);
+    $bugs1 = $bugs2 = "";
     
     $a = bug_list($user, $fixfor, $start, $enddate);
     foreach ($a as $bugid => $bug)
     {
-	if ($bug[3] == $bug[2] 
-		&& abs($bug[2]) <= 0.01 && abs($bug[2]) >= 0.0001)
+	$zeroest = (abs($bug[2]) <= 0.01 && abs($bug[2]) >= 0.0001);
+	$done = ($bug[2] && $bug[3] == $bug[2]);
+	
+	if ($sch_got_bug[$bugid])
+	    continue;
+	
+	if ($done && $zeroest)
 	{
 	    # the bug is done, but with a zero estimate; probably a
 	    # duplicate, wontfix, or something.  Skip it.
 	    $sch_got_bug[$bugid] = 1;
-	    next;
+	    continue;
 	}
-	if (!$sch_got_bug[$bugid])
-	    $ret .= sch_bug($bugid, $bug[0], $bug[1], $bug[2], $bug[3], 0);
+	
+	if (!$done && $fixfor_in_past)
+	{
+	    # if this release is in the past, but it's not fixed yet, the
+	    # bug must not *actually* be for this milestone.  Skip it now,
+	    # and add it into the next release or at the end of the schedule.
+	    continue;
+	}
+	
+	$val = sch_bug($bugid, $bug[0], $bug[1], $bug[2], $bug[3], 0);
+	if ($done)
+	  $bugs1 .= $val;
+	else
+	  $bugs2 .= $val;
     }
-    return $ret;
+    return $ret . $bugs1 . $bugs2;
 }
 
 function sch_milestone($descr, $name, $due)
@@ -550,6 +570,8 @@ function sch_milestone($descr, $name, $due)
       $tmpdue = sch_format_day($sch_curday);
     else 
       $tmpdue = $due;
+    
+    # fill in all bugs up to this milestone
     $ret .= sch_extrabugs($sch_user, $name, $tmpdue);
     
     # if no due date was given, make it the day after the last bug finished.
