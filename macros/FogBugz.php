@@ -222,13 +222,14 @@ class Bug
     var $origest;
     var $currest;
     var $elapsed;
+    var $resolvedate;
     var $resolved_byme;
     var $my_user;
     var $category;
     var $manual_ix;
     
     function Bug($a, $b, $c, $d, $e, $f, $g, $h,
-		 $i, $j, $k, $l, $m, $n, $o, $p, $q, $r,
+		 $i, $j, $k, $l, $m, $n, $o, $p, $q, $r, 
 		 $_manual_ix=0)
     {
 	$this->ix = $a;
@@ -387,7 +388,9 @@ class BugTable extends FogTable
 
         if ($stolen)
         {
+	    $open = 0;
             $title = "STOLEN: $r[3]";
+	    $origEst = 0;
             $currEst = 0;
             $elapsed = 0;
             $resolved_byme = 1;
@@ -395,18 +398,20 @@ class BugTable extends FogTable
         }
         else
         {
+	    $open = $r[1];
             $title = $r[3];
+	    $origEst = $r[11];
             $currEst = $r[12];
             $elapsed = $r[13];
             $resolved_byme = $this->resolved_tasks[$r[0]][1];
             $resolved_date = $this->resolved_tasks[$r[0]][2];
         }
 
-        return new Bug($r[0], $r[1], $r[2], $title,
+        return new Bug($r[0], $open, $r[2], $title,
 		       $this->projects->a[$r[4]],
 		       $r[5], $this->persons->a[$r[6]],
 		       $this->persons->a[$r[7]], $r[8], $r[9],
-		       $this->fixfors->a[$r[10]], $r[11], $currEst, $elapsed,
+		       $this->fixfors->a[$r[10]], $origEst, $currEst, $elapsed,
 		       $resolved_date, $resolved_byme != '' ? 1 : 0,
 		       $this->persons->a[$this->my_userix],
 		       $r[14]);
@@ -536,6 +541,9 @@ class Estimate
     {
 	if ($this->origest !== '')
             return $this->origest;
+	// Make sure VERIFY bugs that I didn't fix don't count towards my time
+	else if ($this->isverify() && !$this->task->resolved_byme)
+	    return 0;
 	else if ($this->isbug)
             return $this->task->origest;
 	else
@@ -546,6 +554,9 @@ class Estimate
     {
 	if ($this->currest !== '')
             return $this->currest;
+	// Make sure VERIFY bugs that I didn't fix don't count towards my time
+	else if ($this->isverify() && !$this->task->resolved_byme)
+	    return 0;
 	else if ($this->isbug)
             return $this->task->currest;
 	else
@@ -556,6 +567,9 @@ class Estimate
     {
 	if ($this->elapsed !== '')
             return $this->elapsed;
+	// Make sure VERIFY bugs that I didn't fix don't count towards my time
+	else if ($this->isverify() && !$this->task->resolved_byme)
+	    return 0;
 	else if ($this->isbug)
             return $this->task->elapsed;
 	else
@@ -578,6 +592,11 @@ class Estimate
     function isdone()
     {
 	return $this->be_done;
+    }
+
+    function isverify()
+    {
+	return $this->isbug && $this->task->isresolved() && !$this->isdone();
     }
     
     function update($currest, $elapsed)
@@ -627,8 +646,7 @@ class Estimate
 	    else
 		return $this->task->task.": ".$this->task->name;
 	}
-	else if ($this->isbug && $this->task->isresolved() 
-		 && !$this->isdone())
+	else if ($this->isverify())
             return "VERIFY: " . $this->task->name;
 	else
             return $this->task->name;
@@ -852,6 +870,8 @@ class FogTables
 	   "  having 1 $and_userrb" .
 	   "    $and_dtresolved ");
 	$resolved_tasks = sql_simple($q);
+
+	$stolen_bugs = array();
 
         // Finding stolen bugs is only relevant when we have a particular
         // person to check against.
