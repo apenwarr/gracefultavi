@@ -27,7 +27,7 @@ function template_common_prologue($args)
     global $WikiName, $HomePage, $WikiLogo, $MetaKeywords, $MetaDescription;
     global $StyleScript, $SeparateTitleWords, $SeparateHeaderWords, $UserName;
     global $shortcutIcon, $AdditionalHeader;
-    global $HomePage;
+    global $HomePage, $page;
 
     if ($SeparateTitleWords) { $args['title'] = html_split_name($args['title']); }
 
@@ -314,7 +314,7 @@ if ($page != $HomePage && $page != 'RecentChanges')
     <tr>
     <td width="50%">&nbsp;</td>
     <td width="50%" align="right">
-        <form method="post" action="<?php print saveURL($args['page']); ?>">
+        <form method="post" action="<?php print saveURL($page); ?>">
         <div class="form">
         <?php
         if ($args['edit'])
@@ -325,7 +325,6 @@ if ($page != $HomePage && $page != 'RecentChanges')
         ?>
             <input type="hidden" name="Save" value="1">
             <input type="hidden" name="appending" value="1">
-            <input type="hidden" name="page" value="<?php print $page ?>">
             <?php
             if (!strcasecmp($page, 'annoyingquote') || !strcasecmp($page, 'accumulatedwisdom'))
             {
