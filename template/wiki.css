@@ -1,0 +1,110 @@
+/* WikkiTikkiTavi default style sheet. */
+/* $Id: wiki.css,v 1.8 2002/01/15 16:02:43 smoonen Exp $ */
+body {
+    background-color: #eeeeee;
+    color:            #000000;
+    margin-right:     1%;
+    margin-left:      1%;
+}
+a:link {
+    color:      #0000ff;  /* 4f6997 */
+    background: transparent;
+}
+a:visited {
+    color:      darkblue;  /* 2f2f4e */
+    background: transparent;
+}
+a:active {
+    color:      #006699;  /* 80307f */
+    background: transparent;
+}
+a.title {
+    /* text-decoration: none; */
+}
+span.highlight {
+    background: #ffff00; /* eeeeff */
+    font-weight: bold;
+}
+img {
+    border: 0;
+}
+div.logo {
+    float: left;
+}
+table.topbox {
+    width:            100%;
+    background-color: #eeeeee;
+}
+table.bottombox {
+    width:            100%;
+    background-color: #eeeeee;
+}
+div.diff {
+    font-family: monospace;
+}
+table.diff {
+    width: 100%;
+}
+table.diffblock {
+    width:            95%;
+    background-color: #efefff;
+}
+td.diff-added {
+    /* background-color: #cfcfff; */
+    background-color: #ccffcc;
+    color:            #000000;
+}
+td.diff-removed {
+    /* background-color: #efefff; */
+    background-color: #ffaaaa;
+    color:            #000000;
+    /* font-color:       red; */
+    /* text-decoration:  line-through; */
+}
+h1 {
+    margin-bottom: 0;
+}
+hr {
+    width: 80%; /* 70% */
+}
+textarea {
+    width: 100%;
+}
+input.fullWidth {
+    width: 100%;
+}
+dl, ul, ol {
+    margin-top:    0pt;
+    margin-bottom: 0pt;
+}
+form {
+    margin-top: 0pt;
+}
+p.warning {
+    color:      #ff3f3f;
+    background: transparent;
+}
+span.twin {
+    font-size: smaller;
+}
+tt {
+    background: transparent;
+    color:      #383838;
+}
+pre {
+    background: transparent;
+    color:      #383838;
+}
+.content table {
+    background: #ffffff;
+}
+.content td {
+    text-align: left;
+    background: #eeeeff;
+}
+.quote {
+    font-size: small;
+    font-style: italic;
+}
+.backlinksHeader { background: #eeeeff; }
+.notBacklinksHeader { background: #ffcfcf; }

@@ -1,0 +1,60 @@
+/* WikkiTikkiTavi default style sheet. */
+/* $Id: wiki.css,v 1.8 2002/01/15 16:02:43 smoonen Exp $ */
+body
+  { background-color: #ffffff;
+    color:            #000000;
+    margin-right:     1%;
+    margin-left:      1%; }
+a:link
+  { color:      #0000ff;  /* 4f6997 */
+    background: transparent; }
+a:visited
+  { color:      purple;  /* 2f2f4e */
+    background: transparent; }
+a:active
+  { color:      #006699;  /* 80307f */
+    background: transparent; }
+a.title
+  { text-decoration: none; }
+font.blueback
+  { background: #eeeeff}
+img
+  { border: 0; }
+div.logo
+  { float: left; } 
+table.diff
+  { width: 95%; }
+table.topbox
+  { width:100%; 
+    background-color: #eeeeee; }
+table.bottombox
+  { width:100%;
+    background-color: #eeeeff; }
+td.diff-added
+  { background-color: #cfffcf;
+    color:            #000000; }
+td.diff-removed
+  { background-color: #ffffaf;
+    color:            #000000; 
+    font-color: red;
+    text-decoration:line-through; }
+h1
+  { margin-bottom: 0; }
+textarea
+  { width: 100%; }
+dl, ul, ol
+  { margin-top:    0px;
+    margin-bottom: 0px; }
+form
+  { margin-top: 0px; }
+p.warning
+  { color:      #ff3f3f;
+    background: transparent; }
+span.twin
+  { font-size: smaller; }
+tt
+  { background: transparent;
+    color:      #383838; }
+pre
+  { background: transparent;
+    color:      #383838; }

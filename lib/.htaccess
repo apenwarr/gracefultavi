@@ -1,0 +1,2 @@
+        RewriteEngine on
+        RewriteRule   ^([^a-z].*)$   index.php?action=view&page=$1
