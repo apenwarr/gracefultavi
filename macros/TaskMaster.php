@@ -59,12 +59,13 @@ class Macro_TaskMaster
 		   "</style>\n");
     }
     
-    function col($isheader, $text)
+    function col($isheader, $text, $class = "")
     {
+	$class = $class ? "class='$class'" : "";
 	if ($isheader)
-	  $this->out("<th>$text</th>");
+	  $this->out("<th $class>$text</th>");
 	else
-	  $this->out("<td>$text</td>");
+	  $this->out("<td $class>$text</td>");
     }
     
     # usage: row($nheaders, col, col, col, ...)
@@ -99,9 +100,10 @@ class Macro_TaskMaster
 	$this->out("<input type='hidden' name='$name' value='$value' />");
     }
     
-    function form_input($name, $value)
+    function form_input($name, $value, $width = 10)
     {
-	$this->out("<input type='input' name='$name' value='$value' />");
+	$this->out("<input type='input' name='$name' " .
+		   " value='$value' size='$width' />");
     }
     
     function form_button($name, $title)
@@ -151,7 +153,7 @@ class Macro_TaskMaster
     function form($use_post = 1)
     {
 	$method = $use_post ? "POST" : "GET";
-	$this->out("<form method='$method'>");
+	$this->out("<form method='$method' name='taskform'>");
 	$this->form_hidden("page", $this->page);
     }
     
@@ -251,7 +253,7 @@ class Macro_TaskMaster
     function do_retarget()
     {
 	$fixforto = $_REQUEST["fixforto"];
-	print "do retarget ($fixforto)!";
+	# print "do retarget ($fixforto)!";
 	$keys = array();
 	foreach (array_keys($_REQUEST) as $key)
 	{
@@ -266,25 +268,22 @@ class Macro_TaskMaster
 	}
     }
     
-    function do_summary($person)
+    function mystyle()
     {
 	$this->style(".table td {  }\n" .
 		     ".table th { background: lightgray }\n" .
-		     "tr.done { color: gray; font-style: italic; text-decoration: line-through; }\n");
+		     "tr.done { color: gray; font-style: italic; " .
+		     "     text-decoration: line-through; }\n" .
+		     ".fooref:hover { background: yellow }\n");
+    }
+    
+    function do_summary($person)
+    {
+	$this->mystyle();
 	
 	# command bar
 	$this->form_button("select-all", "Select All");
 	$this->form_button("unselect-all", "Unselect All");
-	$this->out(" ");
-	$assignto = $_REQUEST["assignto"];
-	$this->form_select("assignto", $assignto, "??", 
-			   $this->list_users("--Do Nothing--"));
-	$this->form_button("cmd", "Assign");
-	$this->out(" ");
-	$fixforto = $_REQUEST["fixforto"];
-	$this->form_select("fixforto", $fixforto, "??", 
-			   $this->list_fixfors("--Do Nothing--"));
-	$this->form_button("cmd", "Retarget");
 	
 	# content...
 	$user = $_REQUEST["filter-user"];
@@ -312,7 +311,10 @@ class Macro_TaskMaster
 	{
 	    $done = $row[5];
 	    $doneclass = $done ? "done" : "notdone";
-	    $this->out("<tr class='$doneclass'>");
+	    $this->out("<tr class='$doneclass fooref' " .
+	       "onClick='" .
+	       "x = document.forms[\"taskform\"][\"task-select-$row[0]\"]; " .
+	       "x.waschecked = x.checked = !x.waschecked'>");
 	    
 	    $checked = $_REQUEST["select-all"] || $_REQUEST[$row[0]];
 	    if ($_REQUEST["unselect-all"])
@@ -323,13 +325,222 @@ class Macro_TaskMaster
 	    
 	    $this->col(1, $row[0]);
 	    $this->col(0, $row[1]);
-	    $this->col(0, $row[2]);
+	    $this->col(0, $row[2], "fooref");
 	    $this->col(0, $row[3]);
 	    $this->col(0, $row[4]);
 	    
 	    $this->out("</tr>");
 	}
 	$this->table_end();
+	
+	$assignto = $_REQUEST["assignto"];
+	$this->form_select("assignto", $assignto, "??", 
+			   $this->list_users("--Do Nothing--"));
+	$this->form_button("cmd", "Assign");
+	$this->out(" ");
+	$fixforto = $_REQUEST["fixforto"];
+	$this->form_select("fixforto", $fixforto, "??", 
+			   $this->list_fixfors("--Do Nothing--"));
+	$this->form_button("cmd", "Retarget");
+    }
+    
+    function do_create_form()
+    {
+	$this->out("Assign to: ");
+	$this->form_select("create-user", $_REQUEST["create-user"], "??",
+			   $this->list_users("--Choose User--"));
+	$this->out("&nbsp;&nbsp;Fix for: ");
+	$this->form_select("create-fixfor", $_REQUEST["create-fixfor"], "??",
+			   $this->list_fixfors("--Choose FixFor--"));
+	
+	$this->table("table");
+	$this->row(2, "Task", "Subtask");
+	for ($i = 0; $i < 10; $i++)
+	{
+	    $this->out("<tr>");
+	    $this->push();
+	    $this->form_input("create-$i-task", "");
+	    $this->col(0, $this->pop());
+	    $this->push();
+	    $this->form_input("create-$i-subtask", "");
+	    $this->col(0, $this->pop());
+	    $this->out("</tr>");
+	}
+	$this->table_end();
+	$this->form_button("cmd", "Create");
+    }
+    
+    function do_create()
+    {
+	$fixfor = $_REQUEST["create-fixfor"];
+	$user = $_REQUEST["create-user"];
+	
+	$this->out("<b>");
+	
+	if ($fixfor <= 0 || $user <= 0)
+	{
+	    $this->out("Can't create: You must specify the user " .
+		       "and fixfor!<br>");
+	}
+	else
+	{
+	    for ($i = 0; $i < 10; $i++)
+	    {
+		$task = $_REQUEST["create-$i-task"];
+		$subtask = $_REQUEST["create-$i-subtask"];
+		if ($task != "") {
+		    $this->out("Creating task: '$task' '$subtask'<br>");
+		    $this->query
+		     ("insert into schedulator.XTask " .
+		      "  (sTask,sSubTask,ixFixFor,ixPersonAssignedTo,fDone) " .
+		      "  values (\"$task\", \"$subtask\", $fixfor, $user, 0) "
+		      );
+		}
+	    }
+	}
+	$this->out("</b><p><hr>");
+	$this->do_create_form();
+    }
+    
+    
+    function estimcol($isbug, $taskid, $coltype, $value, $done)
+    {
+	if ($value == 0)
+	  $value = "";
+	if ($done)
+	    $this->col(0, $value);
+	else
+	{
+	    $this->push();
+	    $this->form_input("$coltype-$isbug-$taskid", $value, 5);
+	    $this->col(0, $this->pop());
+	}
+    }
+    
+    
+    function estimate_rows($prefix, $isbug, $res)
+    {
+	while ($row = mysql_fetch_row($res))
+	{
+	    $taskid = array_shift($row);
+	    $done = $row[5];
+	    if ($row[3]!='' && $row[3] == $row[4]) // currest == elapsed?
+	      $done = 1;
+	    $doneclass = $done ? "done" : "notdone";
+	    $this->out("<tr class='$doneclass'>");
+	    $this->col(1, "$prefix#$isbug-$taskid");
+	    $this->col(0, $row[0]);
+	    $this->col(0, $row[1]);
+	    $this->estimcol($isbug, $taskid, "origest", $row[2], 1);
+	    $this->estimcol($isbug, $taskid, "currest", $row[3], $done);
+	    $this->estimcol($isbug, $taskid, "elapsed", $row[4], $done);
+	    $this->estimcol($isbug, $taskid, "remain", $row[3]-$row[4], 1);
+	    $this->push();
+	    if (!$done)
+	      $this->form_button("done-$isbug-$taskid", "Done");
+	    else
+	      $this->form_button("reopen-$isbug-$taskid", "Reopen");
+	    $this->col(0, $this->pop());
+	    $this->out("</tr>");
+	}
+    }
+    
+    
+    function do_estimate_form()
+    {
+	$user = $_REQUEST["estimate-user"];
+	
+	$this->mystyle();
+	
+	$this->out("Log in: ");
+	$this->form_select("estimate-user", $user, "??",
+			   $this->list_users("--Choose User--"));
+	$this->form_button("Go", "Go");
+	$this->out("<hr>");
+	
+	if ($user > 0)
+	{
+	    $this->out("<b>");
+	    $res = $this->query
+	      ("select fIsBug,ixTask from schedulator.Estimate " .
+	       "   where ixPerson=$user");
+	    while ($row = mysql_fetch_row($res))
+	    {
+		if ($_REQUEST["currest-$row[0]-$row[1]"]!='' &&
+		    $_REQUEST["elapsed-$row[0]-$row[1]"]!='')
+		{
+		    $cur = $_REQUEST["currest-$row[0]-$row[1]"];
+		    $elapsed = $_REQUEST["elapsed-$row[0]-$row[1]"];
+		    $this->out("Estimating task $row[0]-$row[1].<br>");
+		    $this->query
+		      ("update schedulator.Estimate " .
+		       "  set hrsCurrEst=$cur, hrsElapsed=$elapsed " .
+		       "  where fIsBug=$row[0] and ixTask=$row[1] and " .
+		       "        ixPerson=$user ");
+		}
+		
+		if ($_REQUEST["done-$row[0]-$row[1]"])
+		{
+		    $this->out("Closing task $row[0]-$row[1].<br>");
+		    $this->query
+		      ("update schedulator.Estimate " .
+		       "  set hrsCurrEst=if(hrsCurrEst is not null," .
+		       "                    hrsCurrEst,0), " .
+		       "      hrsElapsed=hrsCurrEst " .
+		       "  where fIsBug=$row[0] and ixTask=$row[1] and " .
+		       "        ixPerson=$user ");
+		}
+		else if ($_REQUEST["reopen-$row[0]-$row[1]"])
+		{
+		    $this->out("Reopening task $row[0]-$row[1].<br>");
+		    $this->query
+		      ("update schedulator.Estimate " .
+		       "  set hrsCurrEst=if(hrsCurrEst is not null," .
+		       "                    hrsCurrEst,0), " .
+		       "      hrsElapsed=hrsCurrEst-0.1 " .
+		       "  where fIsBug=$row[0] and ixTask=$row[1] and " .
+		       "        ixPerson=$user ");
+		}
+	    }
+	    $this->out("</b>");
+	    
+	    $this->table("table");
+	    $this->row(7, "Source", "Task", "Subtask",
+		       "OrigEst", "CurrEst", "Elapsed", "Remain");
+	    
+	    $this->query
+	      ("insert into schedulator.Estimate (ixPerson, fIsBug, ixTask) " .
+	       "  select $user,0,ixXTask from schedulator.XTask " .
+	       "    where ixPersonAssignedTo=$user");
+	    
+	    $this->query
+	      ("insert into schedulator.Estimate (ixPerson, fIsBug, ixTask) " .
+	       "  select $user,1,ixBug from Bug " .
+	       "    where ixPersonAssignedTo=$user");
+	    
+	    $res = $this->query
+	      ("select ixTask, " .
+	       "       sTask, sSubTask, hrsOrigEst, hrsCurrEst, hrsElapsed, " .
+	       "       if(x.ixPersonAssignedTo=$user,0,1) as fMeDone " .
+	       "  from schedulator.XTask x, schedulator.Estimate e " .
+	       "  where fIsBug=0 and e.ixTask=x.ixXTask " .
+	       "    and e.ixPerson=$user ");
+	    $this->estimate_rows("TM", 0, $res);
+	    
+	    $res = $this->query
+	      ("select ixTask, " .
+	       "   ixBug, sTitle, " .
+	       "   if(e.hrsOrigEst is not null,e.hrsOrigEst,b.hrsOrigEst), " .
+	       "   if(e.hrsCurrEst is not null,e.hrsCurrEst,b.hrsCurrEst), " .
+	       "   if(e.hrsElapsed is not null,e.hrsElapsed,b.hrsElapsed), " .
+	       "       if(b.ixPersonAssignedTo=$user,0,1) as fMeDone " .
+	       "  from Bug b, schedulator.Estimate e " .
+	       "  where fIsBug=1 and e.ixTask=b.ixBug " .
+	       "    and e.ixPerson=$user ");
+	    $this->estimate_rows("Bug", 1, $res);
+	}
+	$this->table_end();
+	$this->form_button("Save", "Save");
     }
     
     // main gracefultavi entry point
@@ -341,18 +552,50 @@ class Macro_TaskMaster
 	bug_init();
 	$this->bug_h = $bug_h;
 
-        $this->outdata = "";
-	$this->out("TaskMaster output" . $_REQUEST["foo"]);
-	$this->form(1);
-	$this->do_filterbar();
-	$this->out("<hr>");
-	if ($_REQUEST["cmd"] == "Assign")
-	  $this->do_assign();
-	if ($_REQUEST["cmd"] == "Retarget")
-	  $this->do_retarget();
-	$this->do_summary($_REQUEST["new-user"]);
-	$this->form_end();
-        return $this->outdata;
+        if (!preg_match_all('/"[^"]*"|[^ \t]+/', $args, $words))
+            return "regmatch failed!\n";
+        $words = $words[0]; // don't know why I have to do this, exactly...
+
+        foreach ($words as $key => $value)
+        {
+            if (preg_match('/^"(.*)"$/', $value, $result))
+                $words[$key] = $result[1];
+        }
+	
+	$this->outdata = "";
+
+        if ($words[0] == "ESTIMATE")
+	{
+	    $this->out("TaskMaster Estimate");
+	    $this->form(1);
+	    $this->do_estimate_form();
+	    $this->form_end();
+	}
+	else if ($words[0] == "CREATE")
+	{
+	    $this->out("TaskMaster Create");
+	    $this->form(1);
+	    if ($_REQUEST["cmd"] == "Create")
+	      $this->do_create();
+	    else
+	      $this->do_create_form();
+	    $this->form_end();
+	}
+	else if ($words[0] == "ASSIGN")
+	{
+	    $this->out("TaskMaster Assign" . $_REQUEST["foo"]);
+	    $this->form(1);
+	    $this->do_filterbar();
+	    $this->out("<hr>");
+	    if ($_REQUEST["cmd"] == "Assign")
+	      $this->do_assign();
+	    if ($_REQUEST["cmd"] == "Retarget")
+	      $this->do_retarget();
+	    $this->do_summary($_REQUEST["new-user"]);
+	    $this->form_end();
+	}
+	
+	return $this->outdata;
     }
 }
 

@@ -398,13 +398,28 @@ function bug_add_volunteer_tasks()
 }
 
 
-function bug_start_user($user)
+function bug_query($query)
 {
     global $bug_h;
     bug_init();
-
-    $query = "update schedulator.Task set fValid=0 where sPerson='$user'";
     $result = mysql_query($query, $bug_h);
+    if (!$result)
+      print mysql_error($bug_h);
+    return $result;
+}
+
+
+function bug_onerow($query)
+{
+    return mysql_fetch_row(bug_query($query));
+}
+
+
+function bug_start_user($user)
+{
+    // mark old schedulator tasks for this user as invalid
+    $query = "update schedulator.Task set fValid=0 where sPerson='$user'";
+    bug_query($query);
 }
 
 
