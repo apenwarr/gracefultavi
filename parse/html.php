@@ -1,5 +1,5 @@
 <?php
-// $Id: html.php,v 1.24 2002/01/15 15:38:07 smoonen Exp $
+// $Id: html.php,v 1.1.1.2 2003/03/15 03:54:58 apenwarr Exp $
 
 // These functions take wiki entities like 'bold_begin' or 'ref' and return
 //   HTML representing these entities.  They are used throught this script
@@ -215,7 +215,7 @@ function html_category($time, $page, $host, $user, $comment, $version)
 
   $text = '(' . html_timestamp($time) . ') (' .
           '<a href="' . historyURL($page) . '">history</a>) ' .
-          html_ref($page, $page, '', "&$time");
+          html_ref($page, $page, '', "&$version");
 
   if(count($twin = $pagestore->twinpages($page)))
   {
