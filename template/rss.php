@@ -28,12 +28,12 @@ function template_rss($args)
         in the output (the default is 10).
     -->
     <channel rdf:about="<?php print $ScriptBase; ?>">
-        <title><?php print $WikiName; ?></title>
-        <link><?php print $ScriptBase; ?></link>
-        <description><?php print $MetaDescription; ?></description>
+        <title><?php print htmlspecialchars($WikiName); ?></title>
+        <link><?php print htmlspecialchars($ScriptBase); ?></link>
+        <description><?php print htmlspecialchars(($MetaDescription); ?></description>
         <wiki:interwiki>
             <rdf:Description link="<?php print $ScriptBase . '?'; ?>">
-                <rdf:value><?php print $InterWikiPrefix; ?></rdf:value>
+                <rdf:value><?php print htmlspecialchars($InterWikiPrefix); ?></rdf:value>
             </rdf:Description>
         </wiki:interwiki>
         <items>
