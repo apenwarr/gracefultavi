@@ -4,6 +4,13 @@
 // If register_globals is off, we need to harvest the script parameters
 // at this point.
 
+
+if($_SERVER["PATH_INFO"])
+{
+  header('Location: ' . $_SERVER["SCRIPT_NAME"] . '?' . substr($_SERVER["PATH_INFO"], 1));
+  exit;
+}
+
 if(!ini_get('register_globals'))
 {
   $HTTP_REFERER = $HTTP_SERVER_VARS['HTTP_REFERER'];
