@@ -658,8 +658,8 @@ class PageStore
     $this->dbh->query("UNLOCK TABLES");
   }
 
-  // Retrieve a list of all of the pages in the wiki
-  // except the ones with an empty body.
+  // Retrieve a list of all of the pages in the wiki except the ones with an
+  // empty body. This ignores the minor edits.
   function allpages()
   {
         global $PgTbl, $LeTbl;
@@ -695,7 +695,8 @@ class PageStore
                                  "FROM $PgTbl p, $LeTbl l " .
                                  "WHERE p.title = l.page " .
                                  "AND p.version = l.version " .
-                                 "AND LENGTH(p.body) > 1");
+                                 "AND LENGTH(p.body) > 1 " .
+                                 "AND p.minoredit = 0");
 
         while ($result = $this->dbh->result($qid))
             $list[] = array($result[3], $result[0], $result[2], $result[4], $result[5],
