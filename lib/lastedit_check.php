@@ -22,8 +22,6 @@ function lastedit_check()
 
     if ($lastedit_count <> $pages_count)
     {
-        $pagestore->dbh->query("DELETE FROM $LeTbl");
-
         $list = array();
 
         // Make sure we get every page's last version, the next query
@@ -43,9 +41,15 @@ function lastedit_check()
         while(($result = $pagestore->dbh->result($qid)))
             $list[$result[0]] = $result[1];
 
+        $pagestore->dbh->query("LOCK TABLES $LeTbl WRITE");
+
+        $pagestore->dbh->query("DELETE FROM $LeTbl");
+
         foreach ($list as $key => $value)
             $pagestore->dbh->query("INSERT INTO $LeTbl (page, version) " .
                                    "VALUES ('$key', $value)");
+
+        $pagestore->dbh->query("UNLOCK TABLES");
     }
 }
 
