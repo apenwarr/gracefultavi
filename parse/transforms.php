@@ -216,7 +216,7 @@ function parse_hyperlink($text)
   global $UrlPtn, $FlgChr;
 
   $text = preg_replace("/(^|[^A-Za-z=\"])($UrlPtn)(\$|[^\\/?=&~A-Za-z0-9])/e",
-                       "q1('\\1') . url_token(q1('\\2'), q1('\\2')) . q1('\\5')", $text, -1);
+                       "q1('\\1') . url_token(q1('\\2'), q1('\\2')) . q1('\\5')", $text, -1); //"
 
   return $text;
 }
