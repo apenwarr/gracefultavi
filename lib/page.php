@@ -66,7 +66,9 @@ class WikiPage
             $query = "SELECT max(version) FROM $PgTbl WHERE title='$this->dbname'";
             $qid = $this->db->query($query);
             $result = $this->db->result($qid);
-            if (!$qry_version = $result[0]) { die("Error getting page content"); }
+            if (!$qry_version = $result[0]) {
+                return ""; // The page doesn't exist.
+            }
         }
 
         $query = "SELECT title, time, author, body, mutable, version, " .
