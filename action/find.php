@@ -1,5 +1,5 @@
 <?php
-// $Id: find.php,v 1.1.1.1 2003/03/15 03:53:58 apenwarr Exp $
+// $Id: find.php,v 1.2 2003/04/01 01:11:33 mich Exp $
 
 require('parse/html.php');
 require('template/find.php'); // require(TemplateDir . '/find.php');
@@ -81,7 +81,8 @@ function action_find()
                 $text .= html_ref($page, $page) . html_newline();
 
         template_find(array('find'  => $find,
-                            'pages' => $text));
+                            'pages' => $text,
+                            'branch_search' => $branch_search));
     }
 }
 ?>
