@@ -14,8 +14,8 @@ function action_reparent()
 
     $pagestore->reparent($page, $parents);
 
-    template_reparent(array('page' => $page));
-
     $pagestore->unlock();               // End "transaction".
+
+    template_reparent(array('page' => $page));
 }
 ?>

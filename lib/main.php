@@ -45,6 +45,7 @@ if(!ini_get('register_globals'))
   if(isset($HTTP_POST_VARS['user'])) $user = $HTTP_POST_VARS['user'];
   if(isset($HTTP_POST_VARS['minoredit'])) $minoredit = $HTTP_POST_VARS['minoredit'];
   if(isset($HTTP_POST_VARS['pagefrom'])) $pagefrom = $HTTP_POST_VARS['pagefrom'];
+  if(isset($HTTP_POST_VARS['subscribed_pages'])) $subscribed_pages = $HTTP_POST_VARS['subscribed_pages'];
 }
 require('lib/init.php');
 require('parse/transforms.php');
@@ -67,6 +68,7 @@ $ActionList = array(
                 'reparent' => array('action/reparent.php', 'action_reparent', 'edit'),
                 'content' => array('action/content.php', 'action_content', 'edit'),
                 'subscribe' => array('action/subscribe.php', 'action_subscribe', 'edit'),
+                'subscriptions' => array('action/subscriptions.php', 'action_subscriptions', 'view'),
                 'lock'    => array('action/lock.php', 'action_lock', ''),
                 'js'      => array('action/js.php', 'action_js', '')
               );

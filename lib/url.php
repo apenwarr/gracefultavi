@@ -36,6 +36,8 @@ if(!isset($ContentBase))
   { $ContentBase = $ScriptBase . '?action=content&amp;page='; }
 if(!isset($PageSubscribeBase))
   { $PageSubscribeBase = $ScriptBase . '?action=subscribe&amp;page='; }
+if(!isset($SubscriptionsScript))
+  { $SubscriptionsScript = $ScriptBase . '?action=subscriptions'; }
 
 if(!function_exists('viewURL'))
 {

@@ -217,6 +217,40 @@ class PageStore
                                   "VALUES ('$page', '$parent')");
     }
 
+    // Return subscribed pages for a given user
+    function getSubscribedPages($username)
+    {
+        global $SuTbl;
+
+        $query = "SELECT page " .
+                 "FROM $SuTbl " .
+                 "WHERE username='$username' " .
+                 "ORDER BY lower(page)";
+        $qid = $this->dbh->query($query);
+
+        $list = array();
+        while (($result = $this->dbh->result($qid))) {
+            $list[] = $result[0];
+        }
+
+        return $list;
+    }
+
+    // Unsubscribe pages for a giver user
+    function unsubscribePages($username, $pages)
+    {
+        global $SuTbl;
+
+        foreach ($pages as $page) {
+            $query = "DELETE FROM $SuTbl " .
+                     "WHERE username='$username' " .
+                     "AND page='$page'";
+            $qid = $this->dbh->query($query);
+        }
+
+        return;
+    }
+
     // Build a tree from an array of branches
     function getTreeFromBranches($branches)
     {

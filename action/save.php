@@ -147,12 +147,13 @@ function action_save()
             #$subscribed_users = implode(' ', $subscribed_users);
             #exec("$WorkingDirectory/lib/mailnotify.sh $page $subscribed_users");
             foreach ($subscribed_users as $user) {
+                $msg = "This is your friendly neighbourhood wiki letting you " .
+                       "know that the page $page has changed!\n\n";
+                if ($minoredit) { $msg .= "This was a minor edit.\n\n"; }
+                $msg .= "View page: http://nitwiki/?$page\n\n" .
+                        "History: http://nitwiki/?action=history&page=$page";
                 mail($user . $EmailSuffix, "NitWiki: $page has changed",
-                     "This is your friendly neighbourhood wiki letting you " .
-                     "know that the page $page has changed!\n\n" .
-                     "View page: http://nitwiki/?$page\n\n" .
-                     "History: http://nitwiki/?action=history&page=$page",
-                     "From: webmaster@nit.ca");
+                     $msg, "From: webmaster@nit.ca");
             }
         }
     }

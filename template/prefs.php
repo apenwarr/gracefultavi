@@ -8,8 +8,9 @@ require_once('template/common.php');
 
 function template_prefs()
 {
-  global $PrefsScript, $HTTP_REFERER, $HistMax, $TimeZoneOff, $UseHotPages;
-  global $AuthorDiff, $EditRows, $EditCols, $UserName, $DayLimit, $MinEntries;
+  global $AuthorDiff, $DayLimit, $EditCols, $EditRows, $EmailSuffix;
+  global $EnableSubscriptions, $HistMax, $HTTP_REFERER, $MinEntries;
+  global $PrefsScript, $TimeZoneOff, $UseHotPages, $UserName;
 
   template_common_prologue(array('norobots' => 1,
                                  'title'    => 'UserOptions',
@@ -26,15 +27,20 @@ function template_prefs()
   <input type="hidden" name="referrer" value="<?php print $HTTP_REFERER; ?>" />
 
   <strong>You are currently logged in as
-  <?php print $UserName; ?> </strong>
-<br />
-Your login name will apprear on the RecentChanges page to the right of pages you edit.<br /><br />
+  <?php print $UserName; ?> </strong><br />
+  Your login name will apprear on the RecentChanges page to the right of pages you edit.<br /><br />
   <hr />
+
+<?php if ($EnableSubscriptions && isset($EmailSuffix) && $UserName != '') : ?>
+  <strong>Subscriptions</strong><br /><br />
+  <input type="button" value="Manage subscriptions" onClick="location='?action=subscriptions'"><br /><br />
+  <hr />
+<?php endif; ?>
 
   <strong>Edit box</strong><br /><br />
   Rows: <input type="text" name="rows" value="<?php print $EditRows; ?>" /><br />
   Columns: <input type="text" name="cols" value="<?php
-    print $EditCols; ?>" /><br />
+  print $EditCols; ?>" /><br /><br />
   <hr />
 
   <strong>History lists</strong><br /><br />

@@ -4,15 +4,17 @@ require('template/subscribe.php');
 // Toggle page subscription for a user
 function action_subscribe()
 {
-    global $page, $pagestore, $UserName;
+    global $EnableSubscriptions, $page, $pagestore, $UserName;
 
-    $pagestore->lock();                 // Ensure atomicity.
+    if ($EnableSubscriptions) {
+        $pagestore->lock();                 // Ensure atomicity.
 
-    $pg = $pagestore->page($page);
-    $pg->toggleSubscribe($UserName);
+        $pg = $pagestore->page($page);
+        $pg->toggleSubscribe($UserName);
+
+        $pagestore->unlock();               // End "transaction".
+    }
 
     template_subscribe(array('page' => $page));
-
-    $pagestore->unlock();               // End "transaction".
 }
 ?>

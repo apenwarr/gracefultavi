@@ -137,14 +137,14 @@ class WikiPage
     }
 
     // Check if a user is subscribed to a page.
-    function isSubscribed($userName)
+    function isSubscribed($username)
     {
         global $SuTbl;
 
         $query = "SELECT count(*) " .
                  "FROM $SuTbl " .
                  "WHERE page='{$this->name}' " .
-                 "AND username='$userName'";
+                 "AND username='$username'";
 
         $qid = $this->db->query($query);
 
@@ -157,19 +157,19 @@ class WikiPage
     }
 
     // Toggle page subscription for a user
-    function toggleSubscribe($userName)
+    function toggleSubscribe($username)
     {
         global $SuTbl;
 
-        if ($userName != '')
+        if ($username != '')
         {
-            if ($this->isSubscribed($userName))
+            if ($this->isSubscribed($username))
                 $this->db->query("DELETE FROM $SuTbl " .
                                  "WHERE page = '{$this->name}' " .
-                                 "AND username = '$userName'");
+                                 "AND username = '$username'");
             else
                 $this->db->query("INSERT INTO $SuTbl (page, username) " .
-                                 "VALUES ('{$this->name}', '$userName')");
+                                 "VALUES ('{$this->name}', '$username')");
         }
 
         return;

@@ -27,7 +27,7 @@ function template_backlinks($args) {
 
 <h2>Backlinks and Nesting Information</h2>
 
-<form name="reparentFrom" action="<?php print reparentURL($page); ?>" method="POST">
+<form name="reparentForm" action="<?php print reparentURL($page); ?>" method="POST">
 
 <div class="form">
 
