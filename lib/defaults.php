@@ -272,12 +272,12 @@ $ViewMacroEngine = array('!'             => 'view_macro_category',
                          'Sched'         => 'view_macro_schedulator'
                         );
 $ViewMacroEngine[TestMacro] = new Macro_TestMacro;
-
+*/
 // $SaveMacroEngine determines what save macros will be called after a
 // page is saved.  See parse/save.php
 $SaveMacroEngine = array('parse_define_interwiki',
                          'parse_define_sisterwiki',
                          'parse_define_links'
                         );
-*/
+
 ?>

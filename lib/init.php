@@ -88,7 +88,7 @@ if($Charset != '')
   { header("Content-Type: text/html; charset=$Charset"); }
 
 $ViewMacroEngine=array();
-$SaveMacroEngine=array();
+//$SaveMacroEngine=array();
 
 if($dir=opendir("$WorkingDirectory/macros"))
 {
@@ -111,10 +111,10 @@ if($dir=opendir("$WorkingDirectory/macros"))
                   $name=$ViewMacroEngine[$name]->trigger;
                   unset($ViewMacroEngine[$pieces[0]]);
                }
-               if(method_exists($ViewMacroEngine[$name], "save"))
-               {
-                  array_push($SaveMacroEngine, $name);
-               }
+               //if(method_exists($ViewMacroEngine[$name], "save"))
+               //{
+               //   array_push($SaveMacroEngine, $name);
+               //}
            }
         }
     }
