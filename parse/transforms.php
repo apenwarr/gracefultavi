@@ -538,9 +538,12 @@ function parse_indents($text)
         preg_match('/^(\s*)(:)(-.*\\n?)$/', $text, $result);
     }
 
-    if(isset($result[1])) $indentSpaces = $result[1];
-    if(isset($result[2])) $indentChar = $result[2];
-    if(isset($result[3])) $indentText = $result[3];
+    if(array_key_exists(1, $result) && isset($result[1])) 
+        $indentSpaces = $result[1];
+    if(array_key_exists(2, $result) && isset($result[2])) 
+        $indentChar = $result[2];
+    if(array_key_exists(3, $result) && isset($result[3])) 
+        $indentText = $result[3];
 
     // No list on last line, no list on this line. Bail out:
     if ($indentPrevLevel == -1 && !isset($indentChar) && !isset($indentStealLine))

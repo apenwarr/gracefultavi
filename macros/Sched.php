@@ -1,7 +1,6 @@
 <?php
 global $sch_user;
 global $sch_start;
-global $sch_load;
 // FIXME: sch_curday, sch_elapsed_curday shouldn't be global
 // The day we are currently processing, in days since the epoch
 global $sch_curday;
@@ -24,15 +23,9 @@ global $SchedUser;
 global $SchedPass;
 global $SchedName;
 
-// Contains lists of complete and incomplete bugs, one per Fixfor.
-// $sch_bug_lists[fixfor-name] is an array with two elements, "incomplete" and
-// "complete".  Each of these is itself an array of bugs.
-global $sch_bug_lists;
 // Working lists of complete and incomplete bugs (we don't know the Fixfor yet)
-// FIXME: Merge into one list of Bug objects (a BugTable?)
 global $sch_cur_incomplete_bugs;
 global $sch_cur_complete_bugs;
-
 
 function bug_init()
 {
@@ -50,171 +43,15 @@ function bug_init()
 }
                     
 
-// This function could maybe be inlined
-function bug_person($user)
-{
-    global $sch_db;
-
-    $p = $sch_db->person->first_prefix("email", "$user@");
-    return $p->ix;
-}
-
-
-// This function could maybe be inlined
-function bug_duedate($fixfor)
-{
-    global $sch_db;
-
-    $d = $sch_db->fixfor->first("name", $fixfor);
-    return $d->date;
-}
-
-
-// find the last FixFor entry due sooner than or on the same day as
-// $fixforname or $enddate, whichever is later.  Either one can be
-// undefined.  If both are undefined or there are no FixFors at all,
-// returns undef.
-function bug_last_fixfor($fixforname, $enddate)
-{
-    global $sch_db;
-    if ($enddate)
-      $last_fix = $sch_db->fixfor->last_before($enddate);
-    $f = $sch_db->fixfor->first("name", $fixforname);
-    
-    if (!$last_fix)
-      $last_fix = $f;
-    if (!$f)
-      $f = $last_fix;
-    if ($last_fix && $f)
-      $last_fix = $f->due_before($last_fix) ? $last_fix : $f;
-    
-    return $last_fix;
-}
-
-
-// return a list of all ACTIVE bugs due by the given fixfor/enddate, whichever
-// is *later*.
-//
-// Returns an array:
-//       bugid -> (title,OrigEst,CurrEst,Elapsed,FixForDate)
-function bug_unfinished_list($user, $fixforname, $enddate)
-{
-    global $sch_db;
-    $personid = bug_person($user);
-    $last_fix = bug_last_fixfor($fixforname, $enddate);
-    $a = array();
-    
-    foreach ($sch_db->estimate->a as $e)
-    {
-	if ($e->isdone()
-	    || $e->assignto->ix != $personid
-	    || ($last_fix && !$e->task->fixfor->due_before($last_fix))
-            || $e->task->fixfor->name != $fixforname)
-	  continue;
-	
-	$a[$e->id] =
-	  array($e->id, $e->nice_title(),
-		$e->est_orig(), $e->est_curr(),
-		$e->est_elapsed(),
-		$e->task->fixfor->date);
-    }
-    
-    return $a;
-}
-
-
-// return a list of all RESOLVED bugs that were resolved by this user before
-// the given fixfor *and* (if given) the given enddate.
-//
-// The list is in order of least-to-most-recently-resolved.
-//
-// Returns an array:
-//       bugid -> (title,OrigEst,CurrEst,Elapsed,FixForDate)
-function bug_finished_list($user, $fixfor, $startdate, $enddate)
-{
-    global $sch_db;
-    
-    // We want to get all bugs *resolved by* the user after the given start
-    // date.  The bugs are probably no longer assigned to that user.
-    $personid = bug_person($user);
-
-    $last_fix = bug_last_fixfor($fixforname, $enddate);
-    $a = array();
-    
-    $xstartdate = str_replace("/", "-", $startdate);
-    
-    foreach ($sch_db->estimate->a as $e)
-    {
-	if (!$e->isdone()
-	    || $e->resolvedate < $xstartdate
-	    || ($e->est_curr()==0 && $e->est_elapsed()==0)
-	    || ($last_fix && !$e->task->fixfor->due_before($last_fix)))
-	  continue;
-	
-	$a[$e->id] = 
-	  array($e->id, $e->nice_title(),
-		$e->est_orig(), $e->est_curr(), $e->est_elapsed(),
-		$e->task->fixfor->date);
-    }
-    
-    return $a;
-}
-
-
-// FIXME: Return a Bug object from this
 function bug_get($bugid)
 {
     global $sch_db;
-    global $bug_h;
 
     $b = $sch_db->bug->first("ix", $bugid);
-
     if ($b)
-    {
-        // $b->status doesn't give what we want.  Can't wait to return Bug
-        // objects.
-        if ($b->isresolved())
-            $mystatus = "Resolved";
-        else
-            $mystatus = "ACTIVE";
-
-        return array($b->name, $b->origest, $b->currest, $b->elapsed, 
-                $mystatus, $b->fixfor->name, $b->priority);
-    }
+        return $b;
     else
-    {
-        bug_init();
-        $result = mysql_query("select sTitle,hrsOrigEst,hrsCurrEst,hrsElapsed, " .
-                            "    sStatus,sFixFor,ixPriority " .
-                            "from Bug as b, Status as s, FixFor as f " .
-                            "where s.ixStatus=b.ixStatus " .
-                            "  and f.ixFixFor=b.ixFixFor " .
-                            "  and ixBug=" . ($bugid+0),
-                            $bug_h);
-        $row = mysql_fetch_row($result);
-         
-        if (!$row)
-            return array($bugid, 0, 0, 0);
-        else
-            return $row;
-    }
-}
-
-
-// This function should become obsolete as everything switches to using bug
-// objects that make their own links
-function bug_link($bugid)
-{
-    return "<a href='http://nits/FogBUGZ3/?$bugid'>$bugid</a>";
-}
-
-
-// This function should become obsolete as everything switches to using bug
-// objects that have their own titles
-function bug_title($bugid)
-{
-    $bug = bug_get($bugid);
-    return $bug[0];
+        return $sch_db->bug->create_bug($bugid);
 }
 
 
@@ -232,38 +69,32 @@ function bug_set_release($fixfor, $dt)
 {
     global $bug_h;
     bug_init();
-
+    $ff = addslashes($fixfor);
     $query = "delete from schedulator.Milestone " .
-             "  where sMilestone='$fixfor' and nSub=0";
+             "  where sMilestone='$ff' and nSub=0";
     $result = mysql_query($query, $bug_h);
 
     $query = "insert into schedulator.Milestone " .
              "  (sMilestone, nSub, dtDue) " .
-             "  values ('$fixfor', 0, '$dt')";
+             "  values ('$ff', 0, '$dt')";
     $result = mysql_query($query, $bug_h);
 }
 
 
 function bug_set_milestones($fixfor, $dates)
 {
-    global $bug_h;
-    bug_init();
-
+    $ff = addslashes($fixfor);
     $query = "delete from schedulator.Milestone " .
-             "  where sMilestone='$fixfor' and nSub>0";
-    $result = mysql_query($query, $bug_h);
-    if (!$result)
-        print mysql_error($bug_h);
+             "  where sMilestone='$ff' and nSub>0";
+    $result = bug_query($query);
 
     $n = 1;
     foreach ($dates as $d)
     {
         $query = "insert into schedulator.Milestone " .
                  "  (sMilestone, nSub, dtDue) " .
-                 "  values ('$fixfor', $n, '$d')";
-        $result = mysql_query($query, $bug_h);
-        if (!$result)
-            print mysql_error($bug_h);
+                 "  values ('$ff', $n, '$d')";
+        $result = bug_query($query);
         $n++;
     }
 }
@@ -271,14 +102,14 @@ function bug_set_milestones($fixfor, $dates)
 
 function bug_get_milestones($fixfor)
 {
-    global $bug_h;
-    bug_init();
-
-    $query = "select distinct dtDue from schedulator.Milestone " .
-             "  where sMilestone='$fixfor' and nSub>0 order by dtDue";
-    $result = mysql_query($query, $bug_h);
-    if (!$result)
-        print mysql_error($bug_h);
+    $ff = addslashes($fixfor);
+    $query = "select distinct dtDue " .
+	"from schedulator.Milestone " .
+	"where sMilestone='$ff' " .
+	"    and nSub>0 " .
+	"    and dtDue>=now() " .
+	"order by dtDue";
+    $result = bug_query($query);
 
     $a = array();
     while ($row = mysql_fetch_row($result))
@@ -293,21 +124,25 @@ function bug_add_task($user, $fixfor, $t)
 {
     global $bug_h;
     bug_init();
-
+    $ff = addslashes($fixfor);
+    $u = addslashes($user);
     $task = mysql_escape_string($t[0]);
     $subtask = mysql_escape_string($t[1]);
     $remain = $t[3]-$t[4];
+    // Boolean false converts to the empty string.  Stupid PHP.
+    $done = (int)$t[6];
     $query = "insert into schedulator.Task " .
              "  (sPerson, sFixFor, " .
              "      sTask, sSubTask, " .
              "      hrsOrigEst, hrsCurrEst, hrsElapsed, hrsRemain, " .
              "      dtDue, fDone, fResolved, ixPriority) " .
-             "  values ('$user', '$fixfor', \"$task\", \"$subtask\", " .
+             "  values ('$u', '$ff', \"$task\", \"$subtask\", " .
              "            $t[2], $t[3], $t[4], $remain, " . 
-             "            '$t[5]', $t[6], '$t[7]', '$t[8]')";
+             "            '$t[5]', $done, '$t[7]', '$t[8]')";
+
     $result = mysql_query($query, $bug_h);
     if (!$result)
-        print 'x-' . mysql_error($bug_h);
+        print 'x-' . mysql_error($bug_h) . '<br>';
 }
 
 
@@ -322,13 +157,8 @@ function bug_add_tasks($user, $fixfor, $tasks)
 // the Schedulator database.
 function bug_add_volunteer_tasks()
 {
-    global $bug_h;
-    bug_init();
-
     $query = "delete from schedulator.Task where sPerson like '-%-'";
-    $result = mysql_query($query, $bug_h);
-    if (!$result)
-        print mysql_error($bug_h);
+    $result = bug_query($query, $bug_h);
 
     $query = "select sFullName, sFixFor, ixBug, sTitle, " .
              "    b.ixStatus, ixPriority " .
@@ -338,9 +168,7 @@ function bug_add_volunteer_tasks()
              "    and s.ixStatus=b.ixStatus " .
              "    and s.sStatus='ACTIVE' " .
              "    and sFullName like '-%-' ";
-    $result = mysql_query($query, $bug_h);
-    if (!$result)
-        print mysql_error($bug_h);
+    $result = bug_query($query);
 
     while ($row = mysql_fetch_row($result))
     {
@@ -390,42 +218,6 @@ function bug_finish_user($user)
 }
 
 
-// Returns an array of all FixFors the given user has active bugs for, or has
-// ever fixed a bug for, ordered by the due date of the fixfors.
-function bug_get_fixfors($user)
-{
-    global $bug_h;
-    bug_init();
-
-    // We want to get all bugs *resolved by* the user after the given start
-    // date.  The bugs are probably no longer assigned to that user.
-    $personid = bug_person($user);
-
-    $query = "select distinct sFixFor, " .
-             "  ifnull(f.dt, '2099/9/9') as sortdate " .
-             "  from Bug as b, BugEvent as e, FixFor as f, Person as p " .
-             "  where p.ixPerson = $personid " . 
-             "    and p.ixPerson = e.ixPerson " .
-             "    and e.ixBug = b.ixBug " .
-             "    and b.ixFixFor = f.ixFixFor " .
-             "  order by sortdate";
-    //print "(($query))<p>";
-    $result = mysql_query($query, $bug_h);
-    if (!$result)
-        print mysql_error($bug_h);
-    
-    $a = array();
-    
-    while ($row = mysql_fetch_row($result))
-    {
-        //print "((Adding fixfor $row[0] to array))<br>\n";
-	$a[] = $row[0];
-    }
-
-    return $a;
-}
-
-
 function sch_today()
 {
     // we mostly use GMT for our work, but if they want today, they want
@@ -454,7 +246,7 @@ function sch_parse_day($day)
         // FIXME: Insane math ahoy
         $stamp = mktime(12,0,0, $month, $day, $year);
         $spl = localtime($stamp);
-        //print("(day-$year/$month/$day:$stamp:$spl[6])<br>\n");
+        //print("(day-$year/$month/$day:$stamp:$spl[6])");
         if ($spl[6] == 0)  // sunday
             $stamp += 24*60*60;
         else if ($spl[6] == 6) // saturday
@@ -466,7 +258,7 @@ function sch_parse_day($day)
         $days = floor($stamp/24/60/60);
         $weeks = floor($days/7);
         $days -= $weeks*7;
-        //printf("(days/weeks:$days/$weeks)");
+        //printf("(days/weeks:$days/$weeks)<br>\n");
         return $weeks*4 + $days;
     }
     else
@@ -481,7 +273,7 @@ function sch_parse_day($day)
 // form "yyyy/mm/dd", suitable for display.
 // FIXME: This actually takes a value in "working days since the epoch".
 // Must fix this.
-function sch_format_day($day)
+function sch_format_day($day, $seperator="/")
 {
     if (!$day)
         return '';
@@ -497,20 +289,17 @@ function sch_format_day($day)
     $stamp += 4*24*60*60; // the epoch was a Thursday
     $stamp += 12*60*60;   // php timezone handling is insane
 
-    $ret = strftime("%Y/%m/%d", $stamp);// . sprintf("+%.1f", $frac);
+    $ret = strftime("%Y$seperator%m$seperator%d", $stamp);// . sprintf("+%.1f", $frac);
     //print "(ret:$ret)<br>\n";
     return $ret;
 }
 
 
-function sch_add_hours($day, $hours)
+function sch_add_hours($day, $hours, $load)
 {
-    global $sch_load;
-
     //if ($hours < 0)
     //  return $day;  // never subtract hours from the date!
-
-    return $day + ($hours * $sch_load) / 8.0;
+    return $day + ($hours * $load) / 8.0;
 }
 
 
@@ -571,7 +360,7 @@ function sch_warning($text)
 }
 
 
-function sch_genline($feat, $task, $orig, $curr, $elapsed, $left, $due)
+function sch_genline($task, $title, $orig, $curr, $elapsed, $left, $due)
 {
     $ret = "<tr>";
 
@@ -582,26 +371,25 @@ function sch_genline($feat, $task, $orig, $curr, $elapsed, $left, $due)
         $junk2 = "</i></font></strike>";
     }
 
-    if ($task)
-        $ret .= "<td>$junk1$feat$junk2</td><td>$junk1$task$junk2</td>";
+    if ($title)
+        $ret .= "<td>$junk1$task$junk2</td><td>$junk1$title$junk2</td>";
     else
-        $ret .= "<td colspan=2>$junk1$feat$junk2</td>";
+        $ret .= "<td colspan=2>$junk1$task$junk2</td>";
     return $ret . "<td>$junk1" .
-           join("$junk2</td><td>$junk1",
-                array($orig, $curr, $elapsed, $left, $due)) .
-           "$junk2</td></tr>";
+	join("$junk2</td><td>$junk1",
+	     array($orig, $curr, $elapsed, $left, $due)) .
+	"$junk2</td></tr>";
 }
 
 
-function sch_line($feat, $task, $orig, $curr, $elapsed, $remain, $done, 
-                $allow_red)
+function sch_line($task, $title, $orig, $curr, $elapsed, $remain, $done, 
+		  $allow_red)
 {
     global $sch_curday, $sch_elapsed_curday;
 
-    if (preg_match('/^[0-9]+$/', $feat))
-        $xfeat = bug_link($feat);
-    else
-        $xfeat = $feat;
+    //print "($task)($done)<br>\n";
+    
+    $ret = "";
 
     if ($done)
         $sremain = 'done';
@@ -614,25 +402,13 @@ function sch_line($feat, $task, $orig, $curr, $elapsed, $remain, $done,
     // FIXME: Insane math?
     $was_over_elapsed = ($sch_elapsed_curday - 4 > $today);
 
-    // All unfinished bugs have had their elapsed time already accounted for
-    if ($done)
-    {
-        $sch_curday = sch_add_hours($sch_curday, $curr);
-        $sch_elapsed_curday = sch_add_hours($sch_elapsed_curday, $elapsed);
-    }
-    else
-    {
-        $sch_curday = sch_add_hours($sch_curday, $curr - $elapsed);
-        //$ret .= sch_fullline("Ignoring $elapsed elapsed hours for bug $feat");
-    }
-
     $due = sch_format_day($sch_curday);
 
     if ($allow_red && (!$curr || $remain) && !$done
         && floor($sch_curday) < floor($today))
         $due = "<font color=red>$due</font>";
 
-    $ret .= sch_genline($xfeat, $task,
+    $ret .= sch_genline($task, $title,
             sch_period($orig), sch_period($curr),
             sch_period($elapsed), $sremain,
             $due);
@@ -647,72 +423,50 @@ function sch_line($feat, $task, $orig, $curr, $elapsed, $remain, $done,
 }
 
 
-function sch_bug($feat, $task, $_orig, $_curr, $_elapsed, $done, $fixfor)
+function sch_bug($estimate)
 {
-    global $sch_user, $sch_curday, $sch_need_extraline;
+    global $sch_user, $sch_curday;
     global $sch_got_bug, $sch_unknown_fixfor;
-    global $sch_load;
-
-    // FIXME: Use Bug object, check its LoadFactor member
-    if ($feat == "LOADFACTOR")
+    $ret = "";
+    static $old_load = -1;
+    
+    if ($estimate->loadfactor != $old_load)
     {
-        if ($task != $sch_load)
-            $ret .= sch_fullline("(Load factor = $task)");
-        $sch_load = $task;
-        return $ret;
+        $ret .= sch_fullline("(Load factor = ".$estimate->loadfactor.")");
+        $old_load = $estimate->loadfactor;
     }
 
-    $task = htmlentities($task, ENT_QUOTES);
+    $title = htmlentities($estimate->nice_title(), ENT_QUOTES);
 
-    if (!$done)
-        $done = 0;
-    else if ($done == -1)
+    $orig = sch_parse_period($estimate->est_orig());
+    $curr = sch_parse_period($estimate->est_curr());
+    $elapsed = sch_parse_period($estimate->est_elapsed());
+
+    $remain = $estimate->est_remain();
+
+    $task = $estimate->isbug ? $estimate->task->ix : $estimate->task->task;
+
+    // update the time.
+    // we need to update the time BEFORE we put out the line
+    // All unfinished bugs have had their elapsed time already accounted for
+    if ($estimate->isdone())
     {
-	$notdone = 1;
-	$done = 0;
+        $sch_curday = sch_add_hours($sch_curday, $curr, $estimate->loadfactor);
+        $sch_elapsed_curday = sch_add_hours($sch_elapsed_curday, $elapsed, $estimate->loadfactor);
+    }
+    else
+    {
+        $sch_curday = sch_add_hours($sch_curday, $curr - $elapsed, $estimate->loadfactor);
+        //$ret .= sch_fullline("Ignoring $elapsed elapsed hours for bug $feat");
     }
 
-    if ($sch_need_extraline)
-    {
-        $ret .= sch_fullline('&nbsp;');
-        $sch_need_extraline = 0;
-    }
+    // FIXME: Estimate::isdone() only checks the Estimate's be_done flag;
+    // maybe should make it also check its task's state
+    $ret .= sch_line($estimate->task->hyperlink(), $title, $orig, $curr, 
+		     $elapsed, $remain, $estimate->isdone(), true);
 
-    // $fixfor = ''; // now provided as a parameter...
-    if (preg_match('/^[0-9]+$/', $feat))
-    {
-        $bug = bug_get($feat);
-	// $bug = (title origest currest elapsed status fixfor priority)
-	
-        if (!$task)     $task = $bug[0];
-        if (!strcmp($_orig,''))    $_orig = $bug[1];
-        if (!strcmp($_curr,''))    $_curr = $bug[2];
-        if (!strcmp($_elapsed,'')) $_elapsed = $bug[3];
-	$resolved = ($bug[4] != 'ACTIVE');
-        if (!$done && !$notdone && $resolved) $done = 1;
-        if ((!$done && $_curr != $_elapsed)
-	    || ($bug[4] != 'ACTIVE'))
-	{
-	    // already listed as not done, *or* really done in fogbugz:
-	    // never need to auto-import this bug again.
-	    $sch_got_bug[$feat] = 1;
-	}
-        $fixfor = $bug[5];
-	$priority = $bug[6];
-    }
 
-    $orig = sch_parse_period($_orig);
-    $curr = sch_parse_period($_curr);
-    $elapsed = sch_parse_period($_elapsed);
-
-    $remain = $curr - $elapsed;
-
-    if (!$remain && $curr)
-        $done = 1;
-
-    $ret .= sch_line($feat, $task, $orig, $curr, $elapsed, $remain, $done,
-                     true);
-    if ($done && $curr != $elapsed)
+    if ($estimate->isdone() && $curr != $elapsed)
         $ret .= sch_warning("This bug is done, but elapsed time is different " .
                             "from the current estimate.  You know " .
                             "how long it really took, so make your estimate " .
@@ -720,200 +474,27 @@ function sch_bug($feat, $task, $_orig, $_curr, $_elapsed, $done, $fixfor)
     else if ($curr < $elapsed)
         $ret .= sch_warning("This bug's current estimate is less than the " .
                             "elapsed time so far.  Update your estimate!");
-    $buga = array($feat, $task, $orig, $curr, $elapsed,
-                  sch_format_day($sch_curday), $done, $resolved, $priority);
-    if ($fixfor)
-        bug_add_task($sch_user, $fixfor, $buga);
+
+    // FIXME: Call $estimate->update or something.
+    $resolved = $estimate->isbug && $estimate->task->isresolved();
+    $buga = array($task, $title, $orig, $curr, $elapsed,
+                  sch_format_day($sch_curday), $estimate->task->isdone(), 
+                  $resolved, $estimate->task->get_priority());
+    if (!$estimate->isdone() && 
+	isset($estimate->task->fixfor) && $estimate->task->fixfor != -1)
+        bug_add_task($sch_user->username, $estimate->task->fixfor->name, $buga);
     else
         $sch_unknown_fixfor[] = $buga;
     return $ret;
 }
 
-
-// Get a list of all FogBugz assigned to the user, and insert them into the
-// buglists for the correct milestones
-function sch_add_all_fogbugz($user)
-{
-    global $sch_bug_lists;
-    global $sch_cur_complete_bugs; 
-    global $sch_cur_incomplete_bugs;
-
-    $fixfors = bug_get_fixfors($user);
-
-    foreach ($fixfors as $fixfor)
-    {
-        sch_extrabugs($user, $fixfor, '', false);
-    }
-    
-    return $ret;
-}
-
-
-// FIXME: This function can be cleaned up an awful lot
-// Handle all finished and optionally all unfinished bugs for the given
-// FixFor.  If no FixFor given, do all bugs.
-function sch_extrabugs($user, $fixfor, $enddate, $only_done)
-{
-    global $sch_got_bug, $sch_start, $sch_did_all_done;
-    global $sch_bug_lists;
-    global $sch_manual_bugs;
-
-    $ret .= sch_warning("Extrabugs for $fixfor ($enddate) ($only_done)");
-    
-    $start = sch_format_day($sch_start);
-    $today = sch_today();
-    $fixfor_in_past = ($enddate && sch_parse_day($enddate) < $today);
-
-    $bugs1 = array();
-    $bugs2 = array();
-
-    $a = bug_finished_list($user, $fixfor, $start, $enddate); 
-
-    // handle done bugs
-    foreach ($a as $idx => $bug)
-    {
-	$bugid = array_shift($bug);
-        $zeroest = (abs($bug[2]) <= 0.01 && abs($bug[2]) >= 0.0001);
-        $done = ($bug[2] && $bug[3] == $bug[2]);
-        if (!$done)
-            $ret .= sch_warning("Weird1: I don't know if bug #$bugid is done!");
-
-	#print "(done_bug:$idx:$bugid:$done:$zeroest)";
-        if ($sch_got_bug[$bugid] || $sch_manual_bugs[$bugid])
-            continue;
-	#print "!";
-
-        if ($zeroest)
-        {
-            // the bug is done, but with a zero estimate; probably a
-            // duplicate, wontfix, or something.  Skip it.
-            $sch_got_bug[$bugid] = 1;
-            continue;
-        }
-	#print "/";
-
-        $bugarr = array($bugid, $bug[0], $bug[1], $bug[2], $bug[3]);
-        $sch_bug_lists[$fixfor]["complete"][] = $bugarr;
-
-	$sch_got_bug[$bugid] = 1;  # definitely done now
-    }
-
-    // handle unfinished bugs
-    if (!$only_done)
-    {
-        $ua = bug_unfinished_list($user, $fixfor, $enddate);
-        foreach ($ua as $idx => $bug)
-        {
-	    $bugid = array_shift($bug);
-            $zeroest = (abs($bug[2]) <= 0.01 && abs($bug[2]) >= 0.0001);
-            $done = ($bug[2] && $bug[3] == $bug[2]);
-
-            if ($sch_got_bug[$bugid])
-                continue;
-
-            if ($done)  // not actually done - adjust estimate!
-            {
-                // $ret .= sch_warning("Weird2: I don't know if bug #$bugid is done!");
-                $bug[2] += 0.0001;
-            }
-
-            if (0 && $zeroest)
-            {
-                // the bug is done, but with a zero estimate; probably a
-                // duplicate, wontfix, or something.  Skip it.
-                $sch_got_bug[$bugid] = 1;
-                continue;
-            }
-
-            if ($fixfor_in_past)
-            {
-                // if this release is in the past, but it's not fixed yet,
-                // the bug must not *actually* be for this milestone.  Skip
-                // it now, and add it into the next release or at the end of
-                // the schedule.
-                continue;
-            }
-
-            if ($sch_manual_bugs[$bugid])
-            {
-                // The bug was already manually listed, so don't mess with it.
-                continue;
-            }
-
-            $bugarr = array($bugid, $bug[0], $bug[1], $bug[2], $bug[3]);
-            $sch_bug_lists[$fixfor]["incomplete"][] = $bugarr;
-
-	    $sch_got_bug[$bugid] = 1;
-        }
-    }
-    
-    // print "done: " . count($sch_bug_lists[$fixfor]["complete"]) . "<br>\n";
-
-    return $ret;
-}
-
-// Output all unprocessed completed bugs from both FogBugz and the bug lists
-function sch_all_done($user)
-{
-    global $sch_did_all_done;
-    global $sch_bug_lists;
-    global $sch_load;
-
-    $oldload = $sch_load;
-
-    if (!$sch_did_all_done)
-    {
-        // Can't just use foreach ($sch_bug_lists as $milestone => $type)
-        // because the foreach would clobber the internal array pointers
-        $milestones = array_keys($sch_bug_lists);
-        foreach ($milestones as $milestone)
-        {
-            $type = $sch_bug_lists[$milestone];
-            // print("Adding " . count($type["complete"]) . " done bugs for $milestone<br>\n");
-            if (is_array($type["complete"]) && count($type["complete"]) > 0)
-            {
-                foreach ($type["complete"] as $bug)
-                {
-                    //print("Adding done bug $bug[0]<br>\n");
-                    $ret .= sch_bug($bug[0], $bug[1], $bug[2], $bug[3],
-				    $bug[4], 1, $milestone);
-                }
-            }
-
-            //unset($sch_bug_lists[$milestone]["complete"]);
-        }
-
-        // Display the MAGIC line after all done bugs, but it already has all
-        // relevant loadfactors accounted for.
-        $extra = sch_elapsed_time_unfinished($user);
-        // Fudge to get it to display if 0
-        if ($extra == 0)
-            $extra = 0.001;
-        $extra = $extra / $oldload;
-        $ret .= sch_line("MAGIC", "Time elapsed on unfinished bugs " .
-                        "listed below", 
-                        $extra, $extra, $extra, 0, true, false);
-
-        $sch_did_all_done = true;
-    }
-
-    // Running through all these bugs can mess with our load factor, make sure
-    // to reset it
-    // FIXME: Should use LoadFactor member of Bug object instead of LOADFACTOR
-    // "bugs"
-    if ($sch_load != $oldload)
-        $ret .= sch_bug("LOADFACTOR", $oldload, "", "", "", 0, "");
-
-    return $ret;
-}
-
-
-// FIXME: This function doesn't make all that much sense any more.  I think it
+// FIXME: This function doesn't make all that much sense any more. I think it
 // now just outputs the MILESTONE line and the blank line.  Fair enough, but
 // could be simpler.
-function sch_milestone($descr, $name, $due)
+function sch_milestone($descr, $name, $due, $load, $newline)
 {
-    global $sch_user, $sch_load, $sch_curday, $sch_need_extraline;
+    global $sch_curday;
+    $ret = "";
 
     // if no due date was given, make it the day after the last bug finished.
     if (!$due)
@@ -925,7 +506,7 @@ function sch_milestone($descr, $name, $due)
     $newday = sch_parse_day($due);
     $xdue = sch_format_day($newday);
     // FIXME: Insane math
-    $slip = ($newday-$sch_curday)*8 / $sch_load;
+    $slip = ($newday-$sch_curday)*8 / $load;
     //$ret .= sch_line("SLIPPAGE (to $xdue)", "", 0,$slip,0,$slip, 0, true);
     $done = $newday < $today;
     // FIXME: If current day is past the milestone's release date, don't show
@@ -934,149 +515,67 @@ function sch_milestone($descr, $name, $due)
                         '', sch_period($slip), '',
                         $done ? "done" : sch_period($slip),
                         '');
-    $sch_need_extraline = 1;
+    if ($newline)
+	$ret .= sch_fullline('&nbsp;');
 
     $sch_curday = $old_curday; // slippage doesn't actually take time... right?
 
     return $ret;
 }
 
-// Count up the elapsed time in hours on all unfinished bugs, taking
-// loadfactors into account
+// Count up the elapsed time in hours on all unfinished bugs.
 function sch_elapsed_time_unfinished($user)
 {
-    global $sch_bug_lists, $sch_cur_incomplete_bugs;
-
+    global $sch_db;
     $elapsed = 0;
-    $local_loadfactor = 1;
 
-    $milestones = array_keys($sch_bug_lists);
-    foreach ($milestones as $milestone)
+    $estimates = $sch_db->estimate->keys();
+    foreach ($estimates as $ix)
     {
-        $inc = $sch_bug_lists[$milestone]["incomplete"];
-        if (is_array($inc))
-            foreach($inc as $bug)
-            {
-                // FIXME: Should use LoadFactor member of Bug object instead
-                // of LOADFACTOR "bugs"
-                if ($bug[0] == "LOADFACTOR")
-                    $local_loadfactor = $bug[1];
-                else if ($bug[4] > 0)
-                    $elapsed += sch_parse_period($bug[4]) * $local_loadfactor;
-            }
+        $e = $sch_db->estimate->a[$ix];
+        if (!$e->isdone() && $e->est_elapsed() > 0)
+            $elapsed += sch_parse_period($e->est_elapsed());
     }
 
     return $elapsed;
 }
 
 
-// Returns true if the given milestone has at least one incomplete bug (that
-// isn't a LoadFactor)
-// FIXME: This function might not be needed with the new flat buglist.  Let's
-// hope so, because it'll have to be rewritten.
-function sch_has_inc_bug($milestone)
+function sch_release_line($old_fixfor, $estimate, $newline)
 {
-    global $sch_bug_lists;
-    if (is_array($sch_bug_lists[$milestone]["incomplete"]))
-    {
-        $bugids = array_keys($sch_bug_lists[$milestone]["incomplete"]);
-        foreach ($bugids as $bugid)
-        {
-            $bug = $sch_bug_lists[$milestone]["incomplete"][$bugid];
-            if ($bug[0] != "LOADFACTOR")
-                return 1;
-        }
-    }
-    return 0;
-}
-
-
-// Given a list of bugs, go through it and output the HTML for them.  msname
-// is the name of the current milestone, and extra_due is an array of extra
-// due dates that should be listed as they occur while the bugs are output.
-// extra_due will have any output extra due dates removed from it.
-function sch_output_buglist($buglist, $msname, &$extra_due, $done)
-{
-    global $sch_did_all_done, $sch_need_extraline;
-    global $sch_curday;
-
-    if (is_array($buglist))
-    {
-        $next_fixfor = array_shift($extra_due);
-        $fixfor_day = sch_parse_day($next_fixfor);
-        foreach($buglist as $bug)
-        {
-            $bug_line = sch_bug($bug[0], $bug[1], $bug[2], $bug[3],
-				$bug[4], $done, $msname);
-            while ($sch_curday > $fixfor_day && !is_null($next_fixfor))
-            {
-                $ret .= sch_milestone("ZeroBugBounce", $msname, $next_fixfor);
-                $next_fixfor = array_shift($extra_due);
-                if (!is_null($next_fixfor))
-                    $fixfor_day = sch_parse_day($next_fixfor);
-            }
-            if ($sch_need_extraline)
-            {
-                $ret .= sch_fullline('&nbsp;');
-                $sch_need_extraline = 0;
-            }
-            $ret .= $bug_line;
-        }
-
-        if (!is_null($next_fixfor))
-            array_unshift($extra_due, $next_fixfor);
-    }
-
-    return $ret;
-}
-
-
-// Output the HTML for all the bugs in the given milestone.  $buglists is an
-// array containing two subarrays, $buglists["incomplete"] and
-// $buglists["complete"]
-function sch_output_milestone($user, $milestone, $msname, $msdue)
-{
-    global $sch_did_all_done, $sch_need_extraline;
-    global $sch_bug_lists;
-    global $sch_curday;
-
-    $buglists = $sch_bug_lists[$milestone];
-
-    //$num_incomplete = count($buglists["incomplete"]);
-    // $ret .= sch_fullline("Processing $num_incomplete incomplete bugs for milestone $milestone");
+    $a = bug_get_milestones($old_fixfor->name);
+    foreach ($a as $b)
+	$ret .= sch_milestone("ZeroBugBounce", $old_fixfor->name, $b, 
+			      $estimate->loadfactor, false); 
     
-    $extra_due = bug_get_milestones($msname);
-
-    $has_incomplete = sch_has_inc_bug($milestone);
-    // If we have an incomplete bug, make sure to list all completed bugs
-    if (!$sch_did_all_done && $has_incomplete)
-    {
-	// $ret .= sch_fullline("Found incomplete bug, adding all completed ".
-	//                     "bugs first");
-        $ret .= sch_all_done($user);
-    }
-
-    if (!$sch_did_all_done && is_array($buglists["complete"]))
-        $ret .= sch_output_buglist($buglists["complete"], $msname, $extra_due, 0);
-
-    if ($has_incomplete && is_array($buglists["incomplete"]))
-        $ret .= sch_output_buglist($buglists["incomplete"], $msname, $extra_due, -1);
-
-    // Clear out bugs we've already listed, so we can find all unlisted
-    // bugs later.
-    $sch_bug_lists[$milestone]["complete"] = array();
-    $sch_bug_lists[$milestone]["incomplete"] = array();
-
-    foreach ($extra_due as $next_fixfor)
-    {
-        $ret .= sch_milestone("ZeroBugBounce", $msname, $next_fixfor);
-        $next_fixfor++;
-    }
-
-    if ($msdue)
-        $ret .= sch_milestone("RELEASE", $msname, $msdue);
-
+    $ret .= sch_milestone("RELEASE", $old_fixfor->name, $old_fixfor->release_date, 
+			  $estimate->loadfactor, $newline); 
     return $ret;
+}
+
+
+function sch_make_magic_est($magic, $load)
+{
+    global $sch_bug;
+
+    $magic = sch_elapsed_time_unfinished($user);
+
+    $est = new Estimate(/* fake - not in database */ 1,
+			/*done*/true, 
+			"MAGIC", 
+			/*assignto*/ $sch_user->username, 
+			/*isbug*/ 0,
+			/*task - filled in below*/ '', 
+			$magic, $magic, $magic,
+			/*resolvedate*/ "1970-01-01",
+			$sch_user->username, $load);
+    $sch_db->xtask->max_ix++;
+    $est->task = new XTask(/*ix*/ $sch_db->xtask->max_ix, 
+			   "MAGIC", "Time elapsed on unfinished bugs listed below", 
+			   /*fixfor - set later*/ -1,
+			   /*ixPersonAssignedTo*/ $sch_user->ix,
+			   /*my_user*/ $sch_user->username);
+    return $est;
 }
 
 
@@ -1084,126 +583,109 @@ function sch_output_milestone($user, $milestone, $msname, $msdue)
 function sch_create($user)
 {
     global $sch_start;
-    global $sch_bug_lists;
-    global $sch_cur_complete_bugs; 
-    global $sch_cur_incomplete_bugs;
-    global $sch_load;
+    global $sch_curday;
+    global $sch_db;
+    $ret = "";
     
     $ret .= "<table border=0 width='95%'>\n";
     $ret .= "<tr><th>" .
     join("</th><th>", array("Task", "Subtask", "Orig", "Curr",
          "Done", "Left", "Due")) .
          "</th></tr>\n";
-    $ret .= sch_line("START", "", 0,0,0,0, 0, false);
+    $ret .= sch_line("START", "", 0,0,0,0,0, false);
     if ($sch_start > sch_today())
         $ret .= sch_warning("START date is in the future!");
 
-    sch_add_all_fogbugz($user);
-
     // Shove the remaining current list of incomplete bugs onto the pile,
     // even though we don't know its target name
-    $cur_list_name = "-Undecided-";
-    sch_merge_cur_bugs($cur_list_name);
+    sch_merge_cur_bugs("-Undecided-");
 
-    // make sure to print initial load factor
-    $tmpload = $sch_load;
-    $sch_load = 1;
-    $ret .= sch_bug("LOADFACTOR", $tmpload, "", "", "", 0, "");
-
-    $fixfors = array();
-
-    $milestones = array_keys($sch_bug_lists);
-    foreach ($milestones as $milestone)
+    $sch_db->estimate->do_sort();
+    
+    unset($old_fixfor);
+    $did_magic = false;
+    foreach ($sch_db->estimate->a as $e)
     {
-        $msnames[$milestone] = bug_milestone_realname($milestone);
-        $msdue = bug_duedate($msnames[$milestone]);
-        // FIXME: It's a bit gross hard-coding this date, but PHP doesn't have
-        // a "uasort()" to do user-defined sorting based on array values so
-        // otherwise milestones with no release date (-Undecided- and
-        // -Wishlist- in particular) will sort at the start, which is exactly
-        // wrong.
-        if ($msdue == "")
-            $msdue = "2099-09-09 00:00:00";
-        $fixfors[$milestone] = $msdue;
+	//print "Hello: (" . $e->task->name . ") (" . $e->task->fixfor->date . ")<br>\n";
+	if (!$e->isdone() && !$did_magic)
+        {
+	    $ret .= sch_bug(sch_make_magic_est($magic, $e->loadfactor));
+            $did_magic = true;
+        }
+
+        $f = $e->task->fixfor;
+        if (!isset($old_fixfor) && !$e->isdone())
+            $old_fixfor = $f;
+        else if ($old_fixfor->ix != $f->ix && !$e->isdone()) 
+        {
+	    $ret .= sch_release_line($old_fixfor, $e, true);
+	    $old_fixfor = $f;
+        }
+
+        $ret .= sch_bug($e);
     }
 
-    // List milestones in order of release date
-    asort($fixfors);
+    // Print last release line
+    $ret .= sch_release_line($old_fixfor, $e, false);
 
-    // FIXME: foreach milestone (and bugbounce), iterate over manual and
-    // FogBugz buglists until no more bugs targeted for that milestone
-    foreach ($fixfors as $milestone => $msdue)
-    {
-        $ret .= sch_output_milestone($user, $milestone, $msnames[$milestone], 
-                                    $msdue);
-    }
-
-    $ret .= sch_line("END", "", 0,0,0,0, 0, true);
+    $ret .= sch_line("END", "", 0,0,0,0,0, true);
     $ret .= "</table>";
 
     return $ret;
 }
 
 
-// FIXME: This function should no longer be required.  At worst, it should
-// apply a FixFor to the Bug objects in the list, and then throw them onto the
-// big flat list.
 function sch_merge_cur_bugs($fixfor)
 {
     global $sch_cur_incomplete_bugs;
     global $sch_cur_complete_bugs;
+    global $sch_db;
     
-    sch_list_merge($fixfor, "complete", $sch_cur_complete_bugs);
-    sch_list_merge($fixfor, "incomplete", $sch_cur_incomplete_bugs);
+    //print $fixfor . "<br>\n";
+   
+    $f = $sch_db->fixfor->first("name", $fixfor);
+    if (!$f)
+        $f = $sch_db->fixfor->first_prefix("name", $fixfor);
+    foreach ($sch_cur_complete_bugs as $e)
+    {
+	//print "Hello: (" .$e->task->name . ")<br>\n";
+        $e->task->fixfor = $f;
+        $sch_db->estimate->a[] = $e;
+    }
+    foreach ($sch_cur_incomplete_bugs as $e)
+    {
+	//print "Hello: (" .$e->task->name . ")<br>\n";
+        $e->task->fixfor = $f;
+        $sch_db->estimate->a[] = $e;
+    }
+
     $sch_cur_incomplete_bugs = array();
     $sch_cur_complete_bugs = array();
 }
 
-
-function sch_list_merge($fixfor, $sect, $arr)
+function sch_change_loadfactor($load, $date)
 {
-    global $sch_bug_lists;
-    
-    if (!is_array($sch_bug_lists[$fixfor])) {
-	$sch_bug_lists[$fixfor][$sect] = $arr;
+    global $sch_db;
+
+    foreach ($sch_db->estimate->a as $i=>$e)
+    {
+	if (sch_parse_day($e->get_resolvedate()) >= $date 
+	    || sch_parse_day($e->get_resolvedate()) == 0)
+	   $sch_db->estimate->a[$i]->loadfactor = $load;
+	//print sch_parse_day($e->task->resolvedate) . ">?$date -> " . 
+	//$sch_db->estimate->a[$i]->loadfactor . "<br>\n";
     }
-    else
-      $sch_bug_lists[$fixfor][$sect] =
-        array_merge($sch_bug_lists[$fixfor][$sect], $arr);
 }
-
-
-// FIXME: LoadFactors will not be separate "bugs" in the future.
-function sch_switch_loadfactor($load)
-{
-    global $sch_cur_incomplete_bugs;
-    global $sch_cur_complete_bugs;
-    global $sch_load;
-    
-    $loadbug = array("LOADFACTOR", $load, "", "", "");
-    
-    // Mark where the load factor changed for both the complete and
-    // incomplete bug lists, so we can display something sane.
-    $sch_cur_incomplete_bugs[] = $loadbug;
-    $sch_cur_complete_bugs[] = $loadbug;
-    
-    $sch_load = $load;
-    //$ret .= "Setting loadfactor to $sch_load<br>\n";
-}
-
 
 function sch_next_milestone($fixfor)
 {
-    global $bug_h;
-    bug_init();
     $ret = "";
-    
+    $ff = addslashes($fixfor);
     $query = "select dtDue " . 
              "  from schedulator.Milestone " .
-             "  where dtDue > now() and sMilestone='$fixfor' " .
+             "  where dtDue > now() and sMilestone='$ff' " .
              "  order by dtDue limit 1 ";
-    $result = mysql_query($query, $bug_h);
-    $row = mysql_fetch_row($result);
+    $row = bug_onerow($query);
     if (count($row) >= 1)
       return $row[0];
     else
@@ -1241,7 +723,7 @@ function sch_summary($fixfor)
     global $bug_h;
     bug_init();
     $ret = "";
-    
+    $ff = addslashes($fixfor);
     $allpeople = array();
     $result = mysql_query("select distinct sPerson from schedulator.Task " .
 			  "  where fValid=1 and fDone=0 " . 
@@ -1262,7 +744,7 @@ function sch_summary($fixfor)
     $query = "select dtDue, sPerson, sTask, sSubTask, " .
              "    fResolved, ixPriority, hrsCurrEst " . 
              "  from schedulator.Task " .
-             "  where fValid=1 and sFixFor='$fixfor' and fDone=0 " .
+             "  where fValid=1 and sFixFor='$ff' and fDone=0 " .
              "  order by dtDue, ixPriority, sTask, sSubTask ";
     $result = mysql_query($query, $bug_h);
 
@@ -1498,13 +980,18 @@ class Macro_Sched
     function parse($args, $page)
     {
         global $sch_start, $sch_curday, $sch_elapsed_curday;
-        global $sch_user, $sch_load;
+        global $sch_user;
         global $sch_unknown_fixfor;
-        global $sch_bug_lists;
         global $sch_cur_complete_bugs;
         global $sch_cur_incomplete_bugs;
         global $sch_got_bug, $sch_manual_bugs;
 	global $sch_db;
+
+	static $current_load = 1.0;
+
+        // Turn this on to find undefined variables, but it'll whine about the
+        // spectacular $notdef variable in FogBugz.php
+        //error_reporting(E_ALL);
 
         $ret = "";
 
@@ -1529,43 +1016,39 @@ class Macro_Sched
         if ($words[0] == "START")
         {
             // Initialize bug lists
-            $sch_bug_lists = array();
             $sch_cur_incomplete_bugs = array();
             $sch_cur_complete_bugs = array();
             $sch_unknown_fixfor = array();
 
-            $sch_user = $words[1];
+            $username = $words[1];
             $sch_start = $sch_curday = $sch_elapsed_curday
                 = sch_parse_day($words[2]);
             $sch_unknown_fixfor = array();
-            $sch_load = 0.1;
-	    sch_switch_loadfactor(1.0);
 	    
-	    $sch_db = new FogTables($sch_user, -1);
+	    $sch_db = new FogTables($username, -1, sch_format_day($sch_start, "-"));
+            $sch_user = $sch_db->person->first("username", $username);
 	    
-            bug_start_user($sch_user);
+            bug_start_user($sch_user->username);
+	    sch_change_loadfactor($current_load, $sch_start);
         }
         else if ($words[0] == "LOADFACTOR")
         {
             $loadtmp = $words[1] + 0.0;
             if ($loadtmp < 0.1)
-                $ret .= "(INVALID LOAD FACTOR:'$words[1]')";
-	    
-	    sch_switch_loadfactor($loadtmp);
+            {
+		$ret .= "(INVALID LOAD FACTOR:'$words[1]')";
+	    }
+	    else
+	    {
+		$current_load = $loadtmp;
+		$load_date = array_key_exists(2, $words) ? sch_parse_day($words[2]) : $sch_start;
+		sch_change_loadfactor($loadtmp, $load_date);
+	    }
         }
         else if ($words[0] == "FIXFOR")
         {
             // We now know where the current lists of bugs go
 	    sch_merge_cur_bugs($words[1]);
-
-            // Carry over the current LoadFactor
-            // FIXME: Make this a function or something
-            // FIXME: Instead of adding a LoadFactor "bug", just set the
-            // LoadFactor global and set the LoadFactor we'll use for FogBugz
-            // targeted at this milestone somehow.
-            $loadbug = array("LOADFACTOR", $sch_load, "", "", "");
-            $sch_cur_incomplete_bugs[] = $loadbug;
-            $sch_cur_complete_bugs[] = $loadbug;
         }
         else if ($words[0] == "SETBOUNCE")
         {
@@ -1577,31 +1060,22 @@ class Macro_Sched
                  || $words[0] == "BOUNCE")
         {
             $msname = bug_milestone_realname($words[1]);
-            $msdue = $words[2];
+            $msdue = array_key_exists(2, $words) ? $words[2] : '';
 
             // We now know where the current lists of bugs go
 	    sch_merge_cur_bugs($msname);
             
-            // Carry over the current LoadFactor
-            // FIXME: Make this a function or something
-            // FIXME: Instead of adding a LoadFactor "bug", just set the
-            // LoadFactor global and set the LoadFactor we'll use for FogBugz
-            // targeted at this milestone somehow.
-            $loadbug = array("LOADFACTOR", $sch_load, "", "", "");
-            $sch_cur_incomplete_bugs[] = $loadbug;
-            $sch_cur_complete_bugs[] = $loadbug;
-
             bug_set_release($msname, $msdue);
-            bug_add_tasks($sch_user, $msname, $sch_unknown_fixfor);
+            bug_add_tasks($sch_user->username, $msname, $sch_unknown_fixfor);
             $sch_unknown_fixfor = array();
         }
         else if ($words[0] == "END")
         {
-            bug_add_tasks($sch_user, 'UNKNOWN', $sch_unknown_fixfor);
-            bug_finish_user($sch_user);
+            bug_add_tasks($sch_user->username, 'UNKNOWN', $sch_unknown_fixfor);
+            bug_finish_user($sch_user->username);
             bug_add_volunteer_tasks();
 
-            $ret .= sch_create($sch_user);
+            $ret .= sch_create($sch_user->username);
         }
 	else if ($words[0] == "SUMMARY")
 	{
@@ -1611,50 +1085,69 @@ class Macro_Sched
         else
         {
             $bugid = $words[0];
-            $task = $words[1];
-            $est = $words[2];
-            $elapsed = $words[3];
+            $task = array_key_exists(1, $words) ? $words[1] : '';
+            $currest = array_key_exists(2, $words) ? $words[2] : '';
+            $elapsed = array_key_exists(3, $words) ? $words[3] : '';
 
-            $force_done = ($est && $est==$elapsed);
+            $done = ($currest && $currest==$elapsed);
 
             $fixfor = '';
-            $orig = $est;
-            $done = $force_done;
+            $orig = $currest;
+            if (!$elapsed) $elapsed = 0;
+
+            $estimate = new Estimate(/* fake - not in database */ 1,
+                $done, $bugid, 
+                /*assignto*/ $sch_user->username, 
+                /*isbug*/ 0,
+                /*task - filled in below*/ '', 
+                $orig, $currest, $elapsed, 
+                /*resolvedate*/ "1970-01-01", // Want manual bugs to sort first
+                $sch_user->username, $current_load);
+	    
+	    //print "($bugid)($task)<br>\n";
             if (preg_match('/^[0-9]+$/', $bugid))
             {
-                // title, origest, currest, elapsed, status, fixfor
-                $bugdata = bug_get($bugid);
-                if (!$task) $task = $bugdata[0];
-                $orig = $bugdata[1];
-                if (!strcmp($est,''))    $est = $bugdata[2];
-                if (!strcmp($elapsed,'')) $elapsed = $bugdata[3];
-                if (!$done && $bugdata[4] != 'ACTIVE') $done = 1;
-                if ((!$done && $curr != $elapsed) || ($bugdata[4] != 'ACTIVE'))
+                // FIXME: make_bug_object
+                $bug = bug_get($bugid);
+		$sch_db->estimate->remove_estimate($bugid);
+                
+                $estimate->task = $bug;
+		// Fill in manual info we have
+		if ($task != "") $estimate->task->name = $task;
+		if ($currest != "") $estimate->task->currest = $currest;
+		if ($elapsed != "") $estimate->task->elapsed = $elapsed;
+		
+                $estimate->isbug = 1;
+                $estimate->be_done = $done || $bug->isresolved();
+                $estimate->origest = $bug->origest;
+                if (!strcmp($estimate->currest,'')) 
+                    $estimate->currest = $bug->currest;
+                if (!strcmp($estimate->elapsed,'')) 
+                    $estimate->elapsed = $bug->elapsed;
+
+                if ((!$done && $currest != $elapsed) || $bug->isresolved())
                 {
                     // already listed as not done, *or* really done in fogbugz:
                     // never need to auto-import this bug again.
-                    $sch_got_bug[$feat] = 1;
+                    $sch_got_bug[$bugid] = 1;
                 }
-                $fixfor = $bugdata[5];
                 $sch_manual_bugs[$bugid] = 1;
-            }
-
-            if (!$elapsed) $elapsed = 0;
-
-            // Make an array entry to put into bug lists
-            // FIXME: Make a Bug object, set its done status and loadfactor
-            $bug = array($bugid, $task, $orig, $est, $elapsed);
-
-            if (!$force_done && !$done)
-            {
-                $sch_cur_incomplete_bugs[] = $bug;
-                // $ret .= "Adding bug ($bug[0], $bug[1], $bug[2], $bug[3], $bug[4], $bug[5]) to incomplete buglist<br>\n";
             }
             else
             {
-                $sch_cur_complete_bugs[] = $bug;
-                // $ret .= "Adding bug ($bug[0], $bug[1], $bug[2], $bug[3], $bug[4], $bug[5]) to completed buglist<br>\n";
+                $open = ($elapsed != $currest);
+                $sch_db->xtask->max_ix++;
+                $estimate->task = new XTask(/*ix*/ $sch_db->xtask->max_ix, 
+                        $bugid, $task,
+                        /*fixfor - set later*/ -1,
+                        /*ixPersonAssignedTo*/ $sch_user->ix,
+                        /*my_user*/ $sch_user->username);
             }
+
+            if (!$done)
+                $sch_cur_incomplete_bugs[] = $estimate;
+            else
+                $sch_cur_complete_bugs[] = $estimate;
         }
 
         return $ret;
