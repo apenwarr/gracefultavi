@@ -151,27 +151,28 @@ function html_ref($refPage, $appearance, $hover = '', $anchor = '', $anchor_appe
     }
 
     $p = new WikiPage($db, $refPage);
+    $p_exists = $p->exists();
 
     $twintext = "";
     $onlytwin = "";
     $twin = $pagestore->twinpages($refPage);
-    if(!$p->exists() && count($twin) == 1)
+    if(!$p_exists && count($twin) == 1)
     {
-	$onlytwin = html_twin_x($twin[0][0], $twin[0][1], $twin[0][1]);
+        $onlytwin = html_twin_x($twin[0][0], $twin[0][1], $twin[0][1]);
     }
     else if(count($twin))
     {
-    	// point at the sisterwiki's version
-	$n = 1;
+        // point at the sisterwiki's version
+        $n = 1;
         foreach($twin as $site)
-	{ 
-	    $twintext = $twintext . html_twin_x($site[0], $n, $site[1]);
-	    $n++;
-	}
+        {
+            $twintext = $twintext . html_twin_x($site[0], $n, $site[1]);
+            $n++;
+        }
         $twintext = '<sup>' . $twintext . '</sup>';
     }
-    
-    if($p->exists())
+
+    if($p_exists)
     {
         if($SeparateLinkWords && $refPage == $appearance)
         {
@@ -183,14 +184,14 @@ function html_ref($refPage, $appearance, $hover = '', $anchor = '', $anchor_appe
     }
     else
     {
-	$result = "";
+        $result = "";
         if(validate_page($refPage) == 1       // Normal WikiName
             && $appearance == $refPage)       // ... and is what it appears
         {
-	    if ($onlytwin)
-	        $result = $onlytwin;
-	    else
-	        $result = $refPage;
+            if ($onlytwin)
+                $result = $onlytwin;
+            else
+                $result = $refPage;
         }
         else                                  // Free link.
         {
@@ -200,18 +201,19 @@ function html_ref($refPage, $appearance, $hover = '', $anchor = '', $anchor_appe
             else
                 $tempAppearance = "($appearance)";
 
-	    if ($onlytwin)
-	        $result = $onlytwin;
-	    else
-	        $result = $tempAppearance;
+            if ($onlytwin)
+                $result = $onlytwin;
+            else
+                $result = $tempAppearance;
         }
 
-	$result = $result
-	           . '<a href="' . editURL($refPage, '', $page) . '"'
-	           . ' title="Create this Wiki page" '
-	           . $hover . '>?</a>'
-	           . $twintext;
+        $result = $result
+            . '<a href="' . editURL($refPage, '', $page) . '"'
+            . ' title="Create this Wiki page" '
+            . $hover . '>?</a>'
+            . $twintext;
     }
+
     return $result;
 }
 
@@ -231,10 +233,10 @@ function html_twin_x($whichwiki, $linktext, $ref)
          'title="See also: ' . $ref . ' in ' . $whichwiki . '">' .
          '<span class="twin"><em>' . $linktext . '</em></span></a>';
 }
-function html_category($time, $page, $host, $user, $comment, $version, 
+function html_category($time, $page, $host, $user, $comment, $version,
                        $hotPages, $newPages, $modifiedWatchedPages)
 {
-  global $pagestore, $UserName;
+  global $pagestore, $UserName, $UseHotPages;
 
   $text = '(' . html_timestamp($time) . ') (' .
           '<a href="' . historyURL($page) . '">history</a>) ' .
@@ -252,7 +254,7 @@ function html_category($time, $page, $host, $user, $comment, $version,
   if (in_array($page, $newPages))
     $text .= '<img src="images/new.png" alt="New!" title="" width="28" height="11" border="0">';
 
-  if (in_array($page, $hotPages))
+  if ($UseHotPages && in_array($page, $hotPages))
     $text .= '<img src="images/hot.png" alt="Hot!" title="Hot!" width="16" height="15" border="0">';
 
   if (in_array($page, $modifiedWatchedPages))

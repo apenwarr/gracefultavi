@@ -239,25 +239,18 @@ function parse_macros($text)
 
 function macro_token($macro, $trail)
 {
-  global $ViewMacroEngine, $page;
+    global $ViewMacroEngine, $page;
 
-  $fragments = explode(" ", $macro, 2);
-  $cmd = $fragments[0];
-  if(isset($fragments[1])) $args = $fragments[1]; else $args = '';
-
-//  if($ViewMacroEngine[$cmd] != '')
-//    { return new_entity(array('raw', $ViewMacroEngine[$cmd]($args))); }
-//  else
-//    { return '[[' . $macro . ']]' . ($trail == "\n" ? $trail : ''); }
-   if (array_key_exists($cmd, $ViewMacroEngine))
-   {
-     eval("\$result=\$ViewMacroEngine[\$cmd]->parse(\$args, \$page);");
-     return new_entity(array('raw', $result));
-   }
-   else
-   {
-     return '[[' . $macro . ']]' . ($trail == "\n" ? $trail : '');
-   }
+    $fragments = explode(" ", $macro, 2);
+    $cmd = $fragments[0];
+    $args = isset($fragments[1]) ? $fragments[1] : '';
+    if (array_key_exists($cmd, $ViewMacroEngine))
+    {
+        eval('$result = $ViewMacroEngine[$cmd]->parse($args, $page);');
+        return new_entity(array('raw', $result));
+    }
+    else
+        return '[[' . $macro . ']]' . ($trail == "\n" ? $trail : '');
 }
 
 function parse_transclude($text)

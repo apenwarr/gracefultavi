@@ -13,6 +13,7 @@ require('lib/url.php');
 require('lib/messages.php');
 require('lib/pagestore.php');
 require('lib/rate.php');
+require('lib/lastedit_check.php');
 
 $PgTbl = $DBTablePrefix . 'pages';
 $IwTbl = $DBTablePrefix . 'interwiki';
@@ -23,7 +24,8 @@ $RemTbl = $DBTablePrefix . 'remote_pages';
 $PaTbl = $DBTablePrefix . 'parents';
 $MpTbl = $DBTablePrefix . 'metaphone';
 $PwTbl = $DBTablePrefix . 'pageswatch';
-
+$LeTbl = $DBTablePrefix . 'lastedit';
+// Don't forget to update pagestore->lock() when adding new tables.
 
 $pagestore = new PageStore();
 $db = $pagestore->dbh;
@@ -77,6 +79,8 @@ if(!empty($prefstr))
     { $AuthorDiff = $result[1]; }
   if(ereg("min=([[:digit:]]+)", $prefstr, $result))
     { $MinEntries = $result[1]; }
+  if(ereg("hotpages=([[:digit:]]+)", $prefstr, $result))
+    { $UseHotPages = $result[1]; }
   if(ereg("hist=([[:digit:]]+)", $prefstr, $result))
     { $HistMax = $result[1]; }
   if(ereg("tzoff=([[:digit:]]+)", $prefstr, $result))
@@ -119,5 +123,8 @@ if($dir=opendir("$WorkingDirectory/macros"))
     }
     closedir($dir);
 }
+
+// Check if the lastedit table has been created and is up to date.
+lastedit_check();
 
 ?>

@@ -8,7 +8,7 @@ require_once('template/common.php');
 
 function template_prefs()
 {
-  global $PrefsScript, $HTTP_REFERER, $HistMax, $TimeZoneOff;
+  global $PrefsScript, $HTTP_REFERER, $HistMax, $TimeZoneOff, $UseHotPages;
   global $AuthorDiff, $EditRows, $EditCols, $UserName, $DayLimit, $MinEntries;
 
   template_common_prologue(array('norobots' => 1,
@@ -42,6 +42,12 @@ Your login name will apprear on the RecentChanges page to the right of pages you
   list.<br /><br />
   <input type="text" name="hist" value="<?php print $HistMax; ?>" /><br /><br />
 
+  <input type="checkbox" name="auth"<?php
+    if($AuthorDiff) { print ' checked="checked"'; } ?> />
+  History display should show <em>all</em> changes made by the latest
+  author.  Otherwise, show only the last change made.<br /><br />
+  <hr />
+
   <strong>RecentChanges</strong><br /><br />
   Choose your current time here, so the server may figure out what time zone
   you are in.<br /><br />
@@ -64,10 +70,12 @@ Your login name will apprear on the RecentChanges page to the right of pages you
   <em>But</em> display at least this many entries in RecentChanges and other
   subscription lists:<br /><br />
   <input type="text" name="min" value="<?php print $MinEntries; ?>" /><br /><br />
-  <input type="checkbox" name="auth"<?php
-    if($AuthorDiff) { print ' checked="checked"'; } ?> />
-  History display should show <em>all</em> changes made by the latest
-  author.  Otherwise, show only the last change made.<br />
+
+  <input type="checkbox" name="hotpages"<?php
+    if($UseHotPages) { print ' checked="checked"'; } ?> />
+  Use the Hot Pages flag to indicate pages modified at least 5 times during the
+  last week. This ignores minor edits and multiple subsequent updates by the same
+  user. Note that this might slow down access to the RecentChanges page.<br /><br />
 
   <hr /><br />
   <input type="submit" name="Save" value="Save" />

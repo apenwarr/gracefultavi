@@ -28,17 +28,25 @@ class WikiPage
     // Returns: nonzero if page exists in database.
     function exists()
     {
-        global $PgTbl;
+        global $PgTbl, $LeTbl;
 
+        $qid = $this->db->query("SELECT LENGTH(body) " .
+                                "FROM $PgTbl, $LeTbl " .
+                                "WHERE $PgTbl.title = '$this->dbname' " .
+                                "AND $PgTbl.title = $LeTbl.page ".
+                                "AND $PgTbl.version = $LeTbl.version");
+
+/* old version
         $qid = $this->db->query("SELECT LENGTH(body) " .
                                 "FROM $PgTbl " .
                                 "WHERE title = '$this->dbname' " .
                                 "ORDER BY version DESC " .
                                 "LIMIT 1");
+*/
 
         return !!(($result = $this->db->result($qid)) && $result[0]>1);
 
-/* old version
+/* older version
         $qid = $this->db->query("SELECT MAX(version) FROM $PgTbl " .
                                 "WHERE title='$this->dbname'");
 
@@ -86,7 +94,7 @@ class WikiPage
     //       Yes, this is a tiny kludge. :-)
     function write($minoredit = 0)
     {
-        global $PgTbl, $MpTbl;
+        global $PgTbl, $MpTbl, $LeTbl;
 
         // Ensure a leading and trailing spaces free text but force a new line
         // at the end.
@@ -112,6 +120,9 @@ class WikiPage
             $this->db->query("UPDATE $PgTbl SET time=$this->time, " .
                              "supercede=NULL WHERE title='$this->dbname' " .
                              "AND version=" . ($this->version - 1));
+            if (!$insertMinorEdit)
+                $this->db->query("UPDATE $LeTbl SET version=$this->version " .
+                                 "WHERE page='$this->dbname'");
         }
         else
         {
@@ -120,6 +131,8 @@ class WikiPage
                              "WHERE page = '$this->dbname'");
             $this->db->query("INSERT INTO $MpTbl (page, metaphone) " .
                              "VALUES ('$this->dbname', '$metaphone')");
+            $this->db->query("INSERT INTO $LeTbl (page, version) " .
+                             "VALUES ('$this->dbname', 1)");
         }
     }
 

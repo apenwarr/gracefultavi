@@ -8,7 +8,7 @@ class Macro_CategoryCmds
     function parse($args, $page)
     {
         global $pagestore, $MinEntries, $DayLimit, $full, $page, $Entity;
-        global $FlgChr, $UserName;
+        global $FlgChr, $UserName, $UseHotPages;
 
         $text = '';
         if (strstr($args, '*'))                // Category containing all pages.
@@ -35,15 +35,19 @@ class Macro_CategoryCmds
 
         usort($list, 'catSort');
 
-        $now = time();
+        if ($UseHotPages)
+            $hotPagesList = $pagestore->getHotPages();
+        else
+            $hotPagesList = array();
 
-        $hotPages = $pagestore->getHotPages();
         $newPages = $pagestore->getNewPages();
+
         if ($UserName == '')
             $modifiedWatchedPages = array();
         else
             $modifiedWatchedPages = $pagestore->getModifiedWatchedPages($UserName);
 
+        $now = time();
         for ($i = 0; $i < count($list); $i++)
         {
             $editTime = mktime(substr($list[$i][0], 8, 2), substr($list[$i][0], 10, 2),
@@ -57,7 +61,7 @@ class Macro_CategoryCmds
 
             $text = $text . html_category($list[$i][0], $list[$i][1], $list[$i][2],
                                           $list[$i][3], $list[$i][5], $list[$i][7],
-                                          $hotPages, $newPages, $modifiedWatchedPages);
+                                          $hotPagesList, $newPages, $modifiedWatchedPages);
 
             // Do not put a newline on the last one.
             if ($i < count($list) - 1)

@@ -81,8 +81,9 @@ class PageStore
     // before the first edit. Ignores minor edits.
     function getNewPages()
     {
-        global $PgTbl;
+        global $PgTbl, $LeTbl;
 
+/*
         $qid = $this->dbh->query("select p1.title " .
                                  "from $PgTbl p1, $PgTbl p2 " .
                                  "where p1.title = p2.title " .
@@ -96,6 +97,27 @@ class PageStore
 
         while (($result = $this->dbh->result($qid)))
             $list[] = $result[0];
+*/
+
+        $qid = $this->dbh->query("select title, unix_timestamp(time) time " .
+                                 "from $PgTbl " .
+                                 "where version = 1");
+        $mintime = array();
+        while (($result = $this->dbh->result($qid)))
+            $mintime[$result[0]] = $result[1];
+
+        $qid = $this->dbh->query("SELECT p.title, unix_timestamp(p.time) time " .
+                                 "FROM $PgTbl p, $LeTbl l " .
+                                 "WHERE p.title = l.page " .
+                                 "AND p.version = l.version");
+        $maxtime = array();
+        while (($result = $this->dbh->result($qid)))
+            $maxtime[$result[0]] = $result[1];
+
+        $list = array();
+        foreach ($mintime as $title => $time)
+            if (!isset($maxtime[$title]) || ($maxtime[$title] - $time < 86400)) // 86400 seconds = 24 hours
+                $list[] = $title;
 
         return $list;
     }
@@ -622,12 +644,12 @@ class PageStore
   // Lock the database tables.
   function lock()
   {
-    global $PgTbl, $IwTbl, $SwTbl, $LkTbl, $RtTbl, $RemTbl, 
-    	$PaTbl, $MpTbl, $PwTbl;
+    global $PgTbl, $IwTbl, $SwTbl, $LkTbl, $RtTbl, $RemTbl,
+    	$PaTbl, $MpTbl, $PwTbl, $LeTbl;
 
     $this->dbh->query("LOCK TABLES $PgTbl WRITE, $IwTbl WRITE, $SwTbl WRITE, " .
                       "$LkTbl WRITE, $RtTbl WRITE, $RemTbl WRITE, " .
-                      "$PaTbl WRITE, $MpTbl WRITE, $PwTbl WRITE");
+                      "$PaTbl WRITE, $MpTbl WRITE, $PwTbl WRITE, $LeTbl WRITE");
   }
 
   // Unlock the database tables.
@@ -640,11 +662,12 @@ class PageStore
   // except the ones with an empty body.
   function allpages()
   {
-        global $PgTbl;
+        global $PgTbl, $LeTbl;
 
+/*
         $qid = $this->dbh->query("SELECT title, MAX(version) " .
                                  "FROM $PgTbl " .
-                                 "WHERE minoredit = 0 " . 
+                                 "WHERE minoredit = 0 " .
                                  "OR LENGTH(body) <= 1 " .
                                  "GROUP BY title " .
                                  "ORDER BY lower(title)");
@@ -665,6 +688,18 @@ class PageStore
                                 $auth_res[3], $auth_res[4], $auth_res[5] == 'on', $result[1]);
             }
         }
+*/
+
+        $qid = $this->dbh->query("SELECT p.title, p.version, p.author, p.time, p.username, " .
+                                 "LENGTH(p.body), p.comment, p.mutable " .
+                                 "FROM $PgTbl p, $LeTbl l " .
+                                 "WHERE p.title = l.page " .
+                                 "AND p.version = l.version " .
+                                 "AND LENGTH(p.body) > 1");
+
+        while ($result = $this->dbh->result($qid))
+            $list[] = array($result[3], $result[0], $result[2], $result[4], $result[5],
+                            $result[6], $result[7] == 'on', $result[1]);
 
         return $list;
   }

@@ -105,6 +105,10 @@ $DayLimit = 14;
 //   user has not set their preferences.
 $MinEntries = 20;
 
+// $UseHotPages indicates whether the hot pages icon should be used on the
+//   RecentChanges page.
+$UseHotPages = 0;
+
 // $HistMax determines the maximum number of entries on a page's history list.
 //   This default is used if the user has not set their preferences.
 $HistMax = 8;

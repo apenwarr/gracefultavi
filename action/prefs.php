@@ -8,7 +8,7 @@ require('template/prefs.php');
 function action_prefs()
 {
   global $Save, $referrer, $user, $rows, $cols, $days, $min, $auth, $hist;
-  global $CookieName, $ErrorNameMatch, $tzoff;
+  global $CookieName, $ErrorNameMatch, $tzoff, $hotpages;
 
   if(!empty($Save))
   {
@@ -28,7 +28,8 @@ function action_prefs()
       { $auth = 1; }
     else
       { $auth = 0; }
-    $value = "rows=$rows&amp;cols=$cols&amp;auth=$auth";
+    $hotpages = (strcmp($hotpages, "") != 0) ? 1 : 0;
+    $value = "rows=$rows&amp;cols=$cols&amp;auth=$auth&amp;hotpages=$hotpages";
 //    if(strcmp($user, "") != 0)
       { $value = $value . "&amp;user=" . $PHP_AUTH_USER; }
     if(strcmp($days, "") != 0)
