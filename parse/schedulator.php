@@ -419,7 +419,8 @@ function sch_genline($feat, $task, $orig, $curr, $elapsed, $left, $due)
       "$junk2</td></tr>";
 }
 
-function sch_line($feat, $task, $orig, $curr, $elapsed, $remain, $done)
+function sch_line($feat, $task, $orig, $curr, $elapsed, $remain, $done,
+		  $allow_red)
 {
     global $sch_curday, $sch_bugs, $sch_got_bug;
     
@@ -432,7 +433,7 @@ function sch_line($feat, $task, $orig, $curr, $elapsed, $remain, $done)
     
     $sch_curday = sch_add_hours($sch_curday, $curr);
     $due = sch_format_day($sch_curday);
-    if ((!$curr || $remain) && !$done 
+    if ($allow_red && (!$curr || $remain) && !$done 
 	&& floor($sch_curday) < floor(sch_today()))
       $due = "<font color=red>$due</font>";
     
@@ -477,7 +478,8 @@ function sch_bug($feat, $task, $_orig, $_curr, $_elapsed, $done)
     if (!$remain && $curr)
       $done = 1;
 
-    $ret .= sch_line($xfeat, $task, $orig, $curr, $elapsed, $remain, $done);
+    $ret .= sch_line($xfeat, $task, $orig, $curr, $elapsed, $remain, $done,
+		     true);
     $buga = array($feat, $task, $orig, $curr, $elapsed, 
 		  sch_format_day($sch_curday), $done);
     if ($fixfor)
@@ -531,8 +533,9 @@ function sch_milestone($descr, $name, $due)
     $newday = sch_parse_day($due);
     $xdue = sch_format_day($newday);
     $slip = ($newday-$sch_curday)*8 / $sch_load;
-    #$ret .= sch_line("SLIPPAGE (to $xdue)", "", 0,$slip,0,$slip, 0);
-    $ret .= sch_line("<b>$descr: $name ($xdue)</b>", '', 0,$slip,0,$slip, 0);
+    #$ret .= sch_line("SLIPPAGE (to $xdue)", "", 0,$slip,0,$slip, 0, true);
+    $ret .= sch_line("<b>$descr: $name ($xdue)</b>", '', 0,$slip,0,$slip, 0,
+		     false);
     $sch_need_extraline = 1;
     
     $sch_curday = $old_curday; # slippage doesn't actually take time... right?
@@ -576,7 +579,7 @@ function view_macro_schedulator($text)
 	$sch_start = $sch_curday = sch_parse_day($words[2]);
 	$sch_unknown_fixfor = array();
 	$sch_load = 1.0;
-	$ret .= sch_line("START", "", 0,0,0,0, 0);
+	$ret .= sch_line("START", "", 0,0,0,0, 0, false);
 	bug_start_user($sch_user);
     }
     else if ($words[0] == "LOADFACTOR")
@@ -622,7 +625,7 @@ function view_macro_schedulator($text)
 	bug_add_tasks($sch_user, 'UNKNOWN', $sch_unknown_fixfor);
 	bug_finish_user($sch_user);
 	bug_add_volunteer_tasks();
-	$ret .= sch_line("END", "", 0,0,0,0, 0);
+	$ret .= sch_line("END", "", 0,0,0,0, 0, true);
 	$ret .= "</table>";
     }
     else
