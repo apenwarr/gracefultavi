@@ -496,7 +496,8 @@ function sch_extrabugs($user, $fixfor, $enddate)
     $a = bug_list($user, $fixfor, $start, $enddate);
     foreach ($a as $bugid => $bug)
     {
-	if ($bug[3] == $bug[2] && abs($bug[2]) <= 0.01)
+	if ($bug[3] == $bug[2] 
+		&& abs($bug[2]) <= 0.01 && abs($bug[2]) >= 0.0001)
 	{
 	    # the bug is done, but with a zero estimate; probably a
 	    # duplicate, wontfix, or something.  Skip it.
