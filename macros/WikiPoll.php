@@ -57,7 +57,7 @@ class Macro_WikiPoll
     {
         global $HTTP_COOKIE_VARS, $pagestore, $UserName;
 
-        $poll_user = $this->quote($UserName);
+        $poll_user = addslashes($UserName);
 
         // is a ballot being cast?
         if ($_POST['poll_vote']) {
@@ -111,7 +111,7 @@ class Macro_WikiPoll
 
         }
 
-        $args = $this->entitize($args);
+        #$args = $this->entitize($args);
 
         // poll type
         preg_match('/^((single|multiple) )?(.*)/i', $args, $matches);
@@ -133,8 +133,9 @@ class Macro_WikiPoll
 
         if ($poll_user) {
             // check if they have already voted.
+            $query_title = addslashes($poll_title);
             $q1 = $pagestore->dbh->query("SELECT id FROM wiki_poll " .
-                                         "WHERE title='$poll_title' " .
+                                         "WHERE title='$query_title' " .
                                          "AND author='$poll_user'");
             $results = $pagestore->dbh->result($q1);
         } else {
@@ -174,15 +175,18 @@ class Macro_WikiPoll
     {
         global $page, $pagestore;
 
+        $query_title = addslashes($title);
+
         $vote_results = array();
         $allvotes = 0;
         foreach ($members as $choice) {
             $choice = trim($choice);
+            $query_choice = addslashes($choice);
             if ($show_results) {
                 $query = "SELECT COUNT(id) as total " .
                          "FROM wiki_poll " .
-                         "WHERE title='$title' " .
-                         "AND choice='$choice'";
+                         "WHERE title='$query_title' " .
+                         "AND choice='$query_choice'";
                 $q = $pagestore->dbh->query($query);
                 if ($result = $pagestore->dbh->result($q)) {
                     $allvotes += $result[0];
@@ -195,10 +199,9 @@ class Macro_WikiPoll
 
         $user_choices = array();
         if ($user && $show_results && !$show_vote_widgets) {
-
             $query = "SELECT choice " .
                      "FROM wiki_poll " .
-                     "WHERE title='$title' " .
+                     "WHERE title='$query_title' " .
                      "AND author='$user'";
             $q = $pagestore->dbh->query($query);
             while ($result = $pagestore->dbh->result($q)) {
@@ -212,23 +215,24 @@ class Macro_WikiPoll
         if ($show_vote_widgets) {
             $poll .= '<form method="POST" action="?page=' . $page . '">' .
                      '<input type="hidden" name="poll_title" value="' .
-                     $title . '" />';
+                     htmlspecialchars($title) . '" />';
         }
 
         $poll .= '<table><tr><th colspan="' . $col_span .
-                 '" align="center">' . $title . '</th></tr>';
+                 '" align="center">' . htmlspecialchars($title) . '</th></tr>';
 
         foreach ($vote_results as $choice => $total) {
             $poll .= '<tr><td align="left">';
             if ($show_vote_widgets) {
                 $input_type = ($type == POLL_SINGLE ? 'radio' : 'checkbox');
                 $poll .= '<input type="' . $input_type . '" ' .
-                         'name="poll_choice[]" value="' . $choice . '" />';
+                         'name="poll_choice[]" value="' .
+                         htmlspecialchars($choice) . '" />';
             }
             if (isset($user_choices[$choice])) {
-                $poll .= "<b>$choice</b>";
+                $poll .= '<b>' . htmlspecialchars($choice) . '</b>';
             } else {
-                $poll .= $choice;
+                $poll .= htmlspecialchars($choice);
             }
             $poll .= '</td>';
 
