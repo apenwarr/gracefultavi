@@ -1,5 +1,5 @@
 <?php
-// $Id: common.php,v 1.3 2003/03/28 19:54:25 mich Exp $
+// $Id: common.php,v 1.4 2003/03/28 22:58:43 mich Exp $
 
 // This function generates the common prologue and header
 // for the various templates.
@@ -196,6 +196,7 @@ if($args['tree'])
 function template_common_epilogue($args)
 {
   global $FindScript, $pagestore, $page, $UserName, $PrefsScript;
+  global $AdditionalFooter;
 
   $pg = $pagestore->page($page);
   $pagetext = $pg->text;
@@ -382,6 +383,11 @@ if ($page != 'FrontPage' && $page != 'RecentChanges')
 </table>
 
 </div>
+
+<?php
+if ($AdditionalFooter)
+    include($AdditionalFooter);
+?>
 
 </body>
 </html>
