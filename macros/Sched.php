@@ -368,7 +368,7 @@ function bug_add_volunteer_tasks()
 
     while ($row = mysql_fetch_row($result))
     {
-        $person = $row[0];
+        $person = "-???-";
         $fixfor = $row[1];
         $bugid = $row[2];
         $title = $row[3];
