@@ -295,13 +295,15 @@ function sch_parse_day($day)
 	  $stamp += 24*60*60;
 	else if ($spl[6] == 6) # saturday
 	  $stamp += 2*24*60*60;
+	else if ($spl[6] == 5) # friday
+	  $stamp += 3*24*60*60;
 	
 	$stamp -= 4*24*60*60; # the epoch was a Thursday.  Skip to Monday.
 	$days = floor($stamp/24/60/60);
 	$weeks = floor($days/7);
 	$days -= $weeks*7;
 	#printf("(days/weeks:$days/$weeks)");
-	return $weeks*5 + $days;
+	return $weeks*4 + $days;
     }
     else
     {
@@ -316,8 +318,8 @@ function sch_format_day($day)
       return '';
     
     # convert working days to "real" days
-    $weeks = floor($day/5);
-    $days = $day - $weeks*5;
+    $weeks = floor($day/4);
+    $days = $day - $weeks*4;
     $frac = $days - floor($days);
     #print "(weeks/days/frac:$weeks/$days/$frac)";
     $stamp = ($weeks*7 + floor($days)) * 24*60*60;
@@ -336,7 +338,6 @@ function sch_add_hours($day, $hours)
     if ($hours < 0)
       return $day;  # never subtract hours from the date!
     
-    # FIXME: deal with "working days" vs. weekends
     return $day + ($hours * $sch_load) / 8.0;
 }
 
