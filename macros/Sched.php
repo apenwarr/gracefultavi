@@ -690,7 +690,7 @@ function sch_bug($feat, $task, $_orig, $_curr, $_elapsed, $done)
         return $ret;
     }
 
-    $task = htmlentities($task);
+    $task = htmlentities($task, ENT_QUOTES);
 
     if (!$done)
         $done = 0;
@@ -1269,7 +1269,7 @@ function sch_summary($fixfor)
 
 	$bugs[$person][$due][] = array(
                 "task" => $task, 
-                "subtask" => htmlentities($subtask, ENT_QUOTES));
+                "subtask" => $subtask);
 	unset($allpeople[$person]);
     }
     
