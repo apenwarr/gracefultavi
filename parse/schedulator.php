@@ -229,7 +229,8 @@ function bug_finish_user($user)
     global $bug_h;
     bug_init();
     
-    $query = "delete from schedulator.Task where fValid=0";
+    $query = "delete from schedulator.Task " .
+      "where (fValid=0 and sPerson='$user') or sPerson=''";
     $result = mysql_query($query, $bug_h);
 }
 
