@@ -1083,6 +1083,7 @@ CALENDAR_JAVASCRIPT;
         $name = $this->get_template_name($id);
 
         $roles = $this->list_roles();
+        $roles[-1] = '';
 
         if ($id)
             $this->out('<p><h2>Edit Template</h2>');
@@ -1105,15 +1106,17 @@ CALENDAR_JAVASCRIPT;
             </tr>');
 
         $i = 1;
+        $last_owner = '';
         foreach ($template_details as $id => $details)
         {
             $this->print_edit_template_row($details, $roles,
                 $i == count($template_details));
             $i++;
+            $last_owner = $details['owner'];
         }
         $this->form_hidden('templaterowids',
             implode(',', array_keys($template_details)));
-        $this->print_edit_template_row(array(), $roles, false);
+        $this->print_edit_template_row(array('owner' => $last_owner), $roles, false);
         $this->table_end();
 
         $this->out('<p><b>Import:</b> ');
@@ -1168,6 +1171,20 @@ CALENDAR_JAVASCRIPT;
         {
             $roles = $this->list_roles();
 
+            $roles_ex = array();
+            foreach ($roles as $role_id => $role)
+            {
+                $roles_ex[] = array('id' => $role_id, 'name' => $role);
+                $words = split(' ', $role);
+                if (count($words) > 1)
+                {
+                    $new_role = '';
+                    foreach ($words as $word)
+                        $new_role .= substr($word, 0, 1);
+                    $roles_ex[] = array('id' => $role_id, 'name' => $new_role);
+                }
+            }
+
             $content = file_get_contents($_FILES['import']['tmp_name']);
             $content = explode("\n", $content);
 
@@ -1179,13 +1196,13 @@ CALENDAR_JAVASCRIPT;
                     $description = trim($line);
                     $owner = 'null';
 
-                    foreach ($roles as $role_id => $role)
+                    foreach ($roles_ex as $role_ex)
                     {
-                        $role = preg_quote($role);
+                        $role = preg_quote($role_ex['name']);
                         if (preg_match("/^$role\s+(.*)$/i", $description,
                                        $matches))
                         {
-                            $owner = $role_id;
+                            $owner = $role_ex['id'];
                             $description = $matches[1];
                             break;
                         }
@@ -1218,6 +1235,7 @@ CALENDAR_JAVASCRIPT;
     {
         $name = $this->get_template_name($_REQUEST['id']);
         $template_details = $this->get_template_details($_REQUEST['id']);
+        $roles = $this->list_roles();
 
         $output = '';
         $category = '';
@@ -1228,7 +1246,9 @@ CALENDAR_JAVASCRIPT;
                 $category = $row['category'];
                 $output .= $row['category'] . "\n";
             }
-                $output .= "\t" . $row['description'] . "\n";
+
+            if ($row['owner']) $output .= "\t" . $roles[$row['owner']];
+            $output .= "\t" . $row['description'] . "\n";
         }
 
         header('Content-Type: application/octet-stream');
