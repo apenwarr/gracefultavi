@@ -257,12 +257,15 @@ if ($page != 'RecentChanges')
     {
         print '<td align="center"><i>Last edited ' . html_time($args['timestamp']);
 
-        if (isset($args['euser']))
-            print ' by ' . $args['euser'];
-        else
-            print ' anonymously';
+        if ($args['timestamp'] != '')
+        {
+            if (isset($args['euser']))
+                print ' by ' . $args['euser'];
+            else
+                print ' anonymously';
 
-        print ' <a href="' . historyURL($args['history']) . '">(diff)</a></i><br>';
+            print ' <a href="' . historyURL($args['history']) . '">(diff)</a></i><br>';
+        }
     }
 
     if (isset($args['twin']) && $args['twin'] != '')
