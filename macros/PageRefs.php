@@ -14,7 +14,7 @@ class Macro_PageRefs
                                   "GROUP BY link ORDER BY ct DESC, link");
      while(($result = $pagestore->dbh->result($q1)))
      {
-       $q2 = $pagestore->dbh->query("SELECT MAX(version) FROM $PgTbl " .
+       $q2 = $pagestore->dbh->query("SELECT lastversion FROM $PgTbl " .
                                     "WHERE title='$result[0]'");
        if(($r2 = $pagestore->dbh->result($q2)) && !empty($r2[0]))
        {
