@@ -675,7 +675,9 @@ function sch_change_loadfactor($load, $date)
     {
 	if (sch_parse_day($e->get_resolvedate()) >= $date 
 	    || sch_parse_day($e->get_resolvedate()) == 0)
-	   $sch_db->estimate->a[$i]->loadfactor = $load;
+        {
+            $sch_db->estimate->a[$i]->loadfactor = $load;
+        }
 	//print sch_parse_day($e->get_resolvedate()) . ">?$date -> " . 
 	//$sch_db->estimate->a[$i]->loadfactor . "<br>\n";
     }

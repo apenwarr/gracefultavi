@@ -841,7 +841,8 @@ class FogTables
 	}
 	else
 	    $and_user = $and_useras = $and_userrb = "";
-	$and_dtresolved = "and (dtResolved>'$start_date' or ISNULL(dtResolved))"; 
+	$and_dtresolved = "and (dtResolved >= '$start_date' " . 
+            "or ISNULL(dtResolved))"; 
  
 	$whichbugs = sql_simple("select ixTask from schedulator.Estimate " .
 				"    where 1 $and_user " .
