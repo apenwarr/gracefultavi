@@ -1202,6 +1202,121 @@ function sch_switch_loadfactor($load)
 }
 
 
+function sch_summary($fixfor)
+{
+    global $bug_h;
+    bug_init();
+    $ret = "";
+    
+    $query = "select dtDue, sPerson, sTask " . 
+             "  from schedulator.Task " .
+             "  where fValid=1 and sFixFor='$fixfor' and fDone = 0 " .
+             "  order by dtDue ";
+    $result = mysql_query($query, $bug_h);
+
+    $dates = array();
+    $bugs = array();
+    
+    while ($row = mysql_fetch_row($result))
+    {
+	$due = $row[0];
+	$person = $row[1];
+	$task = $row[2];
+	
+	# $nicedue = ereg_replace("-", " ", $due);
+	$nicedue = ereg_replace("(....)-(..)-(..)", "\\2 \\3", $due);
+	$dates[$due] = $nicedue;
+	$last_date = $due;
+	
+	$bugs[$person][$due][] = $task;
+    }
+    
+    $ret .= "<h1>Schedulator Summary for '$fixfor'</h1>\n";
+    $ret .= "<p>Predicted Bounce: $last_date</p>\n";
+    
+    $ret .= "<style type='text/css'>\n" .
+      " table.schedsum th " .
+             "{ font-weight:normal; margin:0pt; text-align:left }\n" .
+      " table.schedsum th.year,th.day,th.person " .
+             "{ background: lightgray }\n" .
+      " table.schedsum th.day,td.bugs " .
+             "{ font-size: 8pt; }\n" .
+      " table.schedsum td.late " .
+             "{ background: yellow }\n" .
+      "</style>";
+    
+    $date_list = array_keys($dates);
+    sort($date_list);
+    
+    $person_list = array_keys($bugs);
+    sort($person_list);
+    $rowcount = 2 + count($person_list);
+    
+    $ret .= "<table class='schedsum'>\n";
+    
+    $ret .= "<tr class='schedsum'><th></th>";
+    $lastyear = 0;
+    $yearcount = 0;
+    foreach ($date_list as $due)
+    {
+	$year = ereg_replace("(....)-(..)-(..)", "\\1", $due);
+	$month = ereg_replace("(....)-(..)-(..)", "\\1 \\2", $due);
+	if (!$lastyear) $lastyear = $year;
+	if ($year != $lastyear)
+	{
+	    $ret .= "<th class='year' colspan=$yearcount>$lastyear</th>";
+	    $lastyear = $year;
+	    $yearcount = 0;
+	}
+	$yearcount++;
+    }
+    $ret .= "<th class='year' colspan=$yearcount>$lastyear</th>";
+    $ret .= "</tr>\n";
+    
+    $ret .= "<tr><th></th><th class='day'>" 
+      . join("</th><th class='day'>", array_values($dates)) . "</th>\n";
+    $ret .= "</tr>";
+    
+    foreach ($person_list as $person)
+    {
+	$schedname = strtoupper(substr($person, 0, 1)) 
+	  . substr($person, 1) . "Schedule";
+	
+	$ret .= "<tr><th class='person'>" .
+	  "<a href='index.php?$schedname' title=\"$person's schedulator\">" .
+	  "$person</a></th>";
+	foreach ($date_list as $due)
+	{
+	    $n = 0;
+	    $v = "";
+	    if (is_array($bugs[$person][$due]))
+	    {
+		foreach ($bugs[$person][$due] as $bug)
+		{
+		    $n++;
+		    if (($bug + 0) . "" == $bug)
+		      $v .= "<a href='http://nits/fogbugz3?$bug' " . 
+		            "title='FogBugz bug #$bug'>$n</a> ";
+		    else
+		      $v .= "$n";
+		}
+	    }
+
+	    $colclass = "";
+	    if ($n && strtotime($due) < time())
+	      $colclass = "late";
+	    
+	    $ret .= "<td class='bugs $colclass'>$v</td>";
+	}
+	$ret .= "</tr>\n";
+    }
+    
+    $ret .= "</table>\n";
+    
+    return $ret;
+}
+
+
 class Macro_Sched
 {
     var $pagestore;
@@ -1305,6 +1420,11 @@ class Macro_Sched
 
             $ret .= sch_create($sch_user);
         }
+	else if ($words[0] == "SUMMARY")
+	{
+	    $fixfor = $words[1];
+	    $ret .= sch_summary($fixfor);
+	}
         else
         {
             $bugid = $words[0];
