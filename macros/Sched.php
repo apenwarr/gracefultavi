@@ -104,42 +104,52 @@ function bug_fixfor_query($fixfor, $enddate)
 }
 
 
-// return a list of all ACTIVE bugs due by the given fixfor/enddate.
+// find the last FixFor entry due sooner than or on the same day as
+// $fixforname or $enddate, whichever is later.  Either one can be
+// undefined.  If both are undefined or there are no FixFors at all,
+// returns undef.
+function bug_last_fixfor($fixforname, $enddate)
+{
+    global $sch_db;
+    if ($enddate)
+      $last_fix = $sch_db->fixfor->last_before($enddate);
+    $f = $sch_db->fixfor->first("name", $fixforname);
+    
+    if (!$last_fix)
+      $last_fix = $f;
+    if (!$f)
+      $f = $last_fix;
+    if ($last_fix && $f)
+      $last_fix = $f->due_before($last_fix) ? $last_fix : $f;
+    
+    return $last_fix;
+}
+
+
+// return a list of all ACTIVE bugs due by the given fixfor/enddate, whichever
+// is *later*.
 //
 // Returns an array:
 //       bugid -> (title,OrigEst,CurrEst,Elapsed,FixForDate)
-function bug_unfinished_list($user, $fixfor, $enddate)
+function bug_unfinished_list($user, $fixforname, $enddate)
 {
-    global $bug_h;
-    bug_init();
-
+    global $sch_db;
     $personid = bug_person($user);
-    $ffquery = bug_fixfor_query($fixfor, $enddate);
-    
-    $query = "select ixStatus,b.ixBug,sTitle, " .
-             "       hrsOrigEst,hrsCurrEst,hrsElapsed, " .
-             "  ifnull(f.dt, '2099/9/9') as sortdate " .
-             "from Bug as b, FixFor as f " .
-             "where b.ixFixFor=f.ixFixFor " .
-             "  and b.ixPersonAssignedTo=$personid " .
-             $ffquery .
-             "  order by sortdate, sFixFor, ixPriority, ixBug ";
-    //print "(($query))<p>";
-    $result = mysql_query($query, $bug_h);
-    if (!$result)
-        print mysql_error($bug_h);
-
+    $last_fix = bug_last_fixfor($fixforname, $enddate);
     $a = array();
-    while ($row = mysql_fetch_row($result))
+    
+    foreach ($sch_db->estimate->a as $e)
     {
-	$status = array_shift($row);
-	if ($status != 1)
-	{
-	    $row[1] = "VERIFY: $row[1]";
-	    $row[2] = $row[3] = 0.01;
-	    $row[4] = 0.009;
-	}
-        array_push($a, $row);
+	if ($e->isdone()
+	    || $e->assignto->ix != $personid
+	    || ($last_fix && !$e->task->fixfor->due_before($last_fix)))
+	  continue;
+	
+	$a[$e->id] =
+	  array($e->id, $e->nice_title(),
+		$e->est_orig(), $e->est_curr(),
+		$e->est_elapsed(),
+		$e->task->fixfor->date);
     }
     
     return $a;
@@ -155,6 +165,7 @@ function bug_unfinished_list($user, $fixfor, $enddate)
 //       bugid -> (title,OrigEst,CurrEst,Elapsed,FixForDate)
 function bug_finished_list($user, $fixfor, $startdate, $enddate)
 {
+    global $sch_db;
     global $bug_h;
     bug_init();
     
@@ -162,68 +173,26 @@ function bug_finished_list($user, $fixfor, $startdate, $enddate)
     // date.  The bugs are probably no longer assigned to that user.
     $personid = bug_person($user);
 
-    $ffquery = bug_fixfor_query($fixfor, $enddate);
-
-    $query = "select distinct " .
-             "b.ixBug,sTitle,hrsOrigEst,hrsCurrEst,hrsElapsed, " .
-             "  e.ixPerson, e.ixBugEvent, " .
-             "  ifnull(f.dt, '2099/9/9') as sortdate " .
-             "from Bug as b, BugEvent as e, FixFor as f " .
-             "where e.ixBug=b.ixBug " .
-             "  and f.ixFixFor=b.ixFixFor " .
-             "  and e.dt >= '$startdate' " .
-             $ffquery .
-             "  and b.ixStatus > 1 " .
-             "  and e.sVerb like 'RESOLVED%' " .
-             "  and e.sVerb != 'Resolved (Again)' " .
-             "  order by ixBugEvent desc ";
-    // print "(($query))<p>";
-    $result = mysql_query($query, $bug_h);
-    if (!$result)
-        print mysql_error($bug_h);
-    
-    $owned = array();
-    $done = array();
+    $last_fix = bug_last_fixfor($fixforname, $enddate);
     $a = array();
-    while ($row = mysql_fetch_row($result))
+    
+    $xstartdate = str_replace("/", "-", $startdate);
+    
+    foreach ($sch_db->estimate->a as $e)
     {
-        $bug = array_shift($row);
-	$byperson = $row[4];
-	if ($byperson != $personid)
-	{
-	    $done[$bug] = 1;
-	    continue;
-	}
+	if (!$e->isdone()
+	    || $e->resolvedate < $xstartdate
+	    || ($e->est_curr()==0 && $e->est_elapsed()==0)
+	    || ($last_fix && !$e->task->fixfor->due_before($last_fix)))
+	  continue;
 	
-	if ($owned[$bug])
-	{
-	    // I own this bug already
-	    continue;
-	}
-	
-	if ($done[$bug])
-	{
-	    // someone resolved this bug *after* I did - don't lose it
-	    $row[0] = "STOLEN: $row[0]";
-	    $row[2] = $row[3] = 0.1;
-	}
-
-        // the bug is done, so don't give it any more time remaining
-        if (!$row[2])
-            $row[2] = 0.001;  // nonzero so we know the 'remaining' is accurate
-        $row[3] = $row[2]; // elapsed = estimate; bug is done!
-
-	if (!$owned[$bug])
-	{
-	    array_unshift($row, $bug);
-	    array_push($a, $row);
-	    $owned[$bug] = 1;
-	}
+	$a[$e->id] = 
+	  array($e->id, $e->nice_title(),
+		$e->est_orig(), $e->est_curr(), $e->est_elapsed(),
+		$e->task->fixfor->date);
     }
     
-    // print "results: " . count($a) . "<p>\n";
-
-    return array_reverse($a);
+    return $a;
 }
 
 
@@ -331,7 +300,7 @@ function bug_get_milestones($fixfor)
 
     $a = array();
     while ($row = mysql_fetch_row($result))
-        array_push($a, $row[0]);
+      $a[] = $row[0];
     return $a;
 }
 
@@ -463,7 +432,7 @@ function bug_get_fixfors($user)
     while ($row = mysql_fetch_row($result))
     {
         //print "((Adding fixfor $row[0] to array))";
-        array_push($a, $row[0]);
+	$a[] = $row[0];
     }
 
     return $a;
@@ -728,9 +697,9 @@ function sch_bug($feat, $task, $_orig, $_curr, $_elapsed, $done)
 	// $bug = (title origest currest elapsed status fixfor)
 	
         if (!$task)     $task = $bug[0];
-        if (!$_orig)    $_orig = $bug[1];
-        if (!$_curr)    $_curr = $bug[2];
-        if (!$_elapsed) $_elapsed = $bug[3];
+        if (!strcmp($_orig,''))    $_orig = $bug[1];
+        if (!strcmp($_curr,''))    $_curr = $bug[2];
+        if (!strcmp($_elapsed,'')) $_elapsed = $bug[3];
         if (!$done && !$notdone && $bug[4] != 'ACTIVE') $done = 1;
 	if ((!$done && $_curr != $_elapsed)
 	    || ($bug[4] != 'ACTIVE'))
@@ -766,7 +735,7 @@ function sch_bug($feat, $task, $_orig, $_curr, $_elapsed, $done)
     if ($fixfor)
         bug_add_task($sch_user, $fixfor, $buga);
     else
-        array_push($sch_unknown_fixfor, $buga);
+        $sch_unknown_fixfor[] = $buga;
     return $ret;
 }
 
@@ -819,8 +788,10 @@ function sch_extrabugs($user, $fixfor, $enddate, $only_done)
         if (!$done)
             $ret .= sch_warning("Weird1: I don't know if bug #$bugid is done!");
 
+	#print "(done_bug:$idx:$bugid:$done:$zeroest)";
         if ($sch_got_bug[$bugid] || $sch_manual_bugs[$bugid])
             continue;
+	#print "!";
 
         if ($zeroest)
         {
@@ -829,6 +800,7 @@ function sch_extrabugs($user, $fixfor, $enddate, $only_done)
             $sch_got_bug[$bugid] = 1;
             continue;
         }
+	#print "/";
 
         $bugarr = array($bugid, $bug[0], $bug[1], $bug[2], $bug[3]);
         $sch_bug_lists[$fixfor]["complete"][] = $bugarr;
@@ -1208,8 +1180,8 @@ function sch_switch_loadfactor($load)
     
     // Mark where the load factor changed for both the complete and
     // incomplete bug lists, so we can display something sane.
-    array_push($sch_cur_incomplete_bugs, $loadbug);
-    array_push($sch_cur_complete_bugs, $loadbug);
+    $sch_cur_incomplete_bugs[] = $loadbug;
+    $sch_cur_complete_bugs[] = $loadbug;
     
     $sch_load = $load;
     //$ret .= "Setting loadfactor to $sch_load<br>\n";
@@ -1435,6 +1407,7 @@ class Macro_Sched
         global $sch_cur_complete_bugs;
         global $sch_cur_incomplete_bugs;
         global $sch_got_bug, $sch_manual_bugs;
+	global $sch_db;
 
         $ret = "";
 
@@ -1471,6 +1444,8 @@ class Macro_Sched
             $sch_load = 0.1;
 	    sch_switch_loadfactor(1.0);
 	    
+	    $sch_db = new FogTables($sch_user, -1);
+	    
             bug_start_user($sch_user);
         }
         else if ($words[0] == "LOADFACTOR")
@@ -1489,8 +1464,8 @@ class Macro_Sched
             // Carry over the current LoadFactor
             // FIXME: Make this a function or something
             $loadbug = array("LOADFACTOR", $sch_load, "", "", "");
-            array_push($sch_cur_incomplete_bugs, $loadbug);
-            array_push($sch_cur_complete_bugs, $loadbug);
+            $sch_cur_incomplete_bugs[] = $loadbug;
+            $sch_cur_complete_bugs[] = $loadbug;
         }
         else if ($words[0] == "SETBOUNCE")
         {
@@ -1510,8 +1485,8 @@ class Macro_Sched
             // Carry over the current LoadFactor
             // FIXME: Make this a function or something
             $loadbug = array("LOADFACTOR", $sch_load, "", "", "");
-            array_push($sch_cur_incomplete_bugs, $loadbug);
-            array_push($sch_cur_complete_bugs, $loadbug);
+            $sch_cur_incomplete_bugs[] = $loadbug;
+            $sch_cur_complete_bugs[] = $loadbug;
 
             bug_set_release($msname, $msdue);
             bug_add_tasks($sch_user, $msname, $sch_unknown_fixfor);
@@ -1549,8 +1524,8 @@ class Macro_Sched
                 if (!$task)    $task = $bugdata[0];
                 // Override orig estimate with one from FogBugz
                 $orig = $bugdata[1];
-                if (!$est)    $est = $bugdata[2];
-                if (!$elapsed) $elapsed = $bugdata[3];
+                if (!strcmp($est,''))    $est = $bugdata[2];
+                if (!strcmp($elapsed,'')) $elapsed = $bugdata[3];
                 if (!$done && $bugdata[4] != 'ACTIVE') $done = 1;
                 if ((!$done && $curr != $elapsed) || ($bugdata[4] != 'ACTIVE'))
                 {
@@ -1569,12 +1544,12 @@ class Macro_Sched
 
             if (!$force_done && !$done)
             {
-                array_push($sch_cur_incomplete_bugs, $bug);
+                $sch_cur_incomplete_bugs[] = $bug;
                 // $ret .= "Adding bug ($bug[0], $bug[1], $bug[2], $bug[3], $bug[4], $bug[5]) to incomplete buglist<br>\n";
             }
             else
             {
-                array_push($sch_cur_complete_bugs, $bug);
+                $sch_cur_complete_bugs[] = $bug;
                 // $ret .= "Adding bug ($bug[0], $bug[1], $bug[2], $bug[3], $bug[4], $bug[5]) to completed buglist<br>\n";
             }
         }
