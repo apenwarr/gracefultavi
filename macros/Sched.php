@@ -49,58 +49,23 @@ function bug_init()
 }
                     
 
+// This function could maybe be inlined
 function bug_person($user)
 {
-    global $bug_h;
-    bug_init();
+    global $sch_db;
 
-    $query = "select ixPerson from Person where sEmail like '$user@%'";
-    $result = mysql_query($query, $bug_h);
-    $row = mysql_fetch_row($result);
-    if ($row)
-        return $row[0];
-    else
-        return -1;
+    $p = $sch_db->person->first_prefix("email", "$user@");
+    return $p->ix;
 }
 
 
+// This function could maybe be inlined
 function bug_duedate($fixfor)
 {
-    global $bug_h;
-    bug_init();
+    global $sch_db;
 
-    $query = "select dt from FixFor where sFixFor='$fixfor'";
-    $result = mysql_query($query, $bug_h);
-    $row = mysql_fetch_row($result);
-    if ($row)
-        return $row[0];
-    else
-        return '';
-}
-
-
-// figure out what we need to append to the "where" clause of an sql query
-// in order to find all bugs due on or before the given fixfor and/or end
-// date.
-function bug_fixfor_query($fixfor, $enddate)
-{
-    $ffquery = "";
-    $endquery = "";
-    
-    if ($fixfor and $enddate)
-        $ffquery = "  and (f.sFixFor = '$fixfor' or " .
-                   "(f.dt is not null and f.dt <= '$enddate')) ";
-    else if ($fixfor)
-        $ffquery = "  and f.sFixFor = '$fixfor' ";
-
-    // any bug opened before the end date counts toward that deadline, even
-    // if the deadline has *now* passed and the bug isn't done.  Any bug
-    // opened *after* the end date is obviously not intended for that
-    // milestone.
-    if ($enddate)
-        $endquery = "  and b.dtOpened < '$enddate' ";
-
-    return $ffquery . $endquery;
+    $d = $sch_db->fixfor->first("name", $fixfor);
+    return $d->date;
 }
 
 
@@ -166,8 +131,6 @@ function bug_unfinished_list($user, $fixforname, $enddate)
 function bug_finished_list($user, $fixfor, $startdate, $enddate)
 {
     global $sch_db;
-    global $bug_h;
-    bug_init();
     
     // We want to get all bugs *resolved by* the user after the given start
     // date.  The bugs are probably no longer assigned to that user.
@@ -198,31 +161,27 @@ function bug_finished_list($user, $fixfor, $startdate, $enddate)
 
 function bug_get($bugid)
 {
-    global $bug_h;
+    global $sch_db;
 
-    bug_init();
-    $result = mysql_query("select sTitle,hrsOrigEst,hrsCurrEst,hrsElapsed, " .
-                          "    sStatus,sFixFor " .
-                          "from Bug as b, Status as s, FixFor as f " .
-                          "where s.ixStatus=b.ixStatus " .
-                          "  and f.ixFixFor=b.ixFixFor " .
-                          "  and ixBug=" . ($bugid+0),
-                          $bug_h);
-    $row = mysql_fetch_row($result);
-
-    if (!$row)
+    $b = $sch_db->bug->first("ix", $bugid);
+    if (!$b)
         return array($bugid, 0, 0, 0);
     else
-        return $row;
+        return array($b->name, $b->origest, $b->currest, $b->elapsed, 
+                $b->status, $b->fixfor);
 }
 
 
+// This function should become obsolete as everything switches to using bug
+// objects that make their own links
 function bug_link($bugid)
 {
     return "<a href='http://nits/FogBUGZ3/?$bugid'>$bugid</a>";
 }
 
 
+// This function should become obsolete as everything switches to using bug
+// objects that have their own titles
 function bug_title($bugid)
 {
     $bug = bug_get($bugid);
@@ -230,19 +189,13 @@ function bug_title($bugid)
 }
 
 
+// This function could maybe be inlined
 function bug_milestone_realname($name)
 {
-    global $bug_h;
-    bug_init();
+    global $sch_db;
 
-    $result = mysql_query("select sFixFor from FixFor " .
-                          "where sFixFor like '$name%' " .
-                          "limit 1");
-    $row = mysql_fetch_row($result);
-    if (!$row)
-        return $name;
-    else
-        return $row[0];
+    $f = $sch_db->fixfor->first_prefix("name", $name);
+    return $f->name;
 }
 
 
@@ -394,12 +347,9 @@ function bug_start_user($user)
 
 function bug_finish_user($user)
 {
-    global $bug_h;
-    bug_init();
-
     $query = "delete from schedulator.Task " .
              "where (fValid=0 and sPerson='$user') or sPerson=''";
-    $result = mysql_query($query, $bug_h);
+    bug_query($query);
 }
 
 
