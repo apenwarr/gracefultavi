@@ -53,22 +53,22 @@ require('parse/transforms.php');
 //   is the file to load, second is the function to call, and third is how
 //   to treat it for rate-checking purposes ('view', 'edit', or 'search').
 $ActionList = array(
-                'view' => array('action/view.php', 'action_view', 'view'),
-                'edit' => array('action/edit.php', 'action_edit', 'view'),
-                'save' => array('action/save.php', 'action_save', 'edit'),
-                'diff' => array('action/diff.php', 'action_diff', 'search'),
-                'find' => array('action/find.php', 'action_find', 'search'),
+                'view'    => array('action/view.php', 'action_view', 'view'),
+                'edit'    => array('action/edit.php', 'action_edit', 'view'),
+                'save'    => array('action/save.php', 'action_save', 'edit'),
+                'diff'    => array('action/diff.php', 'action_diff', 'search'),
+                'find'    => array('action/find.php', 'action_find', 'search'),
                 'history' => array('action/history.php', 'action_history', 'search'),
                 'prefs'   => array('action/prefs.php', 'action_prefs', 'view'),
                 'macro'   => array('action/macro.php', 'action_macro', 'search'),
                 'rss'     => array('action/rss.php', 'action_rss', 'view'),
                 'style'   => array('action/style.php', 'action_style', ''),
                 'backlinks' => array('action/backlinks.php', 'action_backlinks', 'view'),
-                'reparent'  => array('action/reparent.php', 'action_reparent', 'edit'),
+                'reparent' => array('action/reparent.php', 'action_reparent', 'edit'),
                 'content' => array('action/content.php', 'action_content', 'edit'),
                 'watch'   => array('action/watch.php', 'action_watch', 'edit'),
                 'lock'    => array('action/lock.php', 'action_lock', ''),
-		'js'      => array('action/js.php', 'action_php', '')
+                'js'      => array('action/js.php', 'action_js', '')
               );
 
 // Default action and page names.

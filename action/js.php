@@ -1,8 +1,8 @@
 <?php
-// $Id: js.php,v 1.2 2004/08/26 21:44:10 mich Exp $
+// $Id: js.php,v 1.3 2004/08/26 22:30:36 mich Exp $
 
 // This function emits the current template's stylesheet.
-function action_style()
+function action_js()
 {
     global $HTTP_GET_VARS;
 
