@@ -145,11 +145,22 @@ function parse_interwiki($text)
 
 function interwiki_token($prefix, $ref)
 {
-  global $pagestore;
+    global $pagestore;
 
-  if(($url = $pagestore->interwiki($prefix)) != '')
-  {
-    return new_entity(array('interwiki', $url . $ref, $prefix . ':' . $ref));
+    if (($url = $pagestore->interwiki($prefix)) != '') {
+        if (preg_match_all('/\$(\d)/', $url, $matches)) {
+            $ref_parts = explode(':', $ref);
+            if (isset($matches[1]) && is_array($matches[1])) {
+                foreach ($matches[1] as $num) {
+                    $ref_part = isset($ref_parts[$num-1]) ? $ref_parts[$num-1] : '';
+                    $url = preg_replace("/\\\$$num/", $ref_part, $url);
+                }
+            }
+        } else {
+            $url .= $ref;
+        }
+
+        return new_entity(array('interwiki', $url, $prefix . ':' . $ref));
   }
 
   return $prefix . ':' . $ref;
