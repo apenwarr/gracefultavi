@@ -43,6 +43,7 @@ function template_edit($args)
     else
         print "Visit <a href=\"$PrefsScript\">Preferences</a> to set your user name";
 ?>
+<br>
 
 <input type="hidden" name="nextver" value="<?php print $args['nextver']; ?>">
 <input type="hidden" name="pagefrom" value="<?php print $args['pagefrom']; ?>">
