@@ -47,14 +47,29 @@ class Macro_TaskMaster
 	  $this->out("<td $class>$text</td>");
     }
     
-    # usage: row($nheaders, col, col, col, ...)
+    // usage: row($nheaders, col, col, col, ...)
     function row($nheaders)
     {
-	$n = 0;
 	$args = func_get_args();
 	array_shift($args);
+	return $this->_row($nheaders, "", $args);
+    }
+    
+    function row_class($nheaders, $class)
+    {
+	$args = func_get_args();
+	array_shift($args);
+	array_shift($args);
+	return $this->_row($nheaders, $class, $args);
+    }
+    
+    function _row($nheaders, $class, $args)
+    {
+	$n = 0;
+	if ($class != '')
+	  $class = "class='$class'";
 	
-        $this->out("<tr>");
+        $this->out("<tr $class>");
 	foreach ($args as $col)
 	{
 	    if (is_array($col))
@@ -349,6 +364,8 @@ class Macro_TaskMaster
     
     function do_create_form()
     {
+	$this->mystyle();
+	
 	$this->savecookie("filter-user");
 	$this->savecookie("filter-fixfor");
 	
@@ -570,7 +587,9 @@ class Macro_TaskMaster
 	bug_init();
 	$this->bug_h = $bug_h;
 	
-	$this->db = new FogTables($_REQUEST["filter-user"]);
+	$this->savecookie("filter-user");
+	$userix = $_REQUEST["filter-user"];
+	$this->db = new FogTables($userix);
 
         if (!preg_match_all('/"[^"]*"|[^ \t]+/', $args, $words))
             return "regmatch failed!\n";
@@ -596,7 +615,7 @@ class Macro_TaskMaster
 	      $this->do_create();
 	    else
 	      $this->do_create_form();
-	    
+/*	    
 	    $ave = $this->db->person->first_prefix("username", "apenwar");
 	    $this->out("person: $ave->fullname; $ave->email; $ave->username<br>");
 	    
@@ -614,7 +633,7 @@ class Macro_TaskMaster
 	    $foo = $this->db->estimate->a[5];
 	    $pname = $foo->assignto->fullname;
 	    $this->out("estimate: $pname;<br>");
-	    
+*/	    
 	    $this->table("table");
 	    $this->row(5, "XTask", "Task", "SubTask", "FixFor", "Assigned To");
 	    foreach ($this->db->xtask->a as $t)
@@ -623,7 +642,16 @@ class Macro_TaskMaster
 			   $t->fixfor->name, $t->assignto->email);
 	    }
 	    $this->table_end();
-
+/*
+	    $this->table("table");
+	    $this->row(2, "FixFor", "Due");
+	    foreach ($this->db->fixfor->a as $t)
+	    {
+		$this->row(1, $t->name, $t->date);
+	    }
+	    $this->table_end();
+*/
+/*
 	    $this->table("table");
 	    $this->row(4, "Bug", "Title", "FixFor", "Assigned To");
 	    foreach ($this->db->bug->a as $t)
@@ -633,16 +661,21 @@ class Macro_TaskMaster
 		   $t->name, $t->fixfor->name, $t->assignto->email);
 	    }
 	    $this->table_end();
-
+*/
 	    $this->table("table");
 	    $this->row(8, "ix", "Person", "bug?", "task",
 		       "origest", "currest", "elapsed", "remain");
 	    foreach ($this->db->estimate->a as $e)
 	    {
-		$this->row(2, $e->id,
-			   $e->assignto->email, $e->isbug, $e->task->name,
-			   $e->origest, $e->currest, $e->elapsed,
-			   $e->remain());
+		$this->row_class
+		  (2, $e->isdone() ? "done" : "notdone",
+		   $e->isbug ? bug_link($e->id) : $e->id,
+		   $e->task->assignto->email,
+		   $e->isbug . ':' . $e->fake . ':' .
+		     $e->isdone() . ':' . $e->task->isdone(),
+		   $e->task->name,
+		   $e->est_orig(), $e->est_curr(), $e->est_elapsed(),
+		   $e->est_remain());
 	    }
 	    $this->table_end();
 	}
