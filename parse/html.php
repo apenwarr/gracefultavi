@@ -183,6 +183,7 @@ function html_ref($refPage, $appearance, $hover = '', $anchor = '', $anchor_appe
     }
     else
     {
+	$result = "";
         if(validate_page($refPage) == 1       // Normal WikiName
             && $appearance == $refPage)       // ... and is what it appears
         {
@@ -199,7 +200,10 @@ function html_ref($refPage, $appearance, $hover = '', $anchor = '', $anchor_appe
             else
                 $tempAppearance = "($appearance)";
 
-            $result = $tempAppearance;
+	    if ($onlytwin)
+	        $result = $onlytwin;
+	    else
+	        $result = $tempAppearance;
         }
 
 	$result = $result
