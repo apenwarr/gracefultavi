@@ -1,5 +1,5 @@
 <?php
-// $Id: main.php,v 1.2 2002/01/08 17:31:01 smoonen Exp $
+// $Id: main.php,v 1.1.1.1 2003/03/15 03:53:58 apenwarr Exp $
 
 // If register_globals is off, we need to harvest the script parameters
 // at this point.
@@ -17,6 +17,7 @@ if(!ini_get('register_globals'))
   $find         = $HTTP_GET_VARS['find'];
   $version      = $HTTP_GET_VARS['version'];
   $full         = $HTTP_GET_VARS['full'];
+  $branch_search= $HTTP_GET_VARS['branch_search'];
 
   $Preview      = $HTTP_POST_VARS['Preview'];
   $Save         = $HTTP_POST_VARS['Save'];

@@ -1,5 +1,5 @@
 <?php
-// $Id: common.php,v 1.4 2003/03/28 22:58:43 mich Exp $
+// $Id: common.php,v 1.5 2003/03/28 23:24:44 mich Exp $
 
 // This function generates the common prologue and header
 // for the various templates.
@@ -96,7 +96,24 @@ print $args['headsufx'] . '</h1>';
 <form method="get" action="<?php print $FindScript; ?>">
 <div class="form">
 <input type="hidden" name="action" value="find">
-Jump to: <input type="text" name="find" size="20">
+
+<table cellspacing="0" cellpadding="0" border="0">
+<tr>
+<td>Jump to:&nbsp;</td>
+<td><input type="text" name="find" size="20"></td>
+</tr>
+
+<?php if ($args['headlink'] && $args['headlink'] != 'FrontPage' && $args['headlink'] != 'RecentChanges') { ?>
+<tr>
+<td></td>
+<td>
+<input type="checkbox" name="branch_search" value="<?php print htmlspecialchars($args['headlink']) ?>">
+<small>Full search through children of <b><?=$args['headlink']?></b></small>
+</td>
+</tr>
+<?php } ?>
+</table>
+
 </div>
 </form>
 

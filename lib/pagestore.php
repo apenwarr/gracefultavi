@@ -1,5 +1,5 @@
 <?php
-// $Id: pagestore.php,v 1.4 2001/12/14 20:48:08 smoonen Exp $
+// $Id: pagestore.php,v 1.1.1.2 2003/03/15 03:54:58 apenwarr Exp $
 
 require('lib/db.php');
 require('lib/page.php');
@@ -196,13 +196,33 @@ class PageStore
         return $tree;
     }
 
+    // Extracts all the nodes from an array of branches
+    function getNodesFromBranches($branches)
+    {
+        $nodesList = array();
+
+        foreach ($branches as $branch)
+        {
+            $nodes = split('/', $branch);
+
+            foreach ($nodes as $node)
+                if (!array_key_exists($node, $nodesList))
+                    $nodesList[] = $node;
+        }
+
+        $nodesList = array_unique($nodesList);
+
+        return $nodesList;
+    }
+
     // Return a tree structure according to parent/child relationships
     //
     // Initial value of the parameters:
     //   breadcrumb: root page of the tree
     //   findPage  : page to find
+    //   returnType: TREE or FLAT, return a tree or a flat array of the nodes
     //   i         : internal use for recursivity control, do not use when calling getTree
-    function getTree($breadcrumb, $findPage = '', $i = 0)
+    function getTree($breadcrumb, $findPage = '', $returnType = 'TREE', $i = 0)
     {
         static $branches;
 
@@ -226,12 +246,17 @@ class PageStore
                 else
                     foreach ($links as $link)
                         if ($link != $page)
-                            $this->getTree("$breadcrumb/$link", $findPage, $i + 1);
+                            $this->getTree("$breadcrumb/$link", $findPage, $returnType, $i + 1);
             }
 
         // Returns the tree at the end of the first entry in getTree
         if ($i == 0)
-            return $this->getTreeFromBranches($branches);
+        {
+            if ($returnType == 'TREE')
+                return $this->getTreeFromBranches($branches);
+            else
+                return $this->getNodesFromBranches($branches);
+        }
     }
 
     // Return a tree starting by the leafs, going up until rootPage, no parents
