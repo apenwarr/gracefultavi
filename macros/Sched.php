@@ -690,6 +690,8 @@ function sch_bug($feat, $task, $_orig, $_curr, $_elapsed, $done)
         return $ret;
     }
 
+    $task = htmlentities($task);
+
     if (!$done)
         $done = 0;
     else if ($done == -1)
