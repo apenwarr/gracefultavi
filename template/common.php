@@ -149,7 +149,9 @@ if (isset($args['quote']))
         foreach (explode("\n\n", $quotepage->text) as $line);
         $yada = $line;
         print '<div align="right"><span class="quote">';
-        print parseText($yada, $ParseEngine, $page);
+        $yada = parseText($yada, $ParseEngine, $page);
+        if (strtolower(substr($yada, 0, 3)) != '<p>') { $yada = '<p>' . $yada; }
+        print $yada;
         print '</span></div>';
     }
 }

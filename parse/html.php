@@ -247,7 +247,7 @@ function html_twin_x($whichwiki, $linktext, $ref)
   global $pagestore;
 
   return '<a href="' . $pagestore->interwiki($whichwiki) . $ref . '"' .
-         'title="See also: ' . $ref . ' in ' . $whichwiki . '">' .
+         ' title="See also: ' . $ref . ' in ' . $whichwiki . '">' .
          '<span class="twin"><em>' . $linktext . '</em></span></a>';
 }
 function html_category($time, $page, $host, $user, $comment, $version,
