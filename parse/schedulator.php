@@ -234,12 +234,41 @@ function bug_finish_user($user)
 }
 
 
+function sch_today()
+{
+    # we mostly use GMT for our work, but if they want today, they want
+    # the local "today"
+    $dat = strftime("%Y/%m/%d", time());
+    $today = sch_parse_day($dat);
+    #print("(today=$dat:$today/" . sch_format_day($today) . ")");
+    return $today;
+}
+
 function sch_parse_day($day)
 {
     if ($day == '')
         return 0;
     else if (preg_match(",(....)[/-](..)[/-](..),", $day, $a))
-	return mktime(0,0,0, $a[2], $a[3], $a[1])/24/60/60;
+    {
+	$year = $a[1];
+	$month = $a[2];
+	$day = $a[3];
+	
+	$stamp = mktime(0,0,12, $month, $day, $year);
+	$spl = localtime($stamp);
+	#print("(day-$year/$month/$day:$stamp:$spl[6])");
+	if ($spl[6] == 0)  # sunday
+	  $stamp += 24*60*60;
+	else if ($spl[6] == 6) # saturday
+	  $stamp += 2*24*60*60;
+	
+	$stamp -= 4*24*60*60; # the epoch was a Thursday.  Skip to Monday.
+	$days = floor($stamp/24/60/60);
+	$weeks = floor($days/7);
+	$days -= $weeks*7;
+	#printf("(days/weeks:$days/$weeks)");
+	return $weeks*5 + $days;
+    }
     else
     {
 	print("(INVALID DATE:'$day')");
@@ -251,7 +280,16 @@ function sch_format_day($day)
 {
     if (!$day)
       return '';
-    return strftime("%Y/%m/%d", $day*24*60*60);
+    
+    # convert working days to "real" days
+    $weeks = floor($day/5);
+    $days = $day - $weeks*5;
+    $frac = $days - floor($days);
+    $stamp = ($weeks*7 + $days) * 24*60*60;
+    $stamp += 4*24*60*60; # the epoch was a Thursday
+    $stamp += 12*60*60;   # php timezone handling is insane
+    
+    return strftime("%Y/%m/%d", $stamp);# . sprintf("+%.1f", $frac);
 }
 
 function sch_add_hours($day, $hours)
@@ -340,7 +378,7 @@ function sch_line($feat, $task, $orig, $curr, $elapsed, $remain, $done)
     $sch_curday = sch_add_hours($sch_curday, $curr);
     $due = sch_format_day($sch_curday);
     if ((!$curr || $remain) && !$done 
-	&& floor($sch_curday) < floor(time()/24/60/60))
+	&& floor($sch_curday) < floor(sch_today()))
       $due = "<font color=red>$due</font>";
     
     return sch_genline($feat, $task,
