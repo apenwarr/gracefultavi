@@ -77,7 +77,6 @@ function magic_quotes($text)
 class Macro_ChecklistMaster
 {
     var $page;
-    var $page;
     var $chklst_h;
     var $outdata = "";
     var $outdata_push = array();
