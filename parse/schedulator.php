@@ -424,7 +424,7 @@ function sch_milestone($descr, $name, $due)
     $newday = sch_parse_day($due);
     $xdue = sch_format_day($newday);
     $slip = ($newday-$sch_curday)*8 / $sch_load;
-    $ret .= sch_line("SLIPPAGE (to $xdue)", "", 0,0,0,$slip, 0);
+    $ret .= sch_line("SLIPPAGE (to $xdue)", "", 0,$slip,0,$slip, 0);
     $ret .= sch_line("<b>$descr: $name</b><br>&nbsp;", '', 0,0,0,0, 0);
     
     $sch_curday = $old_curday; # slippage doesn't actually take time... right?
