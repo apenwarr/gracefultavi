@@ -45,17 +45,34 @@ class PageStore
     {
         global $PgTbl;
 
-        $qid = $this->dbh->query("SELECT title, COUNT(*) AS c " .
-                                 "FROM $PgTbl " .
+        $qid = $this->dbh->query("SELECT title, username, version " .
+                                 "FROM wiki_pages " .
                                  "WHERE (unix_timestamp(sysdate()) - unix_timestamp(time)) < (7*24*60*60) " .
                                  "AND minoredit = 0 " .
-                                 "GROUP BY title " .
-                                 "HAVING c > 4");
+                                 "ORDER BY title, version");
 
         $list = array();
 
-        while(($result = $this->dbh->result($qid)))
-            $list[] = $result[0];
+        $lastTitle = '';
+        $lastUsername = '';
+        $count = 0;
+        while (($result = $this->dbh->result($qid)))
+        {
+            if ($result[0] != $lastTitle)
+            {
+                if ($count > 4) $list[] = $lastTitle;
+
+                $lastTitle = $result[0];
+                $lastUsername = '';
+                $count = 0;
+            }
+
+            if ($result[1] != $lastUsername)
+            {
+                $lastUsername = $result[1];
+                $count++;
+            }
+        }
 
         return $list;
     }
