@@ -714,7 +714,7 @@ function sch_extrabugs($user, $fixfor, $enddate, $only_done)
         $a = bug_unfinished_list($user, '', '');
         foreach ($a as $idx => $bug)
         {
-	    $bugix = array_shift($bug);
+	    $bugid = array_shift($bug);
             $elapsed += $bug[3];
             $sch_elapsed_subtract[$bugid] = $bug[3];
         }
