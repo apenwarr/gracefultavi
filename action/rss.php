@@ -37,7 +37,7 @@ function action_rss()
     $itemdesc = $itemdesc .
                 '    <item rdf:about="' . viewURL($pages[$i][1], $pages[$i][7]) . '">' . "\n" .
                 '        <title>' . $pages[$i][1] . '</title>' . "\n" .
-                '        <link>' . viewURL($pages[$i][1]) . '</link>' . "\n" .
+                '        <link>' . viewURL($pages[$i][1]) . '&amp;' . $pages[$i][7] . '</link>' . "\n" .
                 '        <description>' . $pages[$i][5] . '</description>' . "\n" .
                 '        <dc:date>' . html_gmtime($pages[$i][0]) . '</dc:date>' . "\n" .
                 '        <dc:contributor>' . "\n" .

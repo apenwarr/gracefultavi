@@ -12,7 +12,7 @@ function template_rss($args)
   global $ScriptBase, $WikiName, $MetaDescription, $InterWikiPrefix;
   global $Charset;
 
-  header('Content-type: text/plain');
+  header('Content-type: text/xml');
 ?>
 <?php print '<?xml '; ?>version="1.0" encoding="<?php print $Charset; ?>"?>
 <rdf:RDF
