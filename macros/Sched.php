@@ -573,7 +573,8 @@ function sch_make_magic_est($magic, $load)
 			   "MAGIC", "Time elapsed on unfinished bugs listed below", 
 			   /*fixfor - set later*/ -1,
 			   /*ixPersonAssignedTo*/ $sch_user->ix,
-			   /*my_user*/ $sch_user->username);
+			   /*my_user*/ $sch_user->username,
+			   /*manual_ix*/1);
     return $est;
 }
 
