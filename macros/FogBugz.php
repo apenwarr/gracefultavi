@@ -785,9 +785,11 @@ class FogTables
 	}
 	else
 	    $and_user = $and_useras = $and_userrb = "";
+	$and_dtresolved = "and dtResolved>'$start_date'"; 
  
 	$whichbugs = sql_simple("select ixTask from schedulator.Estimate " .
 				"    where 1 $and_user " .
+				"      $and_dtresolved " .
 				"      and fIsBug=1");
 	$whichbugs += sql_simple("select ixBug from Bug " .
 				 "    where 1 $and_useras " .
@@ -810,17 +812,18 @@ class FogTables
 	   "    $and_fixfor " .
 	   "  group by e.ixBug " .
 	   "  having 1 $and_userrb" .
-	   "    and dtResolved>'$start_date' ");
+	   "    $and_dtresolved ");
 	$resolved_tasks = sql_simple($q);
 	
 	$whichbugs += array_keys($resolved_tasks);
 	
 	$whichtasks = sql_simple("select ixTask from schedulator.Estimate " .
 				 "    where 1 $and_user " .
+				 "      $and_dtresolved " .
 				 "      and fIsBug=0");
 	$whichtasks += sql_simple("select ixXTask from schedulator.XTask " .
 				  "    where 1 $and_useras " .
-				  "     $and_fixfor");
+				  "      $and_fixfor");
 	$bugwhere = count($whichbugs) 
 	  ? " where ixBug in (" . join(",", $whichbugs) . ")"
 	  : " where 1=0";
@@ -833,7 +836,7 @@ class FogTables
 				  $this->project, $this->fixfor);
 	$this->xtask = new XTaskTable($taskwhere, $userix,
 				      $this->person, $this->fixfor);
-	$this->estimate = new EstimateTable("where 1 $and_user",
+	$this->estimate = new EstimateTable("where 1 $and_user $and_dtresolved",
 					    $userix,
 					    $this->person,
 					    $this->bug, $this->xtask);

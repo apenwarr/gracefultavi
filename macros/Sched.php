@@ -666,13 +666,13 @@ function sch_merge_cur_bugs($fixfor)
 function sch_change_loadfactor($load, $date)
 {
     global $sch_db;
-
+    //print "LOADFACTOR $load <br>\n";
     foreach ($sch_db->estimate->a as $i=>$e)
     {
 	if (sch_parse_day($e->get_resolvedate()) >= $date 
 	    || sch_parse_day($e->get_resolvedate()) == 0)
 	   $sch_db->estimate->a[$i]->loadfactor = $load;
-	//print sch_parse_day($e->task->resolvedate) . ">?$date -> " . 
+	//print sch_parse_day($e->get_resolvedate()) . ">?$date -> " . 
 	//$sch_db->estimate->a[$i]->loadfactor . "<br>\n";
     }
 }
