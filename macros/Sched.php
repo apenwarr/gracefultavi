@@ -1011,7 +1011,7 @@ function sch_has_inc_bug($milestone)
 // is the name of the current milestone, and extra_due is an array of extra
 // due dates that should be listed as they occur while the bugs are output.
 // extra_due will have any output extra due dates removed from it.
-function sch_output_buglist($buglist, $msname, $extra_due, $done)
+function sch_output_buglist($buglist, $msname, &$extra_due, $done)
 {
     global $sch_did_all_done, $sch_need_extraline;
     global $sch_curday;
