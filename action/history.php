@@ -8,6 +8,13 @@ require('lib/diff.php');
 require('template/history.php');  #require(TemplateDir . '/history.php');
 require('lib/headers.php');
 
+function timestampToSeconds($timestamp)
+{
+    return mktime(substr($timestamp, 8, 2),  substr($timestamp, 10, 2),
+                  substr($timestamp, 12, 2), substr($timestamp, 4, 2),
+                  substr($timestamp, 6, 2),  substr($timestamp, 0, 4));
+}
+
 // Display the known history of a page's edits.
 function action_history()
 {
@@ -18,32 +25,44 @@ function action_history()
 
   gen_headers($history[0][0]);
 
-  $text = '';
-  $latest_auth = '';
-  $previous_ver = 0;
 
-  if ($ver1)
-    $previous_ver = $ver1;
-  if ($ver2)
+  // If no Newer version is requested, the latest one will be used.
+  // If no Older version is requested, will find the next version that is
+  // either from a different author, or by the same author but more than
+  // 24 hours before the Newer version.
+  if (count($history) > 0)
   {
-    $latest_ver = $ver2;
-    $latest_auth = 'dummyvalue';
+    $latest_index = 0;
+    if ($ver2)
+      for ($i = 0; $i < count($history); $i++)
+        if ($history[$i][2] == $ver2)
+        {
+          $latest_index = $i;
+          break;
+        }
+    $latest_ver = $history[$latest_index][2];
+    $latest_author = ($history[$latest_index][3] == '' ? $history[$latest_index][1] : $history[$latest_index][3]);
+    $latest_timestamp = timestampToSeconds($history[$latest_index][0]);
+
+    if (!$previous_ver = $ver1)
+    {
+      $previous_ver = $history[count($history)-1][2];
+      for ($i = $latest_index; $i < count($history)-1; $i++)
+        if ( $latest_author != ($history[$i][3] == '' ? $history[$i][1] : $history[$i][3]) ||
+             ($latest_timestamp - timestampToSeconds($history[$i][0])) > 86400
+           )
+        {
+          $previous_ver = $history[$i][2];
+          break;
+        }
+    }
   }
+
+
+  $text = '';
 
   for($i = 0; $i < count($history); $i++)
   {
-    if($latest_auth == '')
-    {
-      $latest_auth = ($history[$i][3] == '' ? $history[$i][1]
-                                              : $history[$i][3]);
-      $latest_ver = $history[$i][2];
-    }
-
-    if($previous_ver == 0
-       && $latest_auth != ($history[$i][3] == '' ? $history[$i][1]
-                                                   : $history[$i][3]))
-      { $previous_ver = $history[$i][2]; }
-
     if($i < $HistMax || $full)
         $text = $text . html_history_entry($page, $history[$i][2],
                                            $history[$i][0], $history[$i][1],
