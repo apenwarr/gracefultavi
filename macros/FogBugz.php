@@ -221,9 +221,11 @@ class Bug
     var $elapsed;
     var $resolved_byme;
     var $my_user;
+    var $manual_ix;
     
     function Bug($a, $b, $c, $d, $e, $f, $g, $h,
-		 $i, $j, $k, $l, $m, $n, $o, $p, $q)
+		 $i, $j, $k, $l, $m, $n, $o, $p, $q,
+		 $_manual_ix=0)
     {
 	$this->ix = $a;
 	$this->open = $b;
@@ -242,6 +244,7 @@ class Bug
 	$this->resolvedate = $o;
 	$this->resolved_byme = $p;
 	$this->my_user = $q;
+	$this->manual_ix = $_manual_ix;
 	
 	if ($this->isresolved())
 	  $this->elapsed = $this->currest;
@@ -295,7 +298,9 @@ function bug_compare($a, $b)
 	      ? $a->resolvedate : "2099-09-09";
     $bres = (isset($b->resolved_byme) && $b->resolved_byme && $b->resolvedate)
 	      ? $b->resolvedate : "2099-09-09";
-    
+    $aix =  $a->manual_ix == 0 ? $a->ix : $a->manual_ix;
+    $bix =  $b->manual_ix == 0 ? $b->ix : $b->manual_ix;
+
     if ($fixcmp)
       return $fixcmp;
     else if ($ares != $bres)
@@ -303,7 +308,7 @@ function bug_compare($a, $b)
     else if ($a->get_priority() != $b->get_priority())
       return $a->get_priority() - $b->get_priority();
     else
-      return $a->ix - $b->ix;
+      return $aix - $bix;
 }
 
 
@@ -385,8 +390,10 @@ class XTask
     var $fixfor;
     var $assignto;
     var $my_user;
+    var $manual_ix;
     
-    function XTask($a, $b, $c, $d, $e, $f)
+    function XTask($a, $b, $c, $d, $e, $f, 
+		   $_manual_ix=0)
     {
 	$this->ix = $a;
 	$this->task = $b;
@@ -394,6 +401,7 @@ class XTask
 	$this->fixfor = $d;
 	$this->assignto = $e;
 	$this->my_user = $f;
+	$this->manual_ix = $_manual_ix;
     }
     
     function isdone()

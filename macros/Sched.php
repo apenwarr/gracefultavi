@@ -988,6 +988,7 @@ class Macro_Sched
 	global $sch_db;
 
 	static $current_load = 1.0;
+	static $sch_manual_ix = 0;
 
         // Turn this on to find undefined variables, but it'll whine about the
         // spectacular $notdef variable in FogBugz.php
@@ -1094,6 +1095,7 @@ class Macro_Sched
             $fixfor = '';
             $orig = $currest;
             if (!$elapsed) $elapsed = 0;
+	    $sch_manual_ix++;
 
             $estimate = new Estimate(/* fake - not in database */ 1,
                 $done, $bugid, 
@@ -1118,6 +1120,7 @@ class Macro_Sched
 		if ($elapsed != "") $estimate->task->elapsed = $elapsed;
 		
                 $estimate->isbug = 1;
+		$estimate->task->manual_ix = $sch_manual_ix;
                 $estimate->be_done = $done || $bug->isresolved();
                 $estimate->origest = $bug->origest;
                 if (!strcmp($estimate->currest,'')) 
@@ -1138,10 +1141,11 @@ class Macro_Sched
                 $open = ($elapsed != $currest);
                 $sch_db->xtask->max_ix++;
                 $estimate->task = new XTask(/*ix*/ $sch_db->xtask->max_ix, 
-                        $bugid, $task,
-                        /*fixfor - set later*/ -1,
-                        /*ixPersonAssignedTo*/ $sch_user->ix,
-                        /*my_user*/ $sch_user->username);
+					    $bugid, $task,
+					    /*fixfor - set later*/ -1,
+					    /*ixPersonAssignedTo*/ $sch_user->ix,
+					    /*my_user*/ $sch_user->username,
+					    /*manual_ix*/$sch_manual_ix);
             }
 
             if (!$done)
