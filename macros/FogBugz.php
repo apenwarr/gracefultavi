@@ -123,7 +123,7 @@ class FixFor
 {
     var $ix;
     var $name;
-    var $date;
+    var $bounce_date;
     var $deleted;
     var $project;
     var $release_date;
@@ -132,7 +132,7 @@ class FixFor
     {
 	$this->ix = $a;
 	$this->name = $b;
-	$this->date = $c ? $c : "2099-09-09"; // no due date? in the future...
+	$this->bounce_date = $c ? $c : "2099-09-09"; // no bounce date? in the future...
 	$this->deleted = $d;
 	$this->project = $e;
 	$this->release_date = $f ? $f : "2099-09-09"; // no release date? in the future...;
@@ -141,17 +141,19 @@ class FixFor
     // returns true if this is due before the fixfor $f.
     function due_before($f)
     {
-	return strcmp($this->date, $f->date) <= 0;
+	return strcmp($this->release_date, $f->release_date) <= 0;
     }
 }
 
 
-// php can't seem to handle it if this is a member function...
+// To sort releases by next bounce date rather than by the release date,
+// change this function to reference the bounce_date.
+// PHP can't seem to handle it if this is a member function...
 function fixfor_compare($a, $b)
 {
-    if ($a->date > $b->date)
+    if ($a->release_date > $b->release_date)
         return 1;
-    else if ($a->date < $b->date)
+    else if ($a->release_date < $b->release_date)
         return -1;
     else
         return strcmp($a->name, $b->name);
@@ -164,17 +166,18 @@ class FixForTable extends FogTable
     {
 	$p = array();
 	$res = bug_query
-	    ("SELECT ff.ixFixFor, ff.sFixFor, IFNULL(m.dtDue, ff.dt) date, " .
-	     "    ff.bDeleted, ff.ixProject, ff.dt " .
+	    ("SELECT ff.ixFixFor, ff.sFixFor, " . 
+             "    IFNULL(m.dtDue, ff.dt) bouncedate, " .
+	     "    ff.bDeleted, ff.ixProject, ff.dt releasedate " .
 	     "FROM FixFor ff " .
 	     "    LEFT OUTER JOIN schedulator.Milestone m " .
 	     "    ON ff.sFixFor=m.sMilestone AND m.nSub>0 " .
 	     "    AND m.dtDue>=now() " .
-	     "ORDER BY ff.ixFixFor, date");
+	     "ORDER BY ff.ixFixFor, bouncedate");
 	$old_ixFixFor = -1;
 	while ($r = mysql_fetch_row($res))
 	{
-	    // Only take the first date for each fixfor.
+	    // Only take the first bounce date for each fixfor.
 	    if ($old_ixFixFor != $r[0])
 	    {
 		$p[$r[0]] = new FixFor($r[0], $r[1], $r[2], $r[3],
@@ -192,7 +195,7 @@ class FixForTable extends FogTable
     {
 	foreach ($this->a as $f)
 	{
-	    if (!$date || strcmp($f->date, $date) <= 0)
+	    if (!$date || strcmp($f->release_date, $date) <= 0)
                 $match = $f;
 	    else
                 return $match; // passed the last one

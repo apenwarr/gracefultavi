@@ -608,7 +608,7 @@ function sch_create($user)
     $did_magic = false;
     foreach ($sch_db->estimate->a as $e)
     {
-	//print "Hello: (" . $e->task->name . ") (" . $e->task->fixfor->date . ")<br>\n";
+	//print "Hello: (" . $e->task->name . ") (" . $e->task->fixfor->bounce_date . ")<br>\n";
 	if (!$e->isdone() && !$did_magic)
         {
 	    $ret .= sch_bug(sch_make_magic_est($magic, $e->loadfactor));
