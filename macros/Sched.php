@@ -1260,7 +1260,7 @@ function sch_summary($fixfor)
     }
     
     $query = "select dtDue, sPerson, sTask, sSubTask, " .
-             "    fResolved, ixPriority " . 
+             "    fResolved, ixPriority, hrsCurrEst " . 
              "  from schedulator.Task " .
              "  where fValid=1 and sFixFor='$fixfor' and fDone=0 " .
              "  order by dtDue, ixPriority, sTask, sSubTask ";
@@ -1277,6 +1277,7 @@ function sch_summary($fixfor)
         $subtask = $row[3];
 	$resolved = $row[4];
 	$priority = $row[5];
+	$currest = $row[6];
 	
 	# $nicedue = ereg_replace("-", " ", $due);
 	$nicedue = ereg_replace("(....)-(..)-(..)", "\\3", $due);
@@ -1287,7 +1288,8 @@ function sch_summary($fixfor)
 	  ("task" => $task, 
 	   "subtask" => $subtask,
 	   "resolved" => $resolved,
-	   "priority" => $priority);
+	   "priority" => $priority,
+	   "currest" => $currest);
 	unset($allpeople[$person]);
     }
     
@@ -1459,10 +1461,13 @@ EOF;
 		    if ($isbug)
 		      $v .= "<a class='$bugclass' " .
 		            "href='http://nits/fogbugz3?$task' " . 
-		            "title='Bug $task: $subtask'>$pri</a> ";
+		            "title='Bug $task: $subtask'>$pri</a>";
 		    else
 		      $v .= "<span class='bugclass' " .
-		            "title=\"$task: $subtask\">$pri</span> ";
+		            "title=\"$task: $subtask\">$pri</span>";
+		    if (!$bug["currest"])
+		      $v .= "<sup>?</sup>";
+		    $v .= " ";
 		}
 	    }
 
