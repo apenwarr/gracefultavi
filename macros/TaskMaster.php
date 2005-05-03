@@ -45,13 +45,16 @@ class Macro_TaskMaster
 		   "</style>\n");
     }
     
-    function col($isheader, $text, $class = "")
+    # extra_opt lets you put extra attributes into the <tr>/<th> tag, such as
+    # the deprecated "nowrap" attribute which keeps the "Reopen" checkbox from
+    # making the page look totally disgusting.
+    function col($isheader, $text, $class = "", $extra_opt = "")
     {
 	$class = $class ? "class='$class'" : "";
 	if ($isheader)
-	  $this->out("<th $class>$text</th>");
+	  $this->out("<th $class $extra_opt>$text</th>");
 	else
-	  $this->out("<td $class>$text</td>");
+	  $this->out("<td $class $extra_opt>$text</td>");
     }
     
     // usage: row($nheaders, col, col, col, ...)
@@ -534,7 +537,7 @@ class Macro_TaskMaster
 	        $this->form_checkbox("done-$isbug-$taskid", "Done", 0);
 	    else
 	        $this->form_checkbox("reopen-$isbug-$taskid", "Reopen", 0);
-	    $this->col(0, $this->pop());
+	    $this->col(0, $this->pop(), "", "nowrap");
 	    $this->out("</tr>");
 	}
     }
