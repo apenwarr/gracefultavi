@@ -101,24 +101,24 @@ class Macro_TaskMaster
     
     function form_hidden($name, $value)
     {
-	$this->out("<input type='hidden' name='$name' value='$value' />");
+	$this->out("<input type='hidden' name='$name' value='$value' />\n");
     }
     
     function form_input($name, $value, $width = 10)
     {
 	$this->out("<input type='input' name='$name' " .
-		   " value='$value' size='$width' />");
+		   " value='$value' size='$width' />\n");
     }
     
     function form_button($name, $title)
     {
-	$this->out("<input type='submit' name='$name' value='$title' />");
+	$this->out("<input type='submit' name='$name' value='$title' />\n");
     }
     
     function form_checkbox($name, $content, $checked)
     {
 	$ch = $checked ? "checked" : "";
-	$this->out("<input type='checkbox' name='$name' $ch>$content</input>");
+	$this->out("<input type='checkbox' name='$name' $ch>$content</input>\n");
     }
     
     function form_select($name, $selectedid, $selected, $items)
@@ -141,7 +141,7 @@ class Macro_TaskMaster
 	if (!$did_sel)
 	  $this->out("<option value='$selectedid' selected='selected'>"
 		     . "$selected</option>");
-	$this->out("</select>");
+	$this->out("</select>\n");
     }
     
     function table($tabclass)
@@ -151,7 +151,7 @@ class Macro_TaskMaster
     
     function table_end()
     {
-	$this->out("</table>");
+	$this->out("</table>\n");
     }
     
     function form($use_post = 1)
@@ -163,7 +163,7 @@ class Macro_TaskMaster
     
     function form_end()
     {
-	$this->out("</form>");
+	$this->out("</form>\n");
     }
     
     function wild_merge($list, $wild)
@@ -196,23 +196,37 @@ class Macro_TaskMaster
 	return $this->wild_merge($fixfors, $wild);
     }
     
-    function do_filterbar($cantext, $cansubmit)
+    function add_filter_user_list()
+    {
+	$this->form_select("filter-user", $_REQUEST["filter-user"], "??",
+			   $this->list_users("--Any User--"));
+    }
+
+    function add_filter_fixfor_list()
+    {
+	$this->form_select("filter-fixfor", $_REQUEST["filter-fixfor"], "??",
+			   $this->list_fixfors("--Any FixFor--"));
+    }
+
+    function do_filterbar()
     {
 	# save settings in cookies for convenience
 	$this->savecookie("filter-user");
 	$this->savecookie("filter-fixfor");
 	$this->savecookie("filter-text");
+
+        $this->form(0);
 	
-	if ($cansubmit)
-	  $this->out("Filter: ");
-	if ($cantext)
-	  $this->form_input("filter-text", $_REQUEST["filter-text"]);
-	$this->form_select("filter-user", $_REQUEST["filter-user"], "??",
-			   $this->list_users("--Any User--"));
-	$this->form_select("filter-fixfor", $_REQUEST["filter-fixfor"], "??",
-			   $this->list_fixfors("--Any FixFor--"));
-	if ($cansubmit)
-	  $this->form_button("Filter", "Filter");
+        $this->out("Filter: ");
+        $this->form_input("filter-text", $_REQUEST["filter-text"]);
+
+        $this->add_filter_user_list();
+        $this->add_filter_fixfor_list();
+
+        $this->form_button("Filter", "Filter");
+
+        $this->form_end();
+
 	$this->out("<hr>");
     }
     
@@ -290,8 +304,10 @@ class Macro_TaskMaster
 	$this->mystyle();
 	
 	# filter bar
-	$this->do_filterbar(1, 1);
+	$this->do_filterbar();
 	
+	$this->form(1);
+
 	# command bar
 	$this->form_button("select-all", "Select All");
 	$this->form_button("unselect-all", "Unselect All");
@@ -348,6 +364,8 @@ class Macro_TaskMaster
 	$this->form_select("fixforto", $fixfor ? $fixfor : $fixforto, "??", 
 			   $this->list_fixfors("--Do Nothing--"));
 	$this->form_button("cmd", "Retarget");
+
+	$this->form_end();
     }
     
     function do_create_form()
@@ -355,8 +373,12 @@ class Macro_TaskMaster
 	$this->mystyle();
 	
 	$this->out("Assign to: ");
-	$this->do_filterbar(0, 0);
 	
+	$this->form(1);
+
+        $this->add_filter_user_list();
+        $this->add_filter_fixfor_list();
+
 	$this->table("table");
 	$this->row(2, "Task", "Subtask");
 	for ($i = 0; $i < 10; $i++)
@@ -382,6 +404,8 @@ class Macro_TaskMaster
 	$this->form_hidden("oldtestplan-bounce", $bounce);
 	$this->form_input("testplan-bounce", $bounce, 20);
 	$this->form_button("cmdTestPlans", "Create TestPlans");
+
+	$this->form_end();
     }
     
     function add_task($task, $subtask, $fixforix, $userix)
@@ -548,8 +572,9 @@ class Macro_TaskMaster
 	$user = $_REQUEST["filter-user"];
 	
 	$this->mystyle();
-	$this->do_filterbar(1, 1);
+	$this->do_filterbar();
 	
+	$this->form(1);
 	if ($user > 0)
 	{
 	    $this->out("<b>");
@@ -596,6 +621,7 @@ class Macro_TaskMaster
 	    $this->table_end();
 	    $this->form_button("Save", "Save");
 	}
+	$this->form_end();
     }
     
     // main gracefultavi entry point
@@ -627,7 +653,6 @@ class Macro_TaskMaster
 	$this->outdata = "";
 
 	$this->out("TaskMaster $words[0]");
-	$this->form(1);
         if ($words[0] == "ESTIMATE")
 	{
 	    $this->do_estimate_form();
@@ -656,7 +681,6 @@ class Macro_TaskMaster
 	    
 	    $this->do_assign_form($_REQUEST["new-user"]);
 	}
-	$this->form_end();
 	
 	return $this->outdata;
     }
