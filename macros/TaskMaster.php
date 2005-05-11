@@ -154,10 +154,10 @@ class Macro_TaskMaster
 	$this->out("</table>\n");
     }
     
-    function form($use_post = 1)
+    function form($use_post = 1, $name = "taskform")
     {
 	$method = $use_post ? "POST" : "GET";
-	$this->out("<form method='$method' name='taskform'>");
+	$this->out("<form method='$method' name='$name'>");
 	$this->form_hidden("page", $this->page);
     }
     
@@ -215,7 +215,7 @@ class Macro_TaskMaster
 	$this->savecookie("filter-fixfor");
 	$this->savecookie("filter-text");
 
-        $this->form(0);
+        $this->form(0, "filterform");
 	
         $this->out("Filter: ");
         $this->form_input("filter-text", $_REQUEST["filter-text"]);
