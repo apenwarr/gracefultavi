@@ -349,7 +349,7 @@ function sch_period($hours)
 
 function sch_fullline($text)
 {
-    return "<tr><td colspan=7>$text</td></tr>";
+    return "<tr><td colspan=8>$text</td></tr>";
 }
 
 
@@ -361,7 +361,7 @@ function sch_warning($text)
 }
 
 
-function sch_genline($task, $title, $orig, $curr, $elapsed, $left, $due)
+function sch_genline($pri, $task, $title, $orig, $curr, $elapsed, $left, $due)
 {
     $ret = "<tr>";
 
@@ -371,6 +371,11 @@ function sch_genline($task, $title, $orig, $curr, $elapsed, $left, $due)
         $junk1 = "<strike><font color=gray><i>";
         $junk2 = "</i></font></strike>";
     }
+
+    if ($pri)
+        $ret .= "<td>$junk1$pri$junk2</td>";
+    else
+        $ret .= "<td></td>";
 
     if ($title)
         $ret .= "<td>$junk1$task$junk2</td><td>$junk1$title$junk2</td>";
@@ -383,7 +388,7 @@ function sch_genline($task, $title, $orig, $curr, $elapsed, $left, $due)
 }
 
 
-function sch_line($task, $title, $orig, $curr, $elapsed, $remain, $done, 
+function sch_line($pri, $task, $title, $orig, $curr, $elapsed, $remain, $done, 
 		  $allow_red)
 {
     global $sch_curday, $sch_elapsed_curday;
@@ -409,7 +414,7 @@ function sch_line($task, $title, $orig, $curr, $elapsed, $remain, $done,
         && floor($sch_curday) < floor($today))
         $due = "<font color=red>$due</font>";
 
-    $ret .= sch_genline($task, $title,
+    $ret .= sch_genline($pri, $task, $title,
             sch_period($orig), sch_period($curr),
             sch_period($elapsed), $sremain,
             $due);
@@ -445,24 +450,32 @@ function sch_bug($estimate)
 
     $remain = $estimate->est_remain();
 
+    $pri = $estimate->task->get_priority();
+
     // update the time.
     // we need to update the time BEFORE we put out the line
     // All unfinished bugs have had their elapsed time already accounted for
     if ($estimate->isdone())
     {
         $sch_curday = sch_add_hours($sch_curday, $curr, $estimate->loadfactor);
-        $sch_elapsed_curday = sch_add_hours($sch_elapsed_curday, $elapsed, $estimate->loadfactor);
+        $sch_elapsed_curday = sch_add_hours($sch_elapsed_curday, $elapsed, 
+                $estimate->loadfactor);
+
+        // Don't display the priority of completed bugs, nobody cares.
+        $pri = 0;
     }
     else
     {
-        $sch_curday = sch_add_hours($sch_curday, $curr - $elapsed, $estimate->loadfactor);
+        $sch_curday = sch_add_hours($sch_curday, $curr - $elapsed, 
+                $estimate->loadfactor);
         //$ret .= sch_fullline("Ignoring $elapsed elapsed hours for bug $feat");
     }
 
     // FIXME: Estimate::isdone() only checks the Estimate's be_done flag;
     // maybe should make it also check its task's state
-    $ret .= sch_line($estimate->task->hyperlink(), $title, $orig, $curr, 
-		     $elapsed, $remain, $estimate->isdone(), true);
+    $ret .= sch_line($pri, $estimate->task->hyperlink(), 
+                     $title, $orig, $curr, $elapsed, $remain, 
+                     $estimate->isdone(), true);
 
 
     if ($estimate->isdone() && $curr != $elapsed)
@@ -512,7 +525,7 @@ function sch_milestone($descr, $name, $due, $load, $newline)
     $done = $newday < $today;
     // FIXME: If current day is past the milestone's release date, don't show
     // the "current" column in red.  See sch_period().
-    $ret .= sch_genline("<b>$descr: $name ($xdue)</b>", '',
+    $ret .= sch_genline(0, "<b>$descr: $name ($xdue)</b>", '',
                         '', sch_period($slip), '',
                         $done ? "done" : sch_period($slip),
                         '');
@@ -572,7 +585,8 @@ function sch_make_magic_est($magic, $load)
 			$sch_user->username, $load);
     $sch_db->xtask->max_ix++;
     $est->task = new XTask(/*ix*/ $sch_db->xtask->max_ix, 
-			   "MAGIC", "Time elapsed on unfinished bugs listed below", 
+			   "MAGIC", 
+                           "Time elapsed on unfinished bugs listed below", 
 			   /*fixfor - set later*/ -1,
 			   /*ixPersonAssignedTo*/ $sch_user->ix,
 			   /*my_user*/ $sch_user->username,
@@ -591,10 +605,10 @@ function sch_create($user)
     
     $ret .= "<table border=0 width='95%'>\n";
     $ret .= "<tr><th>" .
-    join("</th><th>", array("Task", "Subtask", "Orig", "Curr",
+    join("</th><th>", array("Pri", "Task", "Subtask", "Orig", "Curr",
          "Done", "Left", "Due")) .
          "</th></tr>\n";
-    $ret .= sch_line("START", "", 0,0,0,0,0, false);
+    $ret .= sch_line(0, "START", "", 0,0,0,0,0, false);
     if ($sch_start > sch_today())
         $ret .= sch_warning("START date is in the future!");
 
@@ -631,7 +645,7 @@ function sch_create($user)
     if (isset($old_fixfor))
         $ret .= sch_release_line($old_fixfor, $e, false);
 
-    $ret .= sch_line("END", "", 0,0,0,0,0, true);
+    $ret .= sch_line(0, "END", "", 0,0,0,0,0, true);
     $ret .= "</table>";
 
     return $ret;
