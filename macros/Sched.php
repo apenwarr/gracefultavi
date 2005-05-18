@@ -571,7 +571,7 @@ function sch_release_line($old_fixfor, $estimate, $newline)
 }
 
 
-function sch_make_magic_est($magic, $load)
+function sch_make_magic_est($load)
 {
     global $sch_bug;
 
@@ -628,7 +628,9 @@ function sch_create($user)
 	//print "Hello: (" . $e->task->name . ") (" . $e->task->fixfor->bounce_date . ")<br>\n";
 	if (!$e->isdone() && !$did_magic)
         {
-	    $ret .= sch_bug(sch_make_magic_est($magic, $e->loadfactor));
+            $magic = sch_make_magic_est($e->loadfactor);
+            if ($magic->elapsed > 0)
+                $ret .= sch_bug($magic);
             $did_magic = true;
         }
 
