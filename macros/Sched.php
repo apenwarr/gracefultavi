@@ -377,10 +377,13 @@ function sch_genline($pri, $task, $title, $orig, $curr, $elapsed, $left, $due)
     else
         $ret .= "<td></td>";
 
+    $ret .= "<td>$junk1$task$junk2</td>";
+
     if ($title)
-        $ret .= "<td>$junk1$task$junk2</td><td>$junk1$title$junk2</td>";
+        $ret .= "<td>$junk1$title$junk2</td>";
     else
-        $ret .= "<td colspan=2>$junk1$task$junk2</td>";
+        $ret .= "<td></td>";
+
     return $ret . "<td>$junk1" .
 	join("$junk2</td><td>$junk1",
 	     array($orig, $curr, $elapsed, $left, $due)) .
@@ -415,9 +418,9 @@ function sch_line($pri, $task, $title, $orig, $curr, $elapsed, $remain, $done,
         $due = "<font color=red>$due</font>";
 
     $ret .= sch_genline($pri, $task, $title,
-            sch_period($orig), sch_period($curr),
-            sch_period($elapsed), $sremain,
-            $due);
+                sch_period($orig), sch_period($curr),
+                sch_period($elapsed), $sremain,
+                $due);
     //$ret .= sch_fullline("gork: $was_over_elapsed $sch_elapsed_curday $sch_curday $today");
     if (!$was_over_elapsed && $sch_elapsed_curday - 4 > $today)
         $ret .= sch_warning("The START time, plus the time so far in your " .
@@ -525,7 +528,7 @@ function sch_milestone($descr, $name, $due, $load, $newline)
     $done = $newday < $today;
     // FIXME: If current day is past the milestone's release date, don't show
     // the "current" column in red.  See sch_period().
-    $ret .= sch_genline(0, "<b>$descr: $name ($xdue)</b>", '',
+    $ret .= sch_genline(0, "<b>$descr</b>", "<b>$name ($xdue)</b>", '',
                         '', sch_period($slip), '',
                         $done ? "done" : sch_period($slip),
                         '');
