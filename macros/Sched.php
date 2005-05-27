@@ -606,7 +606,7 @@ function sch_create($user)
     global $sch_db;
     $ret = "";
     
-    $ret .= "<table colstoggle='1' id='".rand()."' border=0 width='95%'>\n";
+    $ret .= "<table border=0 width='95%'>\n";
     $ret .= "<tr><th>" .
     join("</th><th>", array("Pri", "Task", "Subtask", "Orig", "Curr",
          "Done", "Left", "Due")) .
