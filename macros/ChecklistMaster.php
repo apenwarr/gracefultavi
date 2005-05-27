@@ -251,7 +251,7 @@ class Macro_ChecklistMaster
     {
         $id = $_REQUEST['id'] ? '&id=' . $_REQUEST['id'] : '';
         header('Location: ' . $_SERVER["PHP_SELF"] .
-               '?page=' . $_REQUEST['page'] .
+               '?page=' . rawurlencode($_REQUEST['page']) .
                '&' . $cmd . '=1' . $id);
         exit;
     }
@@ -1921,7 +1921,7 @@ CALENDAR_JAVASCRIPT;
         foreach ($url_params as $param => $value)
             $url .= "&$param=" . rawurlencode($value);
 
-        return $_SERVER["PHP_SELF"] . '?page=' . $_REQUEST['page'] . $url;
+        return $_SERVER["PHP_SELF"] . '?page=' . rawurlencode($_REQUEST['page']) . $url;
     }
 
     function show_hide_category_link($cat, $hide_cat)
@@ -2190,7 +2190,7 @@ CALENDAR_JAVASCRIPT;
         checklist_init();
         $this->chklst_h = $chklst_h;
 
-        $this->form($_SERVER["PHP_SELF"].'?page='.$_REQUEST['page'], 1);
+        $this->form($_SERVER["PHP_SELF"].'?page='.rawurlencode($_REQUEST['page']), 1);
         $this->form_hidden('id', '');
 
         if ($args)
