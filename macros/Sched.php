@@ -989,7 +989,7 @@ EOF;
 			$bugclass = "unresolved $priclass $dateclass2";
 		    if ($isbug)
 		      $v .= "<a class='$bugclass' " .
-		            "href='http://nits/fogbugz3?$task' " . 
+		            "href='http://eng/~fogbugz/?$task' " . 
 		            "title='Bug $task: $subtask'>$pri</a>";
 		    else
 		      $v .= "<span class='bugclass' " .
