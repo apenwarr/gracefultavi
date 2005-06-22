@@ -57,6 +57,7 @@ function action_history()
     else
         $diff_mode = 0;
 
+    // diff mode: 0 = regular diff, 1 = word diff
     if ($diff_mode == 1)
     {
         $diff = wdiff_compute($p1->read(), $p2->read());

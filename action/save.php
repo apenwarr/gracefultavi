@@ -3,6 +3,7 @@
 
 require('template/save.php');
 require('lib/category.php');
+require('lib/diff.php');
 require('parse/save.php');
 
 // Commit an edit to the database.
@@ -156,7 +157,24 @@ function action_save()
                        "letting you know that the page $page has changed!\n\n";
                 if ($minoredit) { $msg .= "This was a minor edit.\n\n"; }
                 $msg .= "View page: $ScriptBase?$page\n\n" .
-                        "History: $ScriptBase?action=history&page=$page";
+                        "History: $ScriptBase?action=history&page=$page\n\n";
+
+                // friendly diff
+                $history = $pagestore->history($page);
+                if (count($history) > 1) {
+                    $previous_ver = $history[1][2];
+                    $latest_ver = $history[0][2];
+
+                    $p1 = $pagestore->page($page);
+                    $p1->version = $previous_ver;
+
+                    $p2 = $pagestore->page($page);
+                    $p2->version = $latest_ver;
+
+                    $diff = diff_compute($p1->read(), $p2->read());
+                    $msg .= "Friendly diff:\n\n$diff";
+                }
+
                 mail($user . $EmailSuffix, "$WikiName: $page has changed",
                      $msg, "From: $Admin");
             }
