@@ -780,6 +780,8 @@ function sch_summary($fixfor, $unfixed_thres, $fixed_thres)
 
     $dates = array();
     $bugs = array();
+    $skipped = array();
+    $total_skipped = $total_unfixed = $total_fixed = 0;
     
     while ($row = mysql_fetch_row($result))
     {
@@ -793,12 +795,24 @@ function sch_summary($fixfor, $unfixed_thres, $fixed_thres)
 	
 	# $nicedue = ereg_replace("-", " ", $due);
 	$nicedue = ereg_replace("(....)-(..)-(..)", "\\3", $due);
+	
+	$important_unfixed = !$resolved && $priority <= $unfixed_thres;
+	$important_fixed = $resolved && $priority <= $fixed_thres;
+	if ($important_unfixed || $important_fixed)
+	{
+	    if ($important_unfixed) $total_unfixed++;
+	    if ($important_fixed)   $total_fixed++;
+	    $last_date = $due;
+	}
+	else
+	{
+	    $total_skipped++;
+	    $skipped[$person]++;
+	    continue;
+	}
+	
 	$dates[$due] = $nicedue;
 	
-	if (( $resolved && $priority <= $fixed_thres) ||
-	    (!$resolved && $priority <= $unfixed_thres))
-	    $last_date = $due;
-
 	$bugs[$person][$due][] = array
 	  ("task" => $task, 
 	   "subtask" => $subtask,
@@ -823,8 +837,9 @@ function sch_summary($fixfor, $unfixed_thres, $fixed_thres)
     $ret .= "<h1>Schedulator Summary for '$fixfor'</h1>\n";
     $ret .= "<p>Predicted Bounce: $last_date$next_str<br>\n";
     $ret .= "&nbsp;&nbsp;(Bounce goals: " .
-      "fix bugs up to priority $unfixed_thres; " .
-      "verify bugs up to priority $fixed_thres.)</p>\n";
+      "fix $total_unfixed bugs up to priority $unfixed_thres; " .
+      "verify $total_fixed bugs up to priority $fixed_thres; " .
+      "$total_skipped more bugs not shown.)</p>\n";
     
     $ret .= <<<EOF
       
@@ -950,9 +965,12 @@ EOF;
 	$schedname = strtoupper(substr($person, 0, 1)) 
 	  . substr($person, 1) . "Schedule";
 	
+	$skippy = "";
+	if ($skipped[$person])
+	    $skippy = " (+$skipped[$person])";
 	$ret .= "<tr><th class='person'>" .
 	  "<a href='index.php?$schedname' title=\"$person's schedulator\">" .
-	  "$person</a></th>";
+	  "$person</a>$skippy</th>";
 	foreach ($date_list as $due)
 	{
 	    $dateclass = sch_dateclass($due, $daystobounce);
