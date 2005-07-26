@@ -837,8 +837,8 @@ function sch_summary($fixfor, $unfixed_thres, $fixed_thres)
     $ret .= "<h1>Schedulator Summary for '$fixfor'</h1>\n";
     $ret .= "<p>Predicted Bounce: $last_date$next_str<br>\n";
     $ret .= "&nbsp;&nbsp;(Bounce goals: " .
-      "fix $total_unfixed bugs up to priority-$unfixed_thres; " .
-      "verify $total_fixed bugs up to priority-$fixed_thres; " .
+      "fix $total_unfixed bugs up to priority $unfixed_thres; " .
+      "verify $total_fixed bugs up to priority $fixed_thres; " .
       "+$total_skipped more bugs not shown.)</p>\n";
     
     $ret .= <<<EOF
