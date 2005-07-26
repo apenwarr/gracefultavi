@@ -839,7 +839,7 @@ function sch_summary($fixfor, $unfixed_thres, $fixed_thres)
     $ret .= "&nbsp;&nbsp;(Bounce goals: " .
       "fix $total_unfixed bugs up to priority-$unfixed_thres; " .
       "verify $total_fixed bugs up to priority-$fixed_thres; " .
-      "$total_skipped more bugs not shown.)</p>\n";
+      "+$total_skipped more bugs not shown.)</p>\n";
     
     $ret .= <<<EOF
       
