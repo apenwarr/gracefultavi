@@ -1030,8 +1030,17 @@ EOF;
     
     $ret .= "</table>\n";
     
-    $ret .= "<p><b>Done for this release:</b> " .
-      join(", ", array_values($allpeople)) .
+    $allpeople_annotate = array();
+    foreach ($allpeople as $person => $htmlperson)
+    {
+	if ($skipped[$person])
+	    $allpeople_annotate[$person] = "$htmlperson (+$skipped[$person])";
+	else
+	    $allpeople_annotate[$person] = "$htmlperson";
+    }
+    
+    $ret .= "<p><b>Done for this bounce:</b> " .
+      join(", ", array_values($allpeople_annotate)) .
       "</p>\n";
     
     return $ret;
