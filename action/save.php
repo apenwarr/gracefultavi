@@ -62,7 +62,7 @@ function action_save()
     {
         // if we're appending a quote, instead of a comment
         $quoteAuthor = trim($quoteAuthor);
-        if (isset($quoteAuthor))
+        if ($quoteAuthor != '')
         {
             // Add author to quote if author provided. Add a leading dash if
             // needed. See strpos help for information about "=== false".
