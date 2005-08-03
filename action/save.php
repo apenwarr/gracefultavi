@@ -2,6 +2,7 @@
 // $Id: save.php,v 1.7 2002/01/07 16:28:32 smoonen Exp $
 
 require('template/save.php');
+require('template/spamconfirm.php');
 require('lib/category.php');
 require('lib/diff.php');
 require('parse/save.php');
@@ -21,6 +22,26 @@ function action_save()
     // added for "Add a Quote" feature for AnnoyingQuote page
     if(isset($HTTP_POST_VARS['quoteAuthor'])) $quoteAuthor = $HTTP_POST_VARS['quoteAuthor'];
     if(isset($HTTP_POST_VARS['appendingQuote'])) $appendingQuote = $HTTP_POST_VARS['appendingQuote'];
+
+    // added for spam detection
+    if(isset($HTTP_POST_VARS['isnotspam'])) $isnotspam = $HTTP_POST_VARS['isnotspam'];
+
+    // spam detection
+    if (!$UserName && isset($appending) && !isset($isnotspam) && look_like_spam($quickadd))
+    {
+        if (get_magic_quotes_gpc())
+        {
+            if (isset($quickadd)) { $quickadd = stripslashes($quickadd); }
+            if (isset($quoteAuthor)) { $quoteAuthor = stripslashes($quoteAuthor); }
+        }
+
+        template_spamconfirm(array('page' => $page,
+                                   'quickadd' => $quickadd,
+                                   'comment' => $comment,
+                                   'appendingQuote' => $appendingQuote,
+                                   'quoteAuthor' => $quoteAuthor));
+        exit;
+    }
 
     if (empty($Save))                   // Didn't click the save button.
     {
