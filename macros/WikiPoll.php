@@ -29,7 +29,7 @@
 
 Table initialization:
 
-CREATE TABLE wiki_poll (
+CREATE TABLE <DATABASE_TABLE_PREFIX>poll (
   id      int(10) unsigned NOT NULL auto_increment,
   title   varchar(200) NOT NULL default '',
   author  varchar(80) NOT NULL default '',
@@ -50,6 +50,12 @@ class Macro_WikiPoll
     var $barwidth = 200;
     var $barheight = 20;
 
+    function Macro_WikiPoll()
+    {
+        global $DBTablePrefix;
+        $this->tblname = $DBTablePrefix . 'poll';
+    }
+
     function parse($args, $page)
     {
         global $HTTP_COOKIE_VARS, $pagestore, $UserName;
@@ -63,7 +69,8 @@ class Macro_WikiPoll
                 $vote_title = $this->quote($_POST['poll_title']);
 
                 // check if they have already voted.
-                $q1 = $pagestore->dbh->query("SELECT id FROM wiki_poll " .
+                $q1 = $pagestore->dbh->query("SELECT id " .
+                                             "FROM ".$this->tblname." " .
                                              "WHERE title='$vote_title' " .
                                              "AND author='$poll_user'");
                 $results = $pagestore->dbh->result($q1);
@@ -71,8 +78,8 @@ class Macro_WikiPoll
                 if (!$results) {
                     foreach ($_POST['poll_choice'] as $vote_choice) {
                         $vote_choice = $this->quote($vote_choice);
-                        $query = "INSERT INTO wiki_poll (title, author, " .
-                                 "choice) " .
+                        $query = "INSERT INTO ".$this->tblname." " .
+                                 "(title, author, choice) " .
                                  "VALUES ('$vote_title', '$poll_user', " .
                                  "'$vote_choice')";
                         $pagestore->dbh->query($query);
@@ -88,7 +95,7 @@ class Macro_WikiPoll
             if ($poll_user && $_GET['poll_title']) {
                 $vote_title = $this->quote($_GET['poll_title']);
 
-                $query = "DELETE FROM wiki_poll " .
+                $query = "DELETE FROM ".$this->tblname." " .
                          "WHERE title='$vote_title' " .
                          "AND author='$poll_user'";
                 $pagestore->dbh->query($query);
@@ -129,7 +136,8 @@ class Macro_WikiPoll
         if ($poll_user) {
             // check if they have already voted.
             $query_title = addslashes($poll_title);
-            $q1 = $pagestore->dbh->query("SELECT id FROM wiki_poll " .
+            $q1 = $pagestore->dbh->query("SELECT id " .
+                                         "FROM ".$this->tblname." " .
                                          "WHERE title='$query_title' " .
                                          "AND author='$poll_user'");
             $results = $pagestore->dbh->result($q1);
@@ -175,7 +183,7 @@ class Macro_WikiPoll
         }
         if ($show_results || !$show_vote_widgets) {
             $query = "SELECT author, choice " .
-                     "FROM wiki_poll " .
+                     "FROM ".$this->tblname." " .
                      "WHERE title='$query_title'";
             $q = $pagestore->dbh->query($query);
 
