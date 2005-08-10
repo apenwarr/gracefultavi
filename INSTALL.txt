@@ -3,8 +3,8 @@ Feedback
 
 Your feedback is welcome to help make these installation instructions more
 useful, understandable, and complete.  If you have any suggestions, criticisms,
-questions, or other comments, please go to http://open.nit.ca and go to
-GracefulTavi
+questions, or other comments, please visit the home of GracefulTavi on the Web:
+http://open.nit.ca/wiki/?GracefulTavi.
 
 
 GracefulTavi - Installation
