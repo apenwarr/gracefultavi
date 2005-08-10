@@ -187,7 +187,6 @@ TOOLTIP_JAVASCRIPT;
 
         }
 
-
         if (strtoupper(substr($args, 0, 5)) == 'START') {
 
             $this->start = true;
@@ -227,7 +226,7 @@ TOOLTIP_JAVASCRIPT;
                       'background-color: '.$this->color.';" '.$tooltip.'>'.
                       $this->label.'</span>';
 
-            // reset class for next PostIt
+            // reset class for next memo
             $this->lines = array();
             $this->color = '#ffc';
             $this->start = false;
