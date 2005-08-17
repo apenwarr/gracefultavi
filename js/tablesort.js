@@ -172,6 +172,7 @@ function ts_resortTable_do(id)
     //if (itm.match(/^[£$]/)) { sortfn = ts_sort_currency; }
     //if (itm.match(/^-|[\d\.]+( KB)?$/)) { sortfn = ts_sort_numeric; }
     if (itm.match(/^-?[\d]+ min$/)) { sortfn = ts_sort_numeric; }
+    if (itm.match(/^[\d]+\.[\d]+\.[\d]+\.[\d]+$/)) { sortfn = ts_sort_ipaddress; }
     SORT_COLUMN_INDEX = column;
     var firstRow = new Array();
     var newRows = new Array();
@@ -298,4 +299,19 @@ function ts_sort_default(a, b)
     if (aa == bb) { return 0; }
     if (aa < bb) { return -1; }
     return 1;
+}
+
+function getPseudoIp(ip)
+{
+    ip = ip.replace(/\b(\d)\b/g, '0$1');
+    ip = ip.replace(/\b(\d\d)\b/g, '0$1');
+    ip = ip.replace(/[.]/g, '');
+    return ip;
+}
+
+function ts_sort_ipaddress(a, b)
+{
+    var aa = getPseudoIp(ts_getInnerText(a.cells[SORT_COLUMN_INDEX]));
+    var bb = getPseudoIp(ts_getInnerText(b.cells[SORT_COLUMN_INDEX]));
+    return parseFloat(aa) - parseFloat(bb);
 }
