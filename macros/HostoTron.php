@@ -74,7 +74,7 @@ class Macro_HostoTron
             $ret = "";
             $total = 0;
             $url = "http://$words[1]";
-            $f = fopen($url, "r");
+            $f = @fopen($url, "r");
             if (!$f)
                 return "Can't get URL: ($url)\n";
 
