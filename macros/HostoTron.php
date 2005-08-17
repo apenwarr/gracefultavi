@@ -92,7 +92,7 @@ class Macro_HostoTron
                 if ($this->describe[$a[0]] != "")
                     $a[3] = $this->describe[$a[0]];
 
-                $a[6] = round(($now - $a[6])/60) . "min";
+                $a[6] = round(($now - $a[6])/60) . " min";
 
                 if ($this->reserve[$a[0]]
                     || ($a[5] == "OK" && substr($a[3],0,6)=="Shared"))
@@ -116,7 +116,7 @@ class Macro_HostoTron
                 $row = "<tr>$row</tr>\n";
                 $ret .= $row;
             }
-            $ret = "<table width=90%>$ret</table>";
+            $ret = "<table tablesort='1' width=90%>$ret</table>";
 
             $ret .= "<p>$total total hosts indexed.</p>";
             if ($f) fclose($f);

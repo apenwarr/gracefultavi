@@ -91,7 +91,8 @@ function template_common_prologue($args)
 {
     global $AdditionalHeader, $HomePage, $MetaDescription, $MetaKeywords, $page;
     global $pagestore, $ScriptBase, $SeparateHeaderWords, $SeparateTitleWords;
-    global $shortcutIcon, $StyleScript, $UserName, $WikiLogo, $WikiName;
+    global $shortcutIcon, $StyleScript, $TableSortScript, $UserName, $WikiLogo;
+    global $WikiName;
     // global $EmailSuffix, $EnableSubscriptions # for subscription button
 
     if ($SeparateTitleWords) { $args['title'] = html_split_name($args['title']); }
@@ -105,6 +106,7 @@ function template_common_prologue($args)
     <meta name="ROBOTS" content="NOINDEX, NOFOLLOW">
 <?php } ?>
 <link rel="STYLESHEET" href="<?php print $StyleScript; ?>" type="text/css">
+<script src="<?php print $TableSortScript; ?>" type="text/javascript"></script>
 <link rel="SHORTCUT ICON" href="<?=$shortcutIcon?>">
 <link rel="ALTERNATE" title="<?=htmlspecialchars($WikiName)?>" href="<?=$ScriptBase?>?action=rss" TYPE="application/rss+xml">
 <title><?php print $args['title'] . ' - ' . htmlspecialchars($WikiName); ?></title>

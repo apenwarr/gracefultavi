@@ -7,6 +7,7 @@
 // The new versions of the relevant functions should be defined in
 // config.php.  Those functions that are redefined will not be
 // redefined here.
+
 if(!isset($ViewBase))
   { $ViewBase    = $ScriptName . '?page='; }
 if(!isset($EditBase))
@@ -37,6 +38,8 @@ if(!isset($SubscriptionsScript))
   { $SubscriptionsScript = $ScriptName . '?action=subscriptions'; }
 if(!isset($ChildrenBase))
   { $ChildrenBase = $ScriptName . '?action=children&amp;page='; }
+if(!isset($TableSortScript))
+  { $TableSortScript = $ScriptName . '?action=js&file=tablesort'; }
 
 if(!function_exists('viewURL'))
 {

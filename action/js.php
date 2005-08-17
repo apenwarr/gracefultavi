@@ -10,4 +10,6 @@ function action_js()
         require('js/tabsort.js');
     else if ($HTTP_GET_VARS['file'] == "script")
         require('js/script.js');
+    else if ($HTTP_GET_VARS['file'] == "tablesort")
+        require('js/tablesort.js');
 }
