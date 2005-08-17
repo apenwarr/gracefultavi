@@ -69,6 +69,8 @@ class Macro_HostoTron
         }
         else if ($words[0] == "RUN")
         {
+            $hide_old_hosts = isset($_GET['hostotron_hide_old']);
+
             $ret = "";
             $total = 0;
             $url = "http://$words[1]";
@@ -83,7 +85,6 @@ class Macro_HostoTron
                     . "</th></tr>";
             while ($f && ($line = fgets($f)))
             {
-                $total++;
                 $row = "";
                 $a = split("\\|", $line);
 
@@ -92,7 +93,12 @@ class Macro_HostoTron
                 if ($this->describe[$a[0]] != "")
                     $a[3] = $this->describe[$a[0]];
 
-                $a[6] = round(($now - $a[6])/60) . " min";
+                $a[6] = round(($now - $a[6])/60);
+                if ($hide_old_hosts && $a[6] > 60)
+                {
+                    continue;
+                }
+                $a[6] .= " min";
 
                 if ($this->reserve[$a[0]]
                     || ($a[5] == "OK" && substr($a[3],0,6)=="Shared"))
@@ -103,6 +109,8 @@ class Macro_HostoTron
                 }
                 else
                     $a[8] = "-";
+
+                $total++;
 
                 foreach ($a as $key => $val)
                 {
@@ -117,6 +125,11 @@ class Macro_HostoTron
                 $ret .= $row;
             }
             $ret = "<table tablesort='1' width=90%>$ret</table>";
+
+            $link = '<p><a href="?page='.rawurlencode($page).
+                    ($hide_old_hosts ? '' : '&hostotron_hide_old=1').'">'.
+                    ($hide_old_hosts ? 'Show' : 'Hide').' old hosts</a></p>';
+            $ret = $link . $ret;
 
             $ret .= "<p>$total total hosts indexed.</p>";
             if ($f) fclose($f);
