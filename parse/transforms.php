@@ -697,8 +697,12 @@ function entity_list($type, $fn)
     { return new_entity(array('bullet_list_' . $fn)); }
   else if($type == ':' || $type == ';')
     { return new_entity(array('indent_list_' . $fn)); }
-  else if($type == '#' || $type == INDENTS_TYPE_A || $type == INDENTS_TYPE_I)
+  else if($type == '#')
     { return new_entity(array('numbered_list_' . $fn)); }
+  else if($type == INDENTS_TYPE_A)
+    { return new_entity(array('numbered_list_a_' . $fn)); }
+  else if($type == INDENTS_TYPE_I)
+    { return new_entity(array('numbered_list_i_' . $fn)); }
   else if($type == '>')
     { return new_entity(array('cite_list_' . $fn)); }
 }
@@ -709,12 +713,8 @@ function entity_listitem($type, $fn)
     { return new_entity(array('bullet_item_' . $fn)); }
   else if($type == ':' || $type == ';')
     { return new_entity(array('indent_item_' . $fn)); }
-  else if($type == '#')
+  else if($type == '#' || $type == INDENTS_TYPE_A  || $type == INDENTS_TYPE_I)
     { return new_entity(array('numbered_item_' . $fn)); }
-  else if ($type == INDENTS_TYPE_A)
-    { return new_entity(array('numbered_item_a_' . $fn)); }
-  else if ($type == INDENTS_TYPE_I)
-    { return new_entity(array('numbered_item_i_' . $fn)); }
   else if($type == '>')
     { return new_entity(array('cite_item_' . $fn)); }
 }

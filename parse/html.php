@@ -46,17 +46,17 @@ function html_ol_start()
   { return '<ol>'; }
 function html_ol_end()
   { return "</ol>\n"; }
+function html_ol_a_start()
+  { return '<ol type="a">'; }
+function html_ol_a_end()
+  { return "</ol>\n"; }
+function html_ol_i_start()
+  { return '<ol type="i">'; }
+function html_ol_i_end()
+  { return "</ol>\n"; }
 function html_li_start()
   { return '<li>'; }
 function html_li_end()
-  { return "</li>\n"; }
-function html_li_a_start()
-  { return '<li type="a">'; }
-function html_li_a_end()
-  { return "</li>\n"; }
-function html_li_i_start()
-  { return '<li type="i">'; }
-function html_li_i_end()
   { return "</li>\n"; }
 function html_dl_start()
   { return '<dl>'; }
