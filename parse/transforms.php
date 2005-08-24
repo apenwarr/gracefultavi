@@ -1,12 +1,13 @@
 <?php
-// $Id: transforms.php,v 1.1.1.1 2003/03/15 03:53:58 apenwarr Exp $
-
 // The main parser components.  Each of these takes a line of text and scans it
 //   for particular wiki markup.  It converts markup elements to
 //   $FlgChr . x . $FlgChr, where x is an index into the global array $Entity,
 //   which contains descriptions of each markup entity.  Later, these will be
 //   converted back into HTML  (or, in the future, perhaps some other
 //   representation such as XML).
+
+define('INDENTS_TYPE_A', chr(182));
+define('INDENTS_TYPE_I', chr(187));
 
 function parse_noop($text)
 {
@@ -517,8 +518,13 @@ function parse_indents($text)
     // Indentation increase of more than on level will be corrected to only one.
     $auto_fix_indent_leap = 1;
 
-    // Fix notation for ordered list, changes '[0-9].' to '#'
+    // Fix notation for ordered list, changes:
+    //  - '[0-9].' to '#'
+    //  - '[a-z].' to INDENTS_TYPE_A, i.e. ascii 182 (266 in octal)
+    //  - 'ii.' to INDENTS_TYPE_I, i.e. ascii 187 (273 in octal)
     $text = preg_replace('/^(\s*)[0-9]{1,2}\.(.+\\n?$)/', '\\1#\\2', $text);
+    $text = preg_replace('/^(\s*)[a-z]\.(.+\\n?$)/', '\\1'.INDENTS_TYPE_A.'\\2', $text);
+    $text = preg_replace('/^(\s*)ii\.(.+\\n?$)/', '\\1'.INDENTS_TYPE_I.'\\2', $text);
 
     // Fix notation for citation
     $cite_pattern = '^(\s*>)+';
@@ -533,7 +539,7 @@ function parse_indents($text)
     }
 
     // Locate the indent prefix characters.
-    $matched = preg_match('/^(\s*)([:\\-\\*#>])([^:\\-\\*#>].*\\n?)$/', $text, $result);
+    $matched = preg_match('/^(\s*)([:\\-\\*#>\266\273])([^:\\-\\*#>].*\\n?)$/', $text, $result);
     if (!$matched) {
         preg_match('/^(\s*)(:)(-.*\\n?)$/', $text, $result);
     }
@@ -691,7 +697,7 @@ function entity_list($type, $fn)
     { return new_entity(array('bullet_list_' . $fn)); }
   else if($type == ':' || $type == ';')
     { return new_entity(array('indent_list_' . $fn)); }
-  else if($type == '#')
+  else if($type == '#' || $type == INDENTS_TYPE_A || $type == INDENTS_TYPE_I)
     { return new_entity(array('numbered_list_' . $fn)); }
   else if($type == '>')
     { return new_entity(array('cite_list_' . $fn)); }
@@ -705,6 +711,10 @@ function entity_listitem($type, $fn)
     { return new_entity(array('indent_item_' . $fn)); }
   else if($type == '#')
     { return new_entity(array('numbered_item_' . $fn)); }
+  else if ($type == INDENTS_TYPE_A)
+    { return new_entity(array('numbered_item_a_' . $fn)); }
+  else if ($type == INDENTS_TYPE_I)
+    { return new_entity(array('numbered_item_i_' . $fn)); }
   else if($type == '>')
     { return new_entity(array('cite_item_' . $fn)); }
 }
