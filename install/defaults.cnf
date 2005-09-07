@@ -13,7 +13,8 @@ $UrlPtn  = "(http:|mailto:|https:|ftp:|gopher:|news:)" .
 //   Note that changing this requires a change to parse/transforms.php so
 //   that parse_interwiki knows how many parentheses are in $InterwikiPtn.
 $InterwikiPtn = "([A-Za-z0-9]+):" .
-                "(([^ \\/\"\'<>\|]*\\/)*[^ \\t\\n\\/\"\'<>\|]*[\\/=&~A-Za-z0-9])";
+                "(([^ \\/\"\'<>\|\\$FlgChr]*\\/)*" .
+                "[^ \\t\\n\\/\"\'<>\|\\$FlgChr]*[\\/=&~A-Za-z0-9])";
 
 // $ParseEngine indicates what parsing rules will be run when displaying a
 //   wiki page.  To disable a particular rule, you can place a comment at the

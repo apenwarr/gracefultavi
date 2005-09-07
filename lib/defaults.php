@@ -34,7 +34,8 @@ $UrlPtn  = "(http:|mailto:|https:|ftp:|gopher:|news:)" .
 //   Note that changing this requires a change to parse/transforms.php so
 //   that parse_interwiki knows how many parentheses are in $InterwikiPtn.
 $InterwikiPtn = "([A-Za-z0-9]+):" .
-                "(([^ \\/\"\']*\\/)*[^ \\t\\n\\/\"\']*[\\/=&~A-Za-z0-9])";
+                "(([^ \\/\"\']*\\/\\$FlgChr)*" .
+                "[^ \\t\\n\\/\"\'\\$FlgChr]*[\\/=&~A-Za-z0-9])";
 
 // !!!WARNING!!!
 // If $AdminEnabled is set to 1, the script admin/index.php will be accessible.
