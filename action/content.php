@@ -1,5 +1,4 @@
 <?php
-// $Id: content.php,v 1.1.1.1 2003/03/15 03:53:58 apenwarr Exp $
 
 require_once('template/tree.php');
 require('parse/html.php');
@@ -18,7 +17,6 @@ function getAllNodesNames($tree, $i = 0)
 
     if ($i == 0) return $names;
 }
-
 
 // Display all nodes.
 function action_content()
@@ -43,7 +41,7 @@ function action_content()
 
     if (count($tree))
         $drawOutside = 1;
-        
+
     if (count($otherPages))
         $drawOther = 1;
 

@@ -1,4 +1,5 @@
 <?php
+
 require('template/subscribe.php');
 
 // Toggle page subscription for a user

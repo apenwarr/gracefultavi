@@ -1,10 +1,11 @@
 <?php
-// The main parser components.  Each of these takes a line of text and scans it
-//   for particular wiki markup.  It converts markup elements to
-//   $FlgChr . x . $FlgChr, where x is an index into the global array $Entity,
-//   which contains descriptions of each markup entity.  Later, these will be
-//   converted back into HTML  (or, in the future, perhaps some other
-//   representation such as XML).
+
+// The main parser components. Each of these takes a line of text and scans it
+// for particular wiki markup. It converts markup elements to
+// $FlgChr . x . $FlgChr, where x is an index into the global array $Entity,
+// which contains descriptions of each markup entity. Later, these will be
+// converted back into HTML (or, in the future, perhaps some other
+// representation such as XML).
 
 define('INDENTS_TYPE_A', chr(182));
 define('INDENTS_TYPE_I', chr(187));
@@ -111,18 +112,6 @@ function parse_freelink($text, $validate = 0)
 
     return $text;
   }
-
-/*
-  // Old version
-  if($validate)
-    $ptn = "/\\[([-A-Za-z0-9 _+\\/.,']+)(())()\\]/e";
-  else
-    $ptn = "/\\[([-A-Za-z0-9 _+\\/.,']+)((\|[-A-Za-z0-9 _+\\/.,']+)?)((\#[-A-Za-z0-9]+)?)\\]/e";
-
-  return preg_replace($ptn,
-                      "freelink_token(q1('\\1'), q1('\\3'), '\\5', '')",
-                      $text, -1);
-*/
 }
 
 function freelink_token($link, $appearance, $anchor, $anchor_appearance)
@@ -213,11 +202,6 @@ function parse_hyperlink_ref($text)
 function parse_hyperlink_description($text)
 {
   global $UrlPtn;
-
-/* Urls enclosed between brackets
-  return preg_replace("/\\[($UrlPtn) ([^]]+)]/e",
-                      "url_token(q1('\\1'), q1('[\\4]'))", $text, -1);
-*/
 
   return preg_replace("/\\[($UrlPtn) ([^]]+)]/e",
                       "url_token(q1('\\1'), q1('\\4'))", $text, -1);
@@ -380,9 +364,6 @@ function parse_newline($text)
         return "<p>$text";
     else
         return $text;
-
-//    return preg_replace("/\\n(\\r)?/e", "new_entity(array('newline'))",
-//                        $text, -1);
 }
 
 function parse_horiz($text)
@@ -770,13 +751,6 @@ function parse_diff_skip($text)
 {
   static $skipFirstHr = 1;
 
-/*
-  if(preg_match('/^---/', $text))
-    { return ''; }
-  if(preg_match('/^\+\+\+/', $text))
-    { return ''; }
-*/
-
   if(preg_match('/^@@[\s-\+\d,]+@@/', $text))
   {
     if ($skipFirstHr)
@@ -797,14 +771,6 @@ function parse_diff_skip($text)
 function parse_diff_color($text)
 {
   static $in_old = 0, $in_new = 0;
-
-/*
-  $this_old = ($text[0] == '<');
-  $this_new = ($text[0] == '>');
-
-  if($this_old || $this_new)
-    { $text = substr($text, 2); }
-*/
 
   $this_old = ($text[0] == '-');
   $this_new = ($text[0] == '+');
@@ -919,9 +885,6 @@ function parse_table($text)
   if($pre != '')
   {
     $text = new_entity(array('raw', $pre)) . parse_newline($text);
-
-    // Old version
-    // $text = new_entity(array('raw', $pre)) . $text;
   }
 
   if($post != '')

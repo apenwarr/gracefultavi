@@ -1,5 +1,4 @@
 <?php
-// $Id: macro.php,v 1.3 2001/11/30 07:49:32 toph Exp $
 
 require('parse/macros.php');
 require('parse/html.php');

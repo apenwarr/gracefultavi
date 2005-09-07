@@ -1,5 +1,4 @@
 <?php
-// $Id: rate.php,v 1.3 2001/11/30 22:10:15 toph Exp $
 
 // Perform a lookup on an IP addresses edit-rate.
 function rateCheck($db, $type)

@@ -1,11 +1,10 @@
 <?php
-// $Id: pagestore.php,v 1.3 2003/04/01 18:32:36 mich Exp $
 
 require('lib/db.php');
 require('lib/page.php');
 
-// Abstractor for the page database.  Note that page.php contains the actual
-//   code to read/write pages; this serves more general query functions.
+// Abstractor for the page database. Note that page.php contains the actual code
+// to read/write pages; this serves more general query functions.
 class PageStore
 {
     var $dbh;

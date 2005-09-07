@@ -1,10 +1,9 @@
 <?php
-// $Id: view.php,v 1.7 2002/01/07 16:28:32 smoonen Exp $
 
 require('parse/main.php');
 require('parse/macros.php');
 require('parse/html.php');
-require('template/view.php'); // require(TemplateDir . '/view.php');
+require('template/view.php');
 require('lib/headers.php');
 
 // Parse and display a page.

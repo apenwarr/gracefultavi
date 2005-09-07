@@ -1,4 +1,5 @@
 <?php
+
 function action_imgbar(){
     $w = $_GET{'width'};
     $h = $_GET{'height'};

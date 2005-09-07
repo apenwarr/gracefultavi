@@ -1,8 +1,6 @@
 <?php
-// $Id: admin.php,v 1.10 2002/01/10 01:31:04 smoonen Exp $
 
 require_once('template/common.php');
-#require_once(TemplateDir . '/common.php');
 
 // The admin template is passed an associative array with the following
 // elements:

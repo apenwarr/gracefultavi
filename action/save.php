@@ -1,5 +1,4 @@
 <?php
-// $Id: save.php,v 1.7 2002/01/07 16:28:32 smoonen Exp $
 
 require('template/save.php');
 require('template/spamconfirm.php');

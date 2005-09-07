@@ -1,8 +1,6 @@
 <?php
-// $Id: preview.php,v 1.7 2002/01/07 16:28:32 smoonen Exp $
 
 require('template/preview.php');
-#require(TemplateDir . '/preview.php');
 
 // Preview what a page will look like when it is saved.
 function action_preview()

@@ -1,5 +1,4 @@
 <?php
-// $Id: init.php,v 1.8 2002/01/03 21:46:23 smoonen Exp $
 
 // General initialization code.
 
@@ -31,7 +30,6 @@ $db = $pagestore->dbh;
 $Entity = array();                      // Global parser entity list.
 
 // Strip slashes from incoming variables.
-
 if(get_magic_quotes_gpc())
 {
   if(isset($document)) $document = stripslashes($document);
@@ -46,23 +44,8 @@ if(isset($_SERVER["PHP_AUTH_USER"]))
 else if(isset($_SERVER["REMOTE_USER"]))
     $UserName = $_SERVER["REMOTE_USER"];
 
-/*
-$userinfo = posix_getpwnam($UserName);
-
-//$gecos = $userinfo['gecos'];
-//$UserName = str_replace(" ", "", $gecos);
-//list($UserName) = split(',', $UserName); // to eliminate any trailing commas
-$UserName = $userinfo['name'];
-$UserName = str_replace(" ", "", $UserName);
-*/
-
 // Read user preferences from cookie.
-
-//$UserInfo = posix_getpwnam($PHP_AUTH_USER);
-//    { $UserName = urldecode($result[1]); }
-
 if(isset($HTTP_COOKIE_VARS[$CookieName])) $prefstr = $HTTP_COOKIE_VARS[$CookieName];
-//$prefstr='';
 
 if(!empty($prefstr))
 {
@@ -70,11 +53,6 @@ if(!empty($prefstr))
     { $EditRows = $result[1]; }
   if(ereg("cols=([[:digit:]]+)", $prefstr, $result))
     { $EditCols = $result[1]; }
-/*  if(ereg("user=([^&]*)", $prefstr, $result))
-    { $UserName = $_SERVER["PHP_AUTH_USER"];
-      $userinfo = posix_getpwnam($UserName);
-      $gecos = $userinfo['gecos'];
-      $UserName = str_replace(" ", "", $gecos);}*/
   if(ereg("days=([[:digit:]]+)", $prefstr, $result))
     { $DayLimit = $result[1]; }
   if(ereg("auth=([[:digit:]]+)", $prefstr, $result))
@@ -93,7 +71,6 @@ if($Charset != '')
   { header("Content-Type: text/html; charset=$Charset"); }
 
 $ViewMacroEngine=array();
-//$SaveMacroEngine=array();
 
 if(!$WorkingDirectory) $WorkingDirectory = ".";
 
@@ -111,17 +88,12 @@ if($dir=opendir("$WorkingDirectory/macros"))
                eval("\$ViewMacroEngine['$name']=new Macro_$name;");
                if(isset($ViewMacroEngine[$name]->trigger))
                {
-                  // Macro has an alternate trigger defined, use that 
+                  // Macro has an alternate trigger defined, use that
                   // instead of the macro name.
-
                   $ViewMacroEngine[$ViewMacroEngine[$name]->trigger]=$ViewMacroEngine[$pieces[0]];
                   $name=$ViewMacroEngine[$name]->trigger;
                   unset($ViewMacroEngine[$pieces[0]]);
                }
-               //if(method_exists($ViewMacroEngine[$name], "save"))
-               //{
-               //   array_push($SaveMacroEngine, $name);
-               //}
            }
         }
     }

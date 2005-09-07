@@ -1,5 +1,4 @@
 <?php
-// $Id: save.php,v 1.4 2002/01/03 16:33:26 smoonen Exp $
 
 // Macros for on-save features.
 

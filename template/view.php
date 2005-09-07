@@ -1,8 +1,6 @@
 <?php
-// $Id: view.php,v 1.9 2002/01/10 01:31:04 smoonen Exp $
 
 require_once('template/common.php');
-#require_once(TemplateDir . '/common.php');
 
 // The view template is passed an associative array with the following
 // elements:
@@ -40,8 +38,8 @@ function template_view($args)
 <div id="body" class="content">
 <?php
 print $args['html'];
-// Aligns the browser with an HTML anchor, showing the last added comment (or quote)
-// See: action/save.php, template/save.php, template/view.php
+// Aligns the browser with an HTML anchor, showing the last added comment (or
+// quote). See: action/save.php, template/save.php, template/view.php.
 ?>
 
 <a name="pageContentBottom">

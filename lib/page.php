@@ -1,5 +1,4 @@
 <?php
-// $Id: page.php,v 1.3 2001/11/30 22:10:15 toph Exp $
 
 // Abstractor to read and write wiki pages.
 class WikiPage

@@ -1,5 +1,4 @@
 <?php
-// $Id: rss.php,v 1.3 2002/01/15 16:45:33 smoonen Exp $
 
 // The RSS template is passed an associative array with the following
 // elements:

@@ -42,20 +42,6 @@ function toolbar($page, $args)
                     backlinksURL($args['headlink']) : '';
     toolbar_button($backlinks_url, 'Backlinks',
         $args['button_selected']=='backlinks');
-
-    // subscribe / unsubscribe
-    /*
-    if ($EnableSubscriptions && isset($EmailSuffix) && $UserName != '') {
-        $pg = $pagestore->page($page);
-        if ($pg->isSubscribed($UserName))
-            $subscription_label = 'Unsubscribe';
-        else
-            $subscription_label = 'Subscribe';
-        $subscription_url = $args['headlink'] ?
-            pageSubscribeURL($args['headlink']) : '';
-        toolbar_button($subscription_url, $subscription_label);
-    }
-    */
 }
 
 
@@ -93,7 +79,6 @@ function template_common_prologue($args)
     global $pagestore, $ScriptBase, $SeparateHeaderWords, $SeparateTitleWords;
     global $shortcutIcon, $StyleScript, $TableSortScript, $UserName, $WikiLogo;
     global $WikiName;
-    // global $EmailSuffix, $EnableSubscriptions # for subscription button
 
     if ($SeparateTitleWords) { $args['title'] = html_split_name($args['title']); }
 ?>
@@ -149,7 +134,6 @@ if ($args['headlink'] != '')
 if (count($twin = $pagestore->twinpages($args['headlink'])))
 {
     // point at the sisterwiki's version
-    //print "See also:";
     print "<sup>";
     foreach ($twin as $site)
       { print " " . html_twin($site[0], $site[1]); }

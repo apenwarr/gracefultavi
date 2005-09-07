@@ -1,5 +1,4 @@
 <?php
-// $Id: history.php,v 1.6 2002/01/07 16:28:32 smoonen Exp $
 
 require('parse/main.php');
 require('parse/macros.php');

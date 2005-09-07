@@ -1,11 +1,11 @@
 <?php
-// $Id: html.php,v 1.2 2003/04/21 18:20:58 mich Exp $
 
-// These functions take wiki entities like 'bold_begin' or 'ref' and return
-//   HTML representing these entities.  They are used throught this script
-//   to generate appropriate HTML.  Together with the template scripts, they
-//   constitue the sole generators of HTML in this script, and are thus the
-//   sole means of customizing appearance.
+// These functions take wiki entities like 'bold_begin' or 'ref' and return HTML
+// representing these entities. They are used throught this script to generate
+// appropriate HTML. Together with the template scripts, they constitue the sole
+// generators of HTML in this script, and are thus the sole means of customizing
+// appearance.
+
 function html_bold_start()
   { return '<strong>'; }
 function html_bold_end()
@@ -275,15 +275,6 @@ function html_category($time, $page, $host, $user, $comment, $version,
   $text = '(' . html_timestamp($time) . ') (' .
           '<a href="' . historyURL($page) . '">history</a>) ' .
           html_ref($page, $page, '', "&$version");
-
-  /*
-  // Skip this.  Why should twin pages show up in RecentChanges?
-  if(count($twin = $pagestore->twinpages($page)))
-  {
-    foreach($twin as $site)
-      { $text = $text . ' ' . html_twin($site[0], $site[1]); }
-  }
-  */
 
   if (in_array($page, $newPages))
     $text .= '<img src="images/new.png" alt="New!" title="New!" width="28" height="11" border="0">';

@@ -1,8 +1,7 @@
 <?php
-// $Id: find.php,v 1.3 2003/04/01 01:31:59 mich Exp $
 
 require('parse/html.php');
-require('template/find.php'); // require(TemplateDir . '/find.php');
+require('template/find.php');
 
 function emptyElement($var)
 {

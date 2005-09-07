@@ -906,8 +906,6 @@ class BlockDiffFormatter extends DiffFormatter
 
 /**
  $Log: difflib.php,v $
- Revision 1.1  2003/12/11 19:13:00  mich
- Added a macro system and fixed a few things.
 
  Revision 1.7  2003/01/03 22:27:17  carstenklapp
  Minor adjustments to diff block markers ("<<<<<<<"). Source reformatting.

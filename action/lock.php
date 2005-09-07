@@ -17,5 +17,4 @@ function action_lock()
         $pagestore->dbh->query($qry);
     }
 }
-
 ?>

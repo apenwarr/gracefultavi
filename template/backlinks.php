@@ -1,5 +1,4 @@
 <?php
-// $Id: view.php,v 1.9 2002/01/10 01:31:04 smoonen Exp $
 
 require_once('template/common.php');
 

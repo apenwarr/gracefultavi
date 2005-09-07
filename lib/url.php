@@ -156,5 +156,4 @@ function childrenURL($page)
   return $ChildrenBase . urlencode($page);
 }
 }
-
 ?>

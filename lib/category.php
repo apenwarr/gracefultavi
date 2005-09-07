@@ -1,5 +1,4 @@
 <?php
-// $Id: category.php,v 1.6 2002/01/04 20:38:42 smoonen Exp $
 
 require('parse/main.php');
 

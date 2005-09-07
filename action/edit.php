@@ -1,8 +1,7 @@
 <?php
-// $Id: edit.php,v 1.6 2002/01/07 16:28:32 smoonen Exp $
 
 require('parse/html.php');
-require('template/edit.php');  #require(TemplateDir . '/edit.php');
+require('template/edit.php');
 
 // Edit a page (possibly an archive version).
 function action_edit()

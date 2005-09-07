@@ -1,5 +1,4 @@
 <?php
-// $Id: rss.php,v 1.5 2002/01/07 16:28:32 smoonen Exp $
 
 require('template/rss.php');
 require('parse/main.php');

@@ -1,5 +1,4 @@
 <?php
-// $Id: macros.php,v 1.9 2002/01/08 17:31:01 smoonen Exp $
 
 // Prepare a category list.
 function view_macro_category($args)

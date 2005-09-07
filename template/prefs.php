@@ -1,10 +1,7 @@
 <?php
-// $Id: prefs.php,v 1.11 2002/01/10 01:31:04 smoonen Exp $
-
 
 require('parse/html.php');
 require_once('template/common.php');
-
 
 function template_prefs()
 {

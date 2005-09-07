@@ -1,5 +1,4 @@
 <?php
-// $Id: admin.php,v 1.1 2002/01/07 18:13:58 smoonen Exp $
 
 require('lib/init.php');
 require('parse/html.php');

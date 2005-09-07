@@ -1,4 +1,5 @@
 <?php
+
 // The subscribe template is passed an associative array with the following
 // elements:
 //

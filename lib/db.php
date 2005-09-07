@@ -1,5 +1,4 @@
 <?php
-// $Id: db.php,v 1.3 2001/11/30 22:10:15 toph Exp $
 
 // MySQL database abstractor.  It should be easy to port this to other
 //   databases, such as PostgreSQL.

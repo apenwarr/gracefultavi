@@ -1,8 +1,6 @@
 <?php
-// $Id: find.php,v 1.1.1.1 2003/03/15 03:53:58 apenwarr Exp $
 
 require_once('template/common.php');
-#require_once(TemplateDir . '/common.php');
 
 // The find template is passed an associative array with the following
 // elements:
@@ -63,13 +61,6 @@ if ($args['pages'])
         print 'containing ';
 
     print "'" . htmlentities($find) . "'" . ':<br>';
-
-/*
-    if ($searchpage->exists())
-        print "<br><hr align=left><br>Other pages related to  " . htmlentities($find) . ":<br>";
-    else
-        print "<br><hr align=left><br>Pages containing '" . htmlentities($find) . "':<br>";
-*/
 
     print $args['pages'];
 }

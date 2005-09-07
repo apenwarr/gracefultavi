@@ -1,8 +1,6 @@
 <?php
-// $Id: prefs.php,v 1.6 2002/01/07 16:28:32 smoonen Exp $
 
 require('template/prefs.php');
-#require(TemplateDir . '/prefs.php');
 
 // View or set a user's preferences.
 function action_prefs()
@@ -52,5 +50,4 @@ function action_prefs()
   else
     { template_prefs(); }
 }
-
 ?>

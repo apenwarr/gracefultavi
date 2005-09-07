@@ -1,4 +1,5 @@
 <?php
+
 function drawTreeOld($tree)
 {
     if (count($tree))

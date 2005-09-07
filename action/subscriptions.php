@@ -1,4 +1,5 @@
 <?php
+
 require('template/subscriptions.php');
 
 // Allows page subscriptions management for a user

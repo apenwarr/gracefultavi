@@ -1,8 +1,6 @@
 <?php
-// $Id: edit.php,v 1.9 2002/01/10 01:31:04 smoonen Exp $
 
 require('template/common.php');
-#require_once(TemplateDir . '/common.php');
 
 // The edit template is passed an associative array with the following
 // elements:

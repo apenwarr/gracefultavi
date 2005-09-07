@@ -1,4 +1,5 @@
 <?php
+
 require_once("lib/difflib.php");
 
 function diff_compute($text1, $text2)

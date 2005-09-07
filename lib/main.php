@@ -1,17 +1,7 @@
 <?php
-// $Id: main.php,v 1.2 2003/04/01 01:11:33 mich Exp $
 
 // If register_globals is off, we need to harvest the script parameters
 // at this point.
-
-/*
-if($_SERVER["PATH_INFO"])
-{
-  header('Location: ' . $_SERVER["SCRIPT_NAME"] . '?' . substr($_SERVER["PATH_INFO"], 1));
-  exit;
-}
-*/
-
 if(!ini_get('register_globals'))
 {
   if(isset($HTTP_SERVER_VARS['HTTP_REFERER'])) $HTTP_REFERER = $HTTP_SERVER_VARS['HTTP_REFERER'];
@@ -56,9 +46,9 @@ if(!ini_get('register_globals'))
 require('lib/init.php');
 require('parse/transforms.php');
 
-// To add an action=x behavior, add an entry to this array.  First column
-//   is the file to load, second is the function to call, and third is how
-//   to treat it for rate-checking purposes ('view', 'edit', or 'search').
+// To add an action=x behavior, add an entry to this array. First column is the
+// file to load, second is the function to call, and third is how to treat it
+// for rate-checking purposes ('view', 'edit', or 'search').
 $ActionList = array(
                 'view'    => array('action/view.php', 'action_view', 'view'),
                 'edit'    => array('action/edit.php', 'action_edit', 'view'),
@@ -108,5 +98,4 @@ if(!empty($ActionList[$action]))
 
 // Expire old versions, etc.
 $pagestore->maintain();
-
 ?>
