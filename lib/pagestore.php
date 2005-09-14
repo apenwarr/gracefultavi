@@ -641,7 +641,7 @@ class PageStore
 
         if(empty($links[$link]))
         {
-            $this->dbh->query("INSERT INTO $LkTbl VALUES " . 
+            $this->dbh->query("INSERT INTO $LkTbl VALUES " .
                               "('$page', '$link', 1)");
             $links[$link] = 1;
         }
@@ -665,9 +665,10 @@ class PageStore
                                  "WHERE prefix='$prefix'");
         if($this->dbh->result($qid))
         {
-            $this->dbh->query("UPDATE $IwTbl SET " . 
-                            "where_defined='$where_defined', " .
-                            "url='$url' WHERE prefix='$prefix'");
+            $this->dbh->query("UPDATE $IwTbl SET " .
+                              "where_defined='$where_defined', " .
+                              "url='$url' ".
+                              "WHERE prefix='$prefix'");
         }
         else
         {
@@ -688,15 +689,16 @@ class PageStore
                                  "WHERE prefix='$prefix'");
         if($this->dbh->result($qid))
         {
-            $this->dbh->query("UPDATE $SwTbl SET " . 
-                            "where_defined='$where_defined', " .
-                            "url='$url' WHERE prefix='$prefix'");
+            $this->dbh->query("UPDATE $SwTbl SET " .
+                              "where_defined='$where_defined', " .
+                              "url='$url' " .
+                              "WHERE prefix='$prefix'");
         }
         else
         {
-            $this->dbh->query("INSERT INTO $SwTbl " . 
-                            "(prefix, where_defined, url) " .
-                            "VALUES ('$prefix', '$where_defined', '$url')");
+            $this->dbh->query("INSERT INTO $SwTbl " .
+                              "(prefix, where_defined, url) " .
+                              "VALUES ('$prefix', '$where_defined', '$url')");
         }
     }
 
