@@ -20,6 +20,8 @@ if(!ini_get('register_globals'))
   if(isset($HTTP_GET_VARS['no_redirect'])) $no_redirect = $HTTP_GET_VARS['no_redirect'];
   if(isset($HTTP_GET_VARS['diff_mode'])) $diff_mode = $HTTP_GET_VARS['diff_mode'];
   if(isset($HTTP_GET_VARS['view_source'])) $view_source = $HTTP_GET_VARS['view_source'];
+  if(isset($HTTP_GET_VARS['invalid_nick'])) $invalid_nick = $HTTP_GET_VARS['invalid_nick'];
+  if(isset($HTTP_GET_VARS['prefs_from'])) $prefs_from = $HTTP_GET_VARS['prefs_from'];
 
   if(isset($HTTP_POST_VARS['Preview'])) $Preview = $HTTP_POST_VARS['Preview'];
   if(isset($HTTP_POST_VARS['Save'])) $Save = $HTTP_POST_VARS['Save'];
@@ -38,7 +40,7 @@ if(!ini_get('register_globals'))
   if(isset($HTTP_POST_VARS['referrer'])) $referrer = $HTTP_POST_VARS['referrer'];
   if(isset($HTTP_POST_VARS['rows'])) $rows = $HTTP_POST_VARS['rows'];
   if(isset($HTTP_POST_VARS['tzoff'])) $tzoff = $HTTP_POST_VARS['tzoff'];
-  if(isset($HTTP_POST_VARS['user'])) $user = $HTTP_POST_VARS['user'];
+  if(isset($HTTP_POST_VARS['nickname'])) $nickname = $HTTP_POST_VARS['nickname'];
   if(isset($HTTP_POST_VARS['minoredit'])) $minoredit = $HTTP_POST_VARS['minoredit'];
   if(isset($HTTP_POST_VARS['pagefrom'])) $pagefrom = $HTTP_POST_VARS['pagefrom'];
   if(isset($HTTP_POST_VARS['subscribed_pages'])) $subscribed_pages = $HTTP_POST_VARS['subscribed_pages'];

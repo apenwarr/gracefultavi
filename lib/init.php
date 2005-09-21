@@ -36,6 +36,7 @@ if(get_magic_quotes_gpc())
   if(isset($categories)) $categories = stripslashes($categories);
   if(isset($comment)) $comment = stripslashes($comment);
   if(isset($page)) $page = stripslashes($page);
+  if(isset($nickname)) $nickname = stripslashes($nickname);
 }
 
 // Read username from htaccess login
@@ -45,7 +46,8 @@ else if(isset($_SERVER["REMOTE_USER"]))
     $UserName = $_SERVER["REMOTE_USER"];
 
 // Read user preferences from cookie.
-if(isset($HTTP_COOKIE_VARS[$CookieName])) $prefstr = $HTTP_COOKIE_VARS[$CookieName];
+$prefstr = isset($HTTP_COOKIE_VARS[$CookieName]) ?
+    $HTTP_COOKIE_VARS[$CookieName] : '';
 
 if(!empty($prefstr))
 {
@@ -53,6 +55,11 @@ if(!empty($prefstr))
     { $EditRows = $result[1]; }
   if(ereg("cols=([[:digit:]]+)", $prefstr, $result))
     { $EditCols = $result[1]; }
+  if(ereg("nickname=([^&]*)", $prefstr, $result))
+    {
+      $NickName = rawurldecode($result[1]);
+      if (posix_getpwnam($NickName) !== false) { $NickName = ''; }
+    }
   if(ereg("days=([[:digit:]]+)", $prefstr, $result))
     { $DayLimit = $result[1]; }
   if(ereg("auth=([[:digit:]]+)", $prefstr, $result))

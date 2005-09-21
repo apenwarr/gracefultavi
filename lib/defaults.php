@@ -104,6 +104,9 @@ $EditCols = 65;
 // Initialize the default user name to empty.
 $UserName = '';
 
+// Initialize the default nickname to empty.
+$NickName = '';
+
 // Default time zone offset (in minutes) for visitors who haven't yet set their
 //   preferences.
 $TimeZoneOff = 0;

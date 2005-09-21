@@ -5,7 +5,7 @@ require('parse/main.php');
 // Add a page to a list of categories.
 function add_to_category($page, $catlist)
 {
-    global $pagestore, $Entity, $UserName, $REMOTE_ADDR, $FlgChr;
+    global $Entity, $FlgChr, $NickName, $pagestore, $REMOTE_ADDR, $UserName;
 
     // Parse the category list for category names.
     $parsed = parseText($catlist, array('parse_wikiname', 'parse_freelink'), '');
@@ -42,6 +42,12 @@ function add_to_category($page, $catlist)
 
             $pg->version++;
             $pg->hostname = gethostbyaddr($REMOTE_ADDR);
+            if (!$UserName && $NickName)
+            {
+                $nick_sql = str_replace("\\", "\\\\", $NickName);
+                $nick_sql = str_replace("'", "\\'", $nick_sql);
+                $pg->hostname = $nick_sql . '@' . $pg->hostname;
+            }
             $pg->username = $UserName;
 
             $pg->write();

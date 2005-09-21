@@ -6,8 +6,9 @@ require_once('template/common.php');
 function template_prefs()
 {
     global $AuthorDiff, $DayLimit, $EditCols, $EditRows, $EmailSuffix;
-    global $EnableSubscriptions, $HistMax, $HTTP_REFERER, $MinEntries;
-    global $PrefsScript, $TimeZoneOff, $UseHotPages, $UserName;
+    global $EnableSubscriptions, $HistMax, $HTTP_REFERER, $invalid_nick;
+    global $MinEntries, $NickName, $prefs_from, $PrefsScript, $TimeZoneOff;
+    global $UseHotPages, $UserName;
 
     template_common_prologue(array(
         'norobots' => 1,
@@ -23,17 +24,36 @@ function template_prefs()
         #'editver'         => $args['editver']  no edit
         'button_backlinks' => 0
     ));
+
+    $referrer = ($prefs_from ? $prefs_from : $HTTP_REFERER);
+
 ?>
 
 <div id="body">
 <form action="<?php print $PrefsScript; ?>" method="post">
 <div class="form">
-  <input type="hidden" name="referrer" value="<?php print $HTTP_REFERER; ?>" />
+  <input type="hidden" name="referrer" value="<?=htmlspecialchars($referrer)?>">
 
+<?php if ($UserName) : ?>
   <strong>You are currently logged in as
-  <?php print $UserName; ?> </strong><br />
-  Your login name will apprear on the RecentChanges page to the right of pages you edit.<br /><br />
-  <hr />
+  <?php print $UserName; ?></strong><br><br>
+  Your login name will appear on the RecentChanges page to the right of
+  pages you edit.
+<?php else : ?>
+  <strong>You are not currently logged in.</strong><br><br>
+  If you wish, you may provide a nickname to use on this wiki, it will be used
+  when adding comments and will appear on the RecentChanges page.<br><br>
+  <?php if ($invalid_nick) : ?>
+    <span style="color:red;"><b>WARNING:</b></span>
+    Invalid nickname: "<b><?=htmlspecialchars($invalid_nick)?></b>". The
+    nickname you provided can not be used since it is already a valid username.
+    Please choose another one.<br><br>
+  <?php endif; ?>
+  Nickname:
+  <input type="text" name="nickname" value="<?=htmlspecialchars($NickName)?>">
+<?php endif; ?>
+  <br><br>
+  <hr>
 
 <?php if ($EnableSubscriptions && isset($EmailSuffix) && $UserName != '') : ?>
   <strong>Subscriptions</strong><br /><br />

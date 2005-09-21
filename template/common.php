@@ -262,7 +262,8 @@ if (isset($args['tree']))
 function template_common_epilogue($args)
 {
   global $AdditionalFooter, $EmailSuffix, $EnableSubscriptions, $FindScript;
-  global $HomePage, $ndfnow, $page, $pagestore, $PrefsScript, $UserName;
+  global $HomePage, $ndfnow, $NickName, $page, $pagestore, $PrefsScript;
+  global $UserName;
 
   $pg = $pagestore->page($page);
   $pagetext = $pg->text;
@@ -416,10 +417,13 @@ if ($page != $HomePage && $page != 'RecentChanges')
                 print '<input type="hidden" name="comment" value="Comment">';
                 print '<textarea name="quickadd" rows="4" cols="20">';
                 print "<hr><b>";
-                if ($UserName)
+                if ($UserName) {
                     print "[$UserName]";
-                else
+                } else if ($NickName) {
+                    print htmlspecialchars($NickName);
+                } else {
                     print "Anonymous@" . $_SERVER["REMOTE_ADDR"];
+                }
                 print " (" . date('Y/m/d') . ")</b>: ";
                 print '</textarea>';
                 print '<br><input type="submit" name="append" value="Add a Comment" onClick="return epilogue_quickadd_validate(this.form)">';

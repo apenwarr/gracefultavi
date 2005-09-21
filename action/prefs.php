@@ -5,8 +5,8 @@ require('template/prefs.php');
 // View or set a user's preferences.
 function action_prefs()
 {
-  global $Save, $referrer, $user, $rows, $cols, $days, $min, $auth, $hist;
-  global $CookieName, $ErrorNameMatch, $tzoff, $hotpages;
+  global $auth, $cols, $CookieName, $days, $ErrorNameMatch, $hist, $hotpages;
+  global $min, $nickname, $referrer, $rows, $Save, $tzoff, $user;
 
   if(!empty($Save))
   {
@@ -16,11 +16,12 @@ function action_prefs()
         { die($ErrorNameMatch); }
     }
 
-    // Read username from htaccess login
-    if(isset($_SERVER["PHP_AUTH_USER"]))
-        $UserName = $_SERVER["PHP_AUTH_USER"];
-    else if(isset($_SERVER["REMOTE_USER"]))
-        $UserName = $_SERVER["REMOTE_USER"];
+    // make sure the nickname is not a valid username
+    if (posix_getpwnam($nickname) !== false) {
+        $referrer = '?action=prefs&invalid_nick=' . rawurlencode($nickname) .
+                    '&prefs_from=' . rawurlencode($referrer);
+        $nickname = '';
+    }
 
     ereg("([[:digit:]]*)", $rows, $result);
     if(($rows = $result[1]) <= 0)
@@ -34,8 +35,8 @@ function action_prefs()
       { $auth = 0; }
     $hotpages = (strcmp($hotpages, "") != 0) ? 1 : 0;
     $value = "rows=$rows&amp;cols=$cols&amp;auth=$auth&amp;hotpages=$hotpages";
-//    if(strcmp($user, "") != 0)
-      { $value = $value . "&amp;user=" . $UserName; }
+    if(strcmp($nickname, '') != 0)
+      { $value .= "&amp;nickname=" . rawurlencode(trim($nickname)); }
     if(strcmp($days, "") != 0)
       { $value = $value . "&amp;days=$days"; }
     if(strcmp($min, "") != 0)

@@ -11,9 +11,9 @@ function action_save()
 {
     global $Admin, $archive, $categories, $comment, $document;
     global $EnableSubscriptions, $EmailSuffix, $ErrorPageLocked;
-    global $HTTP_POST_VARS, $MaxPostLen, $minoredit, $nextver, $page, $pagefrom;
-    global $pagestore, $REMOTE_ADDR, $Save, $SaveMacroEngine, $UserName;
-    global $WorkingDirectory;
+    global $HTTP_POST_VARS, $MaxPostLen, $minoredit, $nextver, $NickName, $page;
+    global $pagefrom, $pagestore, $REMOTE_ADDR, $Save, $SaveMacroEngine;
+    global $UserName, $WorkingDirectory;
 
     if(isset($HTTP_POST_VARS['quickadd'])) $quickadd = $HTTP_POST_VARS['quickadd'];
     if(isset($HTTP_POST_VARS['appending'])) $appending = $HTTP_POST_VARS['appending'];
@@ -66,9 +66,12 @@ function action_save()
         die($ErrorPageLocked);
     }
 
+    // gets the hostname without the nickname
+    $page_hostname = array_pop(explode('@', $pg->hostname));
+
     if ($pg->exists()                   // Page already exists.
         && $pg->version >= $nextver     // Someone has changed it.
-        && $pg->hostname != gethostbyaddr($REMOTE_ADDR) // Wasn't us.
+        && $page_hostname != gethostbyaddr($REMOTE_ADDR) // Wasn't us.
         && !$archive)                   // Not editing an archive version.
     {
         $pagestore->unlock();
@@ -118,6 +121,12 @@ function action_save()
 
     $pg->text = $document;
     $pg->hostname = gethostbyaddr($REMOTE_ADDR);
+    if (!$UserName && $NickName)
+    {
+        $nick_sql = str_replace("\\", "\\\\", $NickName);
+        $nick_sql = str_replace("'", "\\'", $nick_sql);
+        $pg->hostname = $nick_sql . '@' . $pg->hostname;
+    }
     $pg->username = $UserName;
     $pg->comment  = $comment;
 

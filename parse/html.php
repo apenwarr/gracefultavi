@@ -177,7 +177,7 @@ function html_ref($refPage, $appearance, $hover = '', $anchor = '', $anchor_appe
 
     if($hover != '')
     {
-        $hover = ' title="' . $hover . '"';
+        $hover = ' alt="'.$hover.'" title="'.$hover.'"';
     }
 
     if ($page == 'RecentChanges') {
@@ -283,7 +283,8 @@ function html_category($time, $page, $host, $user, $comment, $version,
     $text .= '<img src="images/hot.png" alt="Hot!" title="Hot!" width="16" height="15" border="0">';
 
   $text = $text . ' . . . . ' .
-          ($user == '' ? $host : html_ref($user, $user, $host));
+          ($user == '' ? $host : (validate_page($user) ?
+           html_ref($user, $user, $host) : $user));
 
   if($comment != '')
   {
@@ -331,7 +332,8 @@ function html_history_entry($page, $version, $time, $host, $user, $c1, $c2,
          ($c2 ? ' checked="checked"' : '') . " /></td>\n" .
          "<td><a href=\"" . viewURL($page, $version) . "\">" .
          html_time2($time) . "</a> . . . . " .
-         ($user == '' ? $host : html_ref($user, $user, $host)) .
+         ($user == '' ? $host : (validate_page($user) ?
+          html_ref($user, $user, $host) : $user)) .
          ($comment == '' ? '' :
            (' ' . html_bold_start() . '[' .
             str_replace('<', '&lt;', str_replace('&', '&amp;', $comment)) .
