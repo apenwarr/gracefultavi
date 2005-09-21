@@ -705,7 +705,9 @@ class PageStore
     // Find all twins of a page at sisterwiki sites.
     function twinpages($page, $viewing_page = '')
     {
-        global $RemTbl, $IwTbl;
+        global $RemTbl, $UserName;
+
+        $restriction_level = $UserName ? 2 : 1;
 
         $list = array();
 
@@ -714,7 +716,8 @@ class PageStore
 
             if (!$twinpages_cache) {
                 $qid = $this->dbh->query("SELECT site, page " .
-                                         "FROM $RemTbl");
+                                         "FROM $RemTbl " .
+                                         "WHERE restricted < $restriction_level");
                 while ($result = $this->dbh->result($qid)) {
                     if (!isset($twinpages_cache[$result[1]])) {
                         $twinpages_cache[$result[1]] = array();
@@ -733,7 +736,8 @@ class PageStore
             $dbname = str_replace('\'', '\\\'', $dbname);
             $q2 = $this->dbh->query("SELECT site " .
                                     "FROM $RemTbl " .
-                                    "WHERE page='$dbname'");
+                                    "WHERE page='$dbname'" .
+                                    "AND restricted < $restriction_level");
             while ($twin = $this->dbh->result($q2)) {
                 $list[] = array($twin[0], $page);
             }
