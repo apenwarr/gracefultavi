@@ -8,6 +8,7 @@ if(!ini_get('register_globals'))
   if(isset($HTTP_SERVER_VARS['QUERY_STRING'])) $QUERY_STRING = $HTTP_SERVER_VARS['QUERY_STRING'];
   if(isset($HTTP_SERVER_VARS['REMOTE_ADDR'])) $REMOTE_ADDR  = $HTTP_SERVER_VARS['REMOTE_ADDR'];
 
+  if(isset($HTTP_GET_VARS['q'])) $q = $HTTP_GET_VARS['q'];
   if(isset($HTTP_GET_VARS['action'])) $action = $HTTP_GET_VARS['action'];
   if(isset($HTTP_GET_VARS['page'])) $page = $HTTP_GET_VARS['page'];
   if(isset($HTTP_GET_VARS['ver1'])) $ver1 = $HTTP_GET_VARS['ver1'];
