@@ -22,18 +22,18 @@ function action_save()
     if(isset($HTTP_POST_VARS['quoteAuthor'])) $quoteAuthor = $HTTP_POST_VARS['quoteAuthor'];
     if(isset($HTTP_POST_VARS['appendingQuote'])) $appendingQuote = $HTTP_POST_VARS['appendingQuote'];
 
+    if (get_magic_quotes_gpc())
+    {
+        if (isset($quickadd)) { $quickadd = stripslashes($quickadd); }
+        if (isset($quoteAuthor)) { $quoteAuthor = stripslashes($quoteAuthor); }
+    }
+
     // added for spam detection
     if(isset($HTTP_POST_VARS['isnotspam'])) $isnotspam = $HTTP_POST_VARS['isnotspam'];
 
     // spam detection
     if (!$UserName && isset($appending) && !isset($isnotspam) && look_like_spam($quickadd))
     {
-        if (get_magic_quotes_gpc())
-        {
-            if (isset($quickadd)) { $quickadd = stripslashes($quickadd); }
-            if (isset($quoteAuthor)) { $quoteAuthor = stripslashes($quoteAuthor); }
-        }
-
         template_spamconfirm(array('page' => $page,
                                    'quickadd' => $quickadd,
                                    'comment' => $comment,
@@ -114,6 +114,8 @@ function action_save()
     {
         // Add new lines if document is not empty.
         if($document) $document = trim($document) . "\n\n";
+        $quickadd = str_replace("\\", "\\\\", $quickadd);
+        $quickadd = str_replace("'", "\\'", $quickadd);
         $quickadd = str_replace("\r", "", $quickadd);
 
         $document .= $quickadd;
