@@ -105,6 +105,7 @@ $qid->execute or die "Error creating table\n";
 $qid = $dbh->prepare("CREATE TABLE " . $prefix . "remote_pages ( "
                      . "page varchar(80) binary DEFAULT '' NOT NULL, "
                      . "site varchar(80) DEFAULT '' NOT NULL, "
+                     . "restricted tinyint(1) NOT NULL default '0', "
                      . "PRIMARY KEY (page, site) )");
 $qid->execute or die "Error creating table\n";
 
