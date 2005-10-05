@@ -11,4 +11,6 @@ function action_js()
         require('js/script.js');
     else if ($HTTP_GET_VARS['file'] == "tablesort")
         require('js/tablesort.js');
+    else if ($HTTP_GET_VARS['file'] == "common")
+        require('js/common.js');
 }

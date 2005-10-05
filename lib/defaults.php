@@ -171,6 +171,14 @@ $EnableSubscriptions = 0;
 // the username when sending the page subscription email.
 $EmailSuffix = '';
 
+// $PageSizeLimit and $PageTooLongSize are used to control when pages are too
+// long for the supporting database backend and prevent data from being lost.
+// Currently, the limit of the "text" datatype, used to store the content of the
+// pages, is 65535 characters in MySQL. Pages are considered too long when they
+// reach 60000 characters and comments are then disabled.
+$PageSizeLimit = 65535;
+$PageTooLongSize = 60000;
+
 // $ParseEngine indicates what parsing rules will be run when displaying a
 //   wiki page.  To disable a particular rule, you can place a comment at the
 //   beginning of its line.  The order of this list is important.

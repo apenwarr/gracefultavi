@@ -15,7 +15,7 @@ require('template/common.php');
 
 function template_edit($args)
 {
-    global $EditRows, $EditCols, $UserName, $PrefsScript;
+    global $EditCols, $EditRows, $PageSizeLimit, $PrefsScript, $UserName;
 
     template_common_prologue(array(
         'norobots' => 1,
@@ -37,11 +37,12 @@ function template_edit($args)
 <div id="body">
 
 <form method="post" action="<?php print saveURL($args['page']); ?>">
+<input type="hidden" name="pagesizelimit" value="<?=$PageSizeLimit?>">
 
 <div class="form">
 
-<input type="submit" name="Save" value="Save">
-<input type="submit" name="Preview" value="Preview">
+<input type="submit" name="Save" value="Save" onClick="return sizeLimitCheck(this.form.document);">
+<input type="submit" name="Preview" value="Preview" onClick="return sizeLimitCheck(this.form.document);">
 
 <?php
     if($UserName != '')
@@ -75,8 +76,8 @@ Summary of change:
 Add document to category:
 <input type="text" name="categories" size="40" value=""><br>
 
-<input type="submit" name="Save" value="Save">
-<input type="submit" name="Preview" value="Preview">
+<input type="submit" name="Save" value="Save" onClick="return sizeLimitCheck(this.form.document);">
+<input type="submit" name="Preview" value="Preview" onClick="return sizeLimitCheck(this.form.document);">
 
 <?php
     if($UserName != '')

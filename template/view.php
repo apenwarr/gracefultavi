@@ -12,6 +12,8 @@ require_once('template/common.php');
 //   archive   => An integer.  Will be nonzero if this is not the most recent
 //                version of the page.
 //   version   => Version number of page version being viewed.
+//   page_length => The length of the page in terms of characters in the
+//                  database, i.e. before being parsed.
 
 function template_view($args)
 {
@@ -54,6 +56,7 @@ print $args['html'];
         'history'   => $args['page'],
         'euser'     => $args['edituser'],
         'timestamp' => $args['timestamp'],
+        'page_length' => $args['page_length'],
 
         'headlink'         => $args['page'],
         'button_selected'  => $args['view_source'] ? '' : 'view',

@@ -44,6 +44,7 @@ function action_view()
 
     template_view(array(
         'page'      => $page,
+        'page_length' => strlen($pg->text),
         'html'      => $html,
         'view_source' => $view_source,
         'editable'  => $UserName && $pg->mutable,

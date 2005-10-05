@@ -40,6 +40,8 @@ if(!isset($ChildrenBase))
   { $ChildrenBase = $ScriptName . '?action=children&amp;page='; }
 if(!isset($TableSortScript))
   { $TableSortScript = $ScriptName . '?action=js&file=tablesort'; }
+if(!isset($CommonScript))
+  { $CommonScript = $ScriptName . '?action=js&file=common'; }
 
 if(!function_exists('viewURL'))
 {

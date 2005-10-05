@@ -15,8 +15,8 @@ require_once('template/common.php');
 
 function template_preview($args)
 {
-    global $EditRows, $EditCols, $categories, $UserName, $comment, $PrefsScript;
-    global $minoredit;
+    global $categories, $comment, $EditCols, $EditRows, $minoredit;
+    global $PageSizeLimit, $PrefsScript, $UserName;
 
     template_common_prologue(array(
         'norobots' => 1,
@@ -37,9 +37,10 @@ function template_preview($args)
 
 <div id="body" class="content">
 <form method="post" action="<?php print saveURL($args['page']); ?>">
+<input type="hidden" name="pagesizelimit" value="<?=$PageSizeLimit?>">
 <div class="form">
-  <input type="submit" name="Save" value="Save" />
-  <input type="submit" name="Preview" value="Preview" />
+  <input type="submit" name="Save" value="Save" onClick="return sizeLimitCheck(this.form.document);">
+  <input type="submit" name="Preview" value="Preview" onClick="return sizeLimitCheck(this.form.document);">
 <?php
   if($UserName != '')
     { print 'Your user name is ' . html_ref($UserName, $UserName); }
@@ -71,8 +72,8 @@ print '>Minor edit<br>';
   Add document to category:
   <input type="text" name="categories" size="40" value="<?php
     print $categories; ?>" /><br />
-  <input type="submit" name="Save" value="Save" />
-  <input type="submit" name="Preview" value="Preview" />
+  <input type="submit" name="Save" value="Save" onClick="return sizeLimitCheck(this.form.document);">
+  <input type="submit" name="Preview" value="Preview" onClick="return sizeLimitCheck(this.form.document);">
 <?php
   if($UserName != '')
     { print 'Your user name is ' . html_ref($UserName, $UserName); }
@@ -88,8 +89,8 @@ user name<?php
 </div>
 <hr />
 <strong>Confirm changes to above document?</strong><br>
-<input type="submit" name="Save" value="Save" />
-<input type="submit" name="Preview" value="Preview" />
+<input type="submit" name="Save" value="Save" onClick="return sizeLimitCheck(this.form.document);">
+<input type="submit" name="Preview" value="Preview" onClick="return sizeLimitCheck(this.form.document);">
 </div>
 </form>
 <?php

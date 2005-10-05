@@ -75,10 +75,10 @@ function toolbar($page, $args)
 
 function template_common_prologue($args)
 {
-    global $AdditionalHeader, $HomePage, $MetaDescription, $MetaKeywords, $page;
-    global $pagestore, $ScriptBase, $SeparateHeaderWords, $SeparateTitleWords;
-    global $shortcutIcon, $StyleScript, $TableSortScript, $UserName, $WikiLogo;
-    global $WikiName;
+    global $AdditionalHeader, $CommonScript, $HomePage, $MetaDescription;
+    global $MetaKeywords, $page, $pagestore, $ScriptBase, $SeparateHeaderWords;
+    global $SeparateTitleWords, $shortcutIcon, $StyleScript, $TableSortScript;
+    global $UserName, $WikiLogo, $WikiName;
 
     if ($SeparateTitleWords) { $args['title'] = html_split_name($args['title']); }
 ?>
@@ -92,6 +92,7 @@ function template_common_prologue($args)
 <?php } ?>
 <link rel="STYLESHEET" href="<?php print $StyleScript; ?>" type="text/css">
 <script src="<?php print $TableSortScript; ?>" type="text/javascript"></script>
+<script src="<?php print $CommonScript; ?>" type="text/javascript"></script>
 <link rel="SHORTCUT ICON" href="<?=$shortcutIcon?>">
 <link rel="ALTERNATE" title="<?=htmlspecialchars($WikiName)?>" href="<?=$ScriptBase?>?action=rss" TYPE="application/rss+xml">
 <title><?php print $args['title'] . ' - ' . htmlspecialchars($WikiName); ?></title>
@@ -258,12 +259,14 @@ if (isset($args['tree']))
 //   'timestamp' => Timestamp for the page.  If not empty, a 'document
 //                  last modified' note will be printed.
 //   'nosearch'  => An integer; if nonzero, the search form will not appear.
+//   'page_length' => The length of the page in terms of characters in the
+//                    database, i.e. before being parsed.
 
 function template_common_epilogue($args)
 {
   global $AdditionalFooter, $EmailSuffix, $EnableSubscriptions, $FindScript;
-  global $HomePage, $ndfnow, $NickName, $page, $pagestore, $PrefsScript;
-  global $UserName;
+  global $HomePage, $ndfnow, $NickName, $page, $pagestore, $PageTooLongSize;
+  global $PrefsScript, $UserName;
 
   $pg = $pagestore->page($page);
   $pagetext = $pg->text;
@@ -380,22 +383,30 @@ if ($page != $HomePage && $page != 'RecentChanges')
     <tr>
     <td width="50%">&nbsp;</td>
     <td width="50%" align="right">
-        <form method="post" action="<?php print saveURL($page); ?>">
-        <div class="form">
-        <?php
-        if ($args['edit'])
+
+    <form method="post" action="<?php print saveURL($page); ?>">
+    <div class="form">
+    <?php
+    if ($args['edit'])
+    {
+        if ($args['page_length'] > $PageTooLongSize)
+        {
+            print '<div style="color:red;font-weight:bold">'.
+                  'This page is too long. Comments are disabled.</div>';
+        }
+        else
         {
             global $document;
             $document = $pg->read();
             $document = str_replace('"', "\\\\'", $document);
-        ?>
+            ?>
             <input type="hidden" name="Save" value="1">
             <input type="hidden" name="appending" value="1">
             <?php
             if (!strcasecmp($page, 'annoyingquote') || !strcasecmp($page, 'accumulatedwisdom'))
             {
                 // Tweaked "Add a Comment" for AnnoyingQuote page
-            ?>
+                ?>
                 <input type="hidden" name="comment" value="Add a Quote">
                 <input type="hidden" name="appendingQuote" value="1">
                 <table width="100%" cellspacing="2" cellpadding="0" border="0">
@@ -409,7 +420,7 @@ if ($page != $HomePage && $page != 'RecentChanges')
                 </tr>
                 </table>
                 <input type="submit" name="append" value="Add a Quote" onClick="return epilogue_quickadd_validate(this.form)">
-            <?php
+                <?php
             }
             else
             {
@@ -428,12 +439,12 @@ if ($page != $HomePage && $page != 'RecentChanges')
                 print '</textarea>';
                 print '<br><input type="submit" name="append" value="Add a Comment" onClick="return epilogue_quickadd_validate(this.form)">';
             }
-            ?>
-        <?php
         }
-        ?>
-        </div>
-        </form>
+    }
+    ?>
+    </div>
+    </form>
+
     </td>
     </tr>
     </table>
