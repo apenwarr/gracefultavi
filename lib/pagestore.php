@@ -736,7 +736,7 @@ class PageStore
             $dbname = str_replace('\'', '\\\'', $dbname);
             $q2 = $this->dbh->query("SELECT site " .
                                     "FROM $RemTbl " .
-                                    "WHERE page='$dbname'" .
+                                    "WHERE page='$dbname' " .
                                     "AND restricted < $restriction_level");
             while ($twin = $this->dbh->result($q2)) {
                 $list[] = array($twin[0], $page);

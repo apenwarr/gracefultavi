@@ -27,6 +27,71 @@ global $SchedName;
 global $sch_cur_incomplete_bugs;
 global $sch_cur_complete_bugs;
 
+$sch_javascript_functions = <<<JAVASCRIPT
+<script language="javascript">
+<!--
+    // For each row in table id 'ixTable', if its class matches 'class', set
+    // style property 'propname' to 'val'
+    function changeStyleInTableRows(ixTable, myclass, propname, val) 
+    {
+        var t = document.getElementById(ixTable);
+        for (i = 0; i < t.rows.length; i++) 
+        {
+            if (t.rows[i].className == myclass) 
+            {
+                t.rows[i].style[propname] = val;
+            }
+        }
+    }
+
+    function hideBugs(ixClass, ixTable) 
+    {
+        var hidelink = document.getElementById(ixClass + "_hidelink");
+        var showlink = document.getElementById(ixClass + "_showlink");
+
+        showlink.style["display"] = "";
+        hidelink.style["display"] = "none";
+
+        changeStyleInTableRows(ixTable, ixClass, "display", "none");
+    }
+
+    function showBugs(ixClass, ixTable)
+    {
+        var hidelink = document.getElementById(ixClass + "_hidelink");
+        var showlink = document.getElementById(ixClass + "_showlink");
+
+        hidelink.style["display"] = "";
+        showlink.style["display"] = "none";
+
+        changeStyleInTableRows(ixTable, ixClass, "display", '');
+    }
+//-->
+</script>
+
+JAVASCRIPT;
+
+function js_make_hide_show_links($class_name, $ixTable, 
+    $hide_style, $show_style, $suffix)
+{
+    $hs = "";
+    if ($hide_style != "")
+        $hs = "style='$hide_style' ";
+    $ss = "";
+    if ($show_style != "")
+        $ss = "style='$show_style' ";
+
+    $hidelink = "<span $hs id='".$class_name."_hidelink'>" .
+        "[ <a href=\"javascript:hideBugs('$class_name', '$ixTable');\">" . 
+        "Hide$suffix</a> ]" .
+        "</span>";
+    $showlink = "<span $ss id='".$class_name."_showlink'>" .
+        "[ <a href=\"javascript:showBugs('$class_name', '$ixTable');\">" . 
+        "Show$suffix</a> ]" . 
+        "</span>";
+
+    return $hidelink . " " . $showlink;
+}
+
 function bug_init()
 {
     global $bug_h;
@@ -361,13 +426,20 @@ function sch_warning($text)
 }
 
 
-function sch_genline($pri, $task, $title, $orig, $curr, $elapsed, $left, $due)
+function sch_genline($pri, $task, $title, $orig, $curr, $elapsed, $left, $due, 
+    $html_class)
 {
-    $ret = "<tr>";
+    $class = "";
+    if ($html_class != "")
+        $class = " class=\"$html_class\"";
+
+    $ret = "<tr$class>";
 
     $junk1 = $junk2 = '';
     if ($left == "done")
     {
+        // Hide done bugs by default.
+        $ret = "<tr $class style=\"display:none\">";
         $junk1 = "<strike><font color=gray><i>";
         $junk2 = "</i></font></strike>";
     }
@@ -387,12 +459,12 @@ function sch_genline($pri, $task, $title, $orig, $curr, $elapsed, $left, $due)
     return $ret . "<td>$junk1" .
 	join("$junk2</td><td>$junk1",
 	     array($orig, $curr, $elapsed, $left, $due)) .
-	"$junk2</td></tr>";
+	"$junk2</td></tr>\n";
 }
 
 
 function sch_line($pri, $task, $title, $orig, $curr, $elapsed, $remain, $done, 
-		  $allow_red)
+		  $html_class, $allow_red)
 {
     global $sch_curday, $sch_elapsed_curday;
 
@@ -420,7 +492,7 @@ function sch_line($pri, $task, $title, $orig, $curr, $elapsed, $remain, $done,
     $ret .= sch_genline($pri, $task, $title,
                 sch_period($orig), sch_period($curr),
                 sch_period($elapsed), $sremain,
-                $due);
+                $due, $html_class);
     //$ret .= sch_fullline("gork: $was_over_elapsed $sch_elapsed_curday $sch_curday $today");
     if (!$was_over_elapsed && $sch_elapsed_curday - 4 > $today)
         $ret .= sch_warning("The START time, plus the time so far in your " .
@@ -474,11 +546,14 @@ function sch_bug($estimate)
         //$ret .= sch_fullline("Ignoring $elapsed elapsed hours for bug $feat");
     }
 
+    $html_class = $estimate->isdone() ? 
+        "done_bug" : "fixfor" . $estimate->task->fixfor->ix;
+
     // FIXME: Estimate::isdone() only checks the Estimate's be_done flag;
     // maybe should make it also check its task's state
     $ret .= sch_line($pri, $estimate->task->hyperlink(), 
                      $title, $orig, $curr, $elapsed, $remain, 
-                     $estimate->isdone(), true);
+                     $estimate->isdone(), $html_class, true);
 
 
     if ($estimate->isdone() && $curr != $elapsed)
@@ -508,10 +583,20 @@ function sch_bug($estimate)
 // FIXME: This function doesn't make all that much sense any more. I think it
 // now just outputs the MILESTONE line and the blank line.  Fair enough, but
 // could be simpler.
-function sch_milestone($descr, $name, $due, $load, $newline)
+function sch_milestone($ixFixFor, $descr, $name, $due, $load, $newline)
 {
     global $sch_curday;
+    global $sch_user;
     $ret = "";
+
+    $hideshow = "";
+    if ($ixFixFor != "")
+    {
+        $ff_str = "fixfor$ixFixFor";
+        $sch_table_id = "sch_".$sch_user->username;
+        $hideshow = js_make_hide_show_links($ff_str, $sch_table_id, 
+            "", "display:none", "");
+    }
 
     // if no due date was given, make it the day after the last bug finished.
     if (!$due)
@@ -524,12 +609,12 @@ function sch_milestone($descr, $name, $due, $load, $newline)
     $xdue = sch_format_day($newday);
     // FIXME: Insane math
     $slip = ($newday-$sch_curday)*8 / $load;
-    //$ret .= sch_line("SLIPPAGE (to $xdue)", "", 0,$slip,0,$slip, 0, true);
+    //$ret .= sch_line("SLIPPAGE (to $xdue)", "", 0,$slip,0,$slip, 0, "", true);
     $done = $newday < $today;
     // FIXME: If current day is past the milestone's release date, don't show
     // the "current" column in red.  See sch_period().
-    $ret .= sch_genline(0, "<b>$descr</b>", "<b>$name ($xdue)</b>", '',
-                        '', sch_period($slip), '',
+    $ret .= sch_genline(0, "<b>$descr</b>", "<b>$name ($xdue)</b> $hideshow", 
+                        '', '', sch_period($slip), '',
                         $done ? "done" : sch_period($slip),
                         '');
     if ($newline)
@@ -562,11 +647,11 @@ function sch_release_line($old_fixfor, $estimate, $newline)
 {
     $a = bug_get_milestones($old_fixfor->name);
     foreach ($a as $b)
-	$ret .= sch_milestone("ZeroBugBounce", $old_fixfor->name, $b, 
+	$ret .= sch_milestone("", "ZeroBugBounce", $old_fixfor->name, $b, 
 			      $estimate->loadfactor, false); 
     
-    $ret .= sch_milestone("RELEASE", $old_fixfor->name, $old_fixfor->release_date, 
-			  $estimate->loadfactor, $newline); 
+    $ret .= sch_milestone($old_fixfor->ix, "RELEASE", $old_fixfor->name, 
+        $old_fixfor->release_date, $estimate->loadfactor, $newline); 
     return $ret;
 }
 
@@ -605,15 +690,21 @@ function sch_create($user)
     global $sch_curday;
     global $sch_db;
     $ret = "";
+    $sch_table_id = "sch_$user";
     
-    $ret .= "<table border=0 width='95%'>\n";
+    $ret .= "<table id='$sch_table_id' border=0 width='95%'>\n";
     $ret .= "<tr><th>" .
     join("</th><th>", array("Pri", "Task", "Subtask", "Orig", "Curr",
          "Done", "Left", "Due")) .
          "</th></tr>\n";
-    $ret .= sch_line(0, "START", "", 0,0,0,0,0, false);
+    $ret .= sch_line(0, "START", "", 0,0,0,0,0, "", false);
     if ($sch_start > sch_today())
         $ret .= sch_warning("START date is in the future!");
+
+    // Hide done bugs by default
+    $hideshow = js_make_hide_show_links("done_bug", $sch_table_id, 
+        "display:none", "", " Completed Bugs");
+    $ret .= sch_fullline($hideshow);
 
     // Shove the remaining current list of incomplete bugs onto the pile,
     // even though we don't know its target name
@@ -650,7 +741,7 @@ function sch_create($user)
     if (isset($old_fixfor))
         $ret .= sch_release_line($old_fixfor, $e, false);
 
-    $ret .= sch_line(0, "END", "", 0,0,0,0,0, true);
+    $ret .= sch_line(0, "END", "", 0,0,0,0,0, "", true);
     $ret .= "</table>";
 
     return $ret;
@@ -1050,6 +1141,7 @@ EOF;
 class Macro_Sched
 {
     var $pagestore;
+    var $include_count = 0;
 
     function parse($args, $page)
     {
@@ -1060,6 +1152,7 @@ class Macro_Sched
         global $sch_cur_incomplete_bugs;
         global $sch_got_bug, $sch_manual_bugs;
 	global $sch_db;
+        global $sch_javascript_functions;
 
 	static $current_load = 1.0;
 	static $sch_manual_ix = 0;
@@ -1067,6 +1160,11 @@ class Macro_Sched
         // Turn this on to find undefined variables, but it'll whine about the
         // spectacular $notdef variable in FogBugz.php
         //error_reporting(E_ALL);
+
+        // Ensure we only have one copy of our javascript gunk.
+        $this->include_count++;
+        if ($this->include_count > 1)
+            $sch_javascript_functions = '';
 
         $ret = "";
 
@@ -1230,7 +1328,7 @@ class Macro_Sched
                 $sch_cur_complete_bugs[] = $estimate;
         }
 
-        return $ret;
+        return $sch_javascript_functions . $ret;
     }
 }
 
