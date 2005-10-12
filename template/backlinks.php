@@ -26,11 +26,12 @@ function template_backlinks($args)
         'button_backlinks' => 1
     ));
 
-    global $pagestore;
+    global $pagestore, $UserName;
 
     $page = $args['page'];
     $backlinks = $args['backlinks'];
     $parents = $args['parents'];
+    $form_action = $UserName ? reparentURL($page) : '';
 ?>
 
 <h2>Backlinks and Nesting Information</h2>
@@ -41,7 +42,7 @@ function template_backlinks($args)
     <p>No children exist for <?=$page?>.
 <?php endif; ?>
 
-<form name="reparentForm" action="<?php print reparentURL($page); ?>" method="POST">
+<form name="reparentForm" action="<?php print $form_action; ?>" method="POST">
 
 <div class="form">
 
@@ -111,9 +112,11 @@ if ($tempText)
 ?>
 
 
+<?php if ($UserName) : ?>
 <p>
 <input type="submit" name="reparentButton" value="Reparent">
 </p>
+<?php endif; ?>
 
 </div>
 

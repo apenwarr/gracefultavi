@@ -384,8 +384,6 @@ if ($page != $HomePage && $page != 'RecentChanges')
     <td width="50%">&nbsp;</td>
     <td width="50%" align="right">
 
-    <form method="post" action="<?php print saveURL($page); ?>">
-    <div class="form">
     <?php
     if ($args['edit'])
     {
@@ -400,6 +398,8 @@ if ($page != $HomePage && $page != 'RecentChanges')
             $document = $pg->read();
             $document = str_replace('"', "\\\\'", $document);
             ?>
+            <form method="post" action="<?php print saveURL($page); ?>">
+            <div class="form">
             <input type="hidden" name="Save" value="1">
             <input type="hidden" name="appending" value="1">
             <?php
@@ -439,11 +439,13 @@ if ($page != $HomePage && $page != 'RecentChanges')
                 print '</textarea>';
                 print '<br><input type="submit" name="append" value="Add a Comment" onClick="return epilogue_quickadd_validate(this.form)">';
             }
+            ?>
+            </div>
+            </form>
+            <?php
         }
     }
     ?>
-    </div>
-    </form>
 
     </td>
     </tr>
