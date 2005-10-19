@@ -14,7 +14,7 @@ Upgrade Notes
     GracefulTavi, it is strongly recommended to do a full backup of your wiki
     database. GracefulTavi now includes an automated script that will smoothly
     upgrade your database from any old format. It has been tested against all
-    previous versions of GracefulTavi without trouble, but this is just a
+    previous versions of GracefulTavi with no trouble, but this is just a
     precaution. If anything wrong was to happen to your data during the
     automated upgrade process, please let us know.
 
