@@ -750,12 +750,12 @@ class PageStore
     function lock()
     {
         global $CoTbl, $IwTbl, $LkTbl, $PaTbl, $PgTbl, $RemTbl, $RtTbl, $SuTbl;
-        global $SwTbl;
+        global $SwTbl, $VeTbl;
 
         $this->dbh->query("LOCK TABLES $CoTbl WRITE, $IwTbl WRITE, " .
                           "$LkTbl WRITE, $PaTbl WRITE, $PgTbl WRITE, " .
                           "$RemTbl WRITE, $RtTbl WRITE, $SuTbl WRITE, " .
-                          "$SwTbl WRITE");
+                          "$SwTbl WRITE, $VeTbl WRITE");
     }
 
     // Unlock the database tables.

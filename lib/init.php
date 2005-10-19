@@ -22,6 +22,7 @@ $RtTbl = $DBTablePrefix . 'rate';
 $RemTbl = $DBTablePrefix . 'remote_pages';
 $PaTbl = $DBTablePrefix . 'parents';
 $SuTbl = $DBTablePrefix . 'subscribe';
+$VeTbl = $DBTablePrefix . 'version';
 // Don't forget to update pagestore->lock() when adding new tables.
 
 $pagestore = new PageStore();

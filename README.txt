@@ -1,5 +1,5 @@
 GracefulTavi
-Version 1.05
+Version 1.06
 --------------
 
   GracefulTavi is free software; you can redistribute it and/or modify it under
@@ -33,6 +33,12 @@ INSTALL.txt
 
 The INSTALL.txt file contains information and instructions on installing and
 setting up your own Wiki using GracefulTavi.
+
+UPGRADE.txt
+-------------
+
+The UPGRADE.txt file contains a note about the Upgrade Notes section of
+INSTALL.txt.
 
 LICENSE.txt
 -------------

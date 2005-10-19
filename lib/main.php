@@ -1,5 +1,8 @@
 <?php
 
+// Database version used by this software version.
+define('DB_VERSION', 3);
+
 // If register_globals is off, we need to harvest the script parameters
 // at this point.
 if(!ini_get('register_globals'))
@@ -48,6 +51,10 @@ if(!ini_get('register_globals'))
 }
 require('lib/init.php');
 require('parse/transforms.php');
+
+// Make sure the database version is up to date
+require('lib/dbupgrade.php');
+check_db_version(DB_VERSION);
 
 // To add an action=x behavior, add an entry to this array. First column is the
 // file to load, second is the function to call, and third is how to treat it
