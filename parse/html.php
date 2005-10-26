@@ -185,6 +185,25 @@ function html_ref($refPage, $appearance, $hover = '', $anchor = '', $anchor_appe
     } else {
         $p = new WikiPage($db, $refPage);
         $p_exists = $p->exists();
+
+        // automatically handle plurals
+        if (!$p_exists)
+        {
+            foreach (array('s', 'es') as $plural)
+            {
+                if (substr($refPage, -strlen($plural)) == $plural)
+                {
+                    $temp_refPage =
+                        substr($refPage, 0, strlen($refPage)-strlen($plural));
+                    $p = new WikiPage($db, $temp_refPage);
+                    if ($p_exists = $p->exists())
+                    {
+                        $refPage = $temp_refPage;
+                        break;
+                    }
+                }
+            }
+        }
     }
 
     $twintext = "";
