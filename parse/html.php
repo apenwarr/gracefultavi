@@ -180,6 +180,8 @@ function html_ref($refPage, $appearance, $hover = '', $anchor = '', $anchor_appe
         $hover = ' alt="'.$hover.'" title="'.$hover.'"';
     }
 
+    $redirect_from = '';
+
     if ($page == 'RecentChanges') {
         $p_exists = $pagestore->page_exists($refPage);
     } else {
@@ -198,6 +200,7 @@ function html_ref($refPage, $appearance, $hover = '', $anchor = '', $anchor_appe
                     $p = new WikiPage($db, $temp_refPage);
                     if ($p_exists = $p->exists())
                     {
+                        $redirect_from = $refPage;
                         $refPage = $temp_refPage;
                         break;
                     }
@@ -232,8 +235,10 @@ function html_ref($refPage, $appearance, $hover = '', $anchor = '', $anchor_appe
             $appearance = html_split_name($refPage);
         }
 
-        $result = '<a href="' . viewURL($refPage) . $anchor . '"' . $hover . '>'
-               . $appearance . $anchor_appearance . '</a>' . $onlytwin;
+        $result = '<a href="' . viewURL($refPage).
+                  ($redirect_from ? '&redirect_from=' . $redirect_from : '').
+                  $anchor . '"' . $hover . '>'.
+                  $appearance . $anchor_appearance . '</a>' . $onlytwin;
     }
     else
     {
