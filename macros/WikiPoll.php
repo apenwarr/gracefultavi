@@ -131,6 +131,9 @@ class Macro_WikiPoll
             $poll_members = substr($args, $ob + 1);
             $poll_members = rtrim($poll_members, ')');
             $poll_members = explode('|', $poll_members);
+            for ($i = 0; $i < count($poll_members); $i++) {
+                $poll_members[$i] = trim($poll_members[$i]);
+            }
         }
 
         if ($poll_user) {
