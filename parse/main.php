@@ -1,6 +1,6 @@
 <?php
 
-// Master parser for 'Tavi.
+// Master parser for GracefulTavi
 function parseText($text, $parsers, $object_name)
 {
   global $Entity, $ParseObject;
