@@ -84,8 +84,8 @@ $ActionList = array(
 // Default action and page names.
 if(isset($q))
   { $action = 'find'; $find = $q; }
-if($action == 'find' && $find == '%s')
-  { $action = 'view'; } // small hack for browser bookmarklets
+if($action == 'find' && $find == '%s') // small hack for browser bookmarklets
+  { $action = 'view'; $page = 'RecentChanges'; }
 if(empty($page) && empty($action))
   { $page = $QUERY_STRING; }
 if(empty($action))
