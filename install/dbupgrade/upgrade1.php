@@ -68,11 +68,11 @@ if (!$rs)
         version     MEDIUMINT UNSIGNED  NOT NULL DEFAULT '1',
         time        TIMESTAMP(14)       NOT NULL,
         supercede   TIMESTAMP(14)       NOT NULL,
+        minoredit   TINYINT             NOT NULL DEFAULT 0,
         username    VARCHAR(80)         NOT NULL,
         author      VARCHAR(80)         NOT NULL DEFAULT '',
         comment     VARCHAR(80)         NOT NULL DEFAULT '',
         body        TEXT                NOT NULL,
-        minoredit   TINYINT             NOT NULL DEFAULT 0,
         PRIMARY KEY (page, version)
     )");
 
