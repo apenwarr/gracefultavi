@@ -32,16 +32,19 @@ function action_save()
     if(isset($HTTP_POST_VARS['isnotspam'])) $isnotspam = $HTTP_POST_VARS['isnotspam'];
 
     // spam detection
-    if (!$UserName && isset($appending) && !isset($isnotspam) &&
-        ($spam_level = look_like_spam($quickadd)))
+    if (!$UserName && isset($appending))
     {
-        template_spamconfirm(array('page' => $page,
-                                   'quickadd' => $quickadd,
-                                   'comment' => $comment,
-                                   'appendingQuote' => $appendingQuote,
-                                   'quoteAuthor' => $quoteAuthor,
-                                   'spam_level' => $spam_level));
-        exit;
+        $spam_level = look_like_spam($quickadd);
+        if ($spam_level > 1 || ($spam_level == 1 && !isset($isnotspam)))
+        {
+            template_spamconfirm(array('page'           => $page,
+                                       'quickadd'       => $quickadd,
+                                       'comment'        => $comment,
+                                       'appendingQuote' => $appendingQuote,
+                                       'quoteAuthor'    => $quoteAuthor,
+                                       'spam_level'     => $spam_level));
+            exit;
+        }
     }
 
     if (empty($Save))                   // Didn't click the save button.

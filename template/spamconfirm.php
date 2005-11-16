@@ -9,6 +9,11 @@ function look_like_spam($comment)
         return 2;
     }
 
+    preg_match_all('/<a .*?href="(.*?)">\1<\/a>/i', $comment, $matches);
+    if (count($matches[0]) > 0) {
+        return 2;
+    }
+
     preg_match_all('/http:\/\//', $comment, $matches);
     if (count($matches[0]) > 20) {
         return 2;
@@ -17,7 +22,7 @@ function look_like_spam($comment)
         return 1;
     }
 
-    preg_match('/^(<hr><b>.*?<\/b>:)?(.*)$/', trim($comment), $matches);
+    preg_match('/^(<hr><b>.*?<\/b>:)?(.*)$/s', trim($comment), $matches);
     if (count(preg_split('/ +/', $matches[2], -1, PREG_SPLIT_NO_EMPTY)) < 5) {
         return 1;
     }
