@@ -25,6 +25,13 @@ $SuTbl = $DBTablePrefix . 'subscribe';
 $VeTbl = $DBTablePrefix . 'version';
 // Don't forget to update pagestore->lock() when adding new tables.
 
+// page attributes
+define('MUTABLE_ATTR', 1);
+define('TEMPLATE_ATTR', 2);
+//define('', 4);
+//define('', 8);
+//define('', 16);
+
 $pagestore = new PageStore();
 $db = $pagestore->dbh;
 

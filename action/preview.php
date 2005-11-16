@@ -5,8 +5,8 @@ require('template/preview.php');
 // Preview what a page will look like when it is saved.
 function action_preview()
 {
-  global $ParseEngine, $archive;
-  global $page, $pagefrom, $document, $nextver, $pagestore;
+  global $archive, $document, $minoredit, $nextver, $page, $pagefrom;
+  global $pagestore, $ParseEngine, $template;
 
   $document = str_replace("\r", "", $document);
   $pg = $pagestore->page($page);
@@ -20,6 +20,8 @@ function action_preview()
                          'timestamp' => $pg->time,
                          'nextver'   => $nextver,
                          'archive'   => $archive,
+                         'minoredit' => $minoredit,
+                         'template'  => $template,
                          'edituser'  => $pg->username));
 }
 ?>

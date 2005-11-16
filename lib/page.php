@@ -13,6 +13,7 @@ class WikiPage
     var $comment  = '';                   // Description of last edit.
     var $version = -1;                    // Version number of page.
     var $mutable = 1;                     // Whether page may be edited.
+    var $template = 0;                    // Whether page is a template.
     var $exists = 0;                      // Whether page already exists.
     var $db;                              // Database object.
     var $createtime;                      // Creation time of page.
@@ -52,7 +53,7 @@ class WikiPage
             $qry_version = $this->version;
         }
 
-        $qry = "SELECT id, time, author, body, mutable, version, " .
+        $qry = "SELECT id, time, author, body, attributes, version, " .
                "username, comment, createtime, updatetime " .
                "FROM $PgTbl, $CoTbl " .
                "WHERE title='$this->dbname' " .
@@ -69,7 +70,8 @@ class WikiPage
         $this->hostname = $result[2];
         $this->exists   = 1;
         $this->version  = $result[5];
-        $this->mutable  = ($result[4] == 'on');
+        $this->mutable  = (($result[4] & MUTABLE_ATTR) == MUTABLE_ATTR ? 1 : 0);
+        $this->template = (($result[4] & TEMPLATE_ATTR) == TEMPLATE_ATTR ? 1 : 0);
         $this->username = $result[6];
         $this->text     = $result[3];
         $this->comment  = $result[7];
@@ -99,15 +101,20 @@ class WikiPage
         // minor edit is always disabled if body is empty
         $insertMinorEdit = ($body_length <= 1) ? 0 : ($minoredit ? 1 : 0);
 
+        // template is disabled if body is empty
+        if ($body_length <= 1) { $this->template = 0; }
+
         if ($insertMinorEdit && !trim($this->comment)) {
             $this->comment = 'Minor edit';
         }
 
         // page table
+        $attributes = $this->mutable * MUTABLE_ATTR +
+                      $this->template * TEMPLATE_ATTR;
         if ($this->exists) {
             // get roolback information
             $qry = "SELECT lastversion, lastversion_major, bodylength, " .
-                   "createtime, updatetime " .
+                   "attributes, createtime, updatetime " .
                    "FROM $PgTbl " .
                    "WHERE id=$page_id";
             $qid = $this->db->query($qry);
@@ -115,6 +122,7 @@ class WikiPage
 
             $qry = "UPDATE $PgTbl SET lastversion=$this->version, " .
                    "bodylength=$body_length, " .
+                   "attributes=$attributes, " .
                    "createtime='$this->createtime'";
             if ($insertMinorEdit) {
                 $qry .= ", updatetime='$this->updatetime'";
@@ -128,11 +136,10 @@ class WikiPage
             $metaphone = substr(metaphone($this->name), 0, 80);
             $qry = "INSERT INTO $PgTbl (title, title_notbinary, " .
                    "lastversion, lastversion_major, metaphone, bodylength, " .
-                   "mutable, createtime, updatetime) " .
+                   "attributes, createtime, updatetime) " .
                    "VALUES ('$this->dbname', '$this->dbname', " .
                    "$this->version, $this->version, '$metaphone', " .
-                   "$body_length, '" . ($this->mutable ? 'on' : 'off') . "', " .
-                   "null, null)";
+                   "$body_length, $attributes, null, null)";
             $this->db->query($qry);
             $page_id = mysql_insert_id($this->db->handle);
             if (!$page_id) { return false; }
@@ -152,8 +159,9 @@ class WikiPage
                 $qry = "UPDATE $PgTbl SET lastversion = $rollback[0], " .
                        "lastversion_major = $rollback[1], " .
                        "bodylength = $rollback[2], " .
-                       "createtime = '$rollback[3]', " .
-                       "updatetime = '$rollback[4]' " .
+                       "attributes = $rollback[3], " .
+                       "createtime = '$rollback[4]', " .
+                       "updatetime = '$rollback[5]' " .
                        "WHERE id=$page_id";
             } else {
                 $qry = "DELETE FROM $PgTbl " .

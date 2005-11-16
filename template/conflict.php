@@ -17,7 +17,8 @@ require_once('template/common.php');
 
 function template_conflict($args)
 {
-    global $EditRows, $EditCols, $UserName, $PrefsScript;
+    global $categories, $comment, $EditCols, $EditRows, $minoredit;
+    global $PageSizeLimit, $PrefsScript, $template, $UserName;
 
     template_common_prologue(array(
         'norobots' => 1,
@@ -37,14 +38,15 @@ function template_conflict($args)
 
 <div id="body">
 <p class="warning">
-  Warning: since you started editing, this document has been changed by someone
-  else.  Please merge your edits into the current version of this document.
+  <b>Warning! Since you started editing, this document has been changed by someone
+  else. Please merge your edits into the current version of this document.</b>
 </p>
 <h1>Current Version</h1>
 <form method="post" action="<?php print saveURL($args['page']); ?>">
+<input type="hidden" name="pagesizelimit" value="<?=$PageSizeLimit?>">
 <div class="form">
-  <input type="submit" name="Save" value="Save" />
-  <input type="submit" name="Preview" value="Preview" />
+  <input type="submit" name="Save" value="Save" onClick="return sizeLimitCheck(this.form.document);">
+  <input type="submit" name="Preview" value="Preview" onClick="return sizeLimitCheck(this.form.document);">
 <?php
   if($UserName != '')
     { print 'Your user name is ' . html_ref($UserName, $UserName); }
@@ -60,6 +62,16 @@ user name<?php
     print $EditCols; ?>" wrap="virtual"><?php
   print str_replace('<', '&lt;', str_replace('&', '&amp;', $args['text']));
 ?></textarea><br />
+<?php
+print '<input id="minoredit" type="checkbox" name="minoredit" value="1"';
+if ($minoredit) print ' CHECKED';
+print '><label for="minoredit">Minor edit</label> ';
+
+print '<input id="template" type="checkbox" name="template" value="1"';
+if ($template) print ' CHECKED';
+print '><label for="template">This page is a template</label> ';
+?>
+<br>
   Summary of change:
   <input type="text" name="comment" size="40" value="" /><br />
   Add document to category:

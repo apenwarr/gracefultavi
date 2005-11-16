@@ -11,3 +11,12 @@ function sizeLimitCheck(field)
         return false;
     }
 }
+
+function useTemplate(obj, page)
+{
+    var templateName = obj.options[obj.selectedIndex].value;
+    page = page.replace(/\\/g, '\\\\');
+    page = page.replace(/'/g, '\\\'');
+    document.location = 'index.php?action=edit&page='+page+
+                        '&use_template='+escape(templateName);
+}

@@ -15,8 +15,8 @@ require_once('template/common.php');
 
 function template_preview($args)
 {
-    global $categories, $comment, $EditCols, $EditRows, $minoredit;
-    global $PageSizeLimit, $PrefsScript, $UserName;
+    global $categories, $comment, $EditCols, $EditRows, $PageSizeLimit;
+    global $PrefsScript, $UserName;
 
     template_common_prologue(array(
         'norobots' => 1,
@@ -62,16 +62,21 @@ user name<?php
   print str_replace('<', '&lt;', str_replace('&', '&amp;', $args['text']));
 ?></textarea><br />
 <?php
-print '<input type="checkbox" name="minoredit" value="1"';
-if ($minoredit) print ' CHECKED';
-print '>Minor edit<br>';
+print '<input id="minoredit" type="checkbox" name="minoredit" value="1"';
+if ($args['minoredit']) print ' CHECKED';
+print '><label for="minoredit">Minor edit</label> ';
+
+print '<input id="template" type="checkbox" name="template" value="1"';
+if ($args['template']) print ' CHECKED';
+print '><label for="template">This page is a template</label> ';
 ?>
+<br>
   Summary of change:
   <input type="text" name="comment" size="40" value="<?php
-    print $comment; ?>" /><br />
+    print htmlspecialchars($comment); ?>" /><br />
   Add document to category:
   <input type="text" name="categories" size="40" value="<?php
-    print $categories; ?>" /><br />
+    print htmlspecialchars($categories); ?>" /><br />
   <input type="submit" name="Save" value="Save" onClick="return sizeLimitCheck(this.form.document);">
   <input type="submit" name="Preview" value="Preview" onClick="return sizeLimitCheck(this.form.document);">
 <?php

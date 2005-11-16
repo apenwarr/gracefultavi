@@ -17,7 +17,7 @@
  *   table for the new versioning system.
  */
 
-global $RemTbl, $VeTbl;
+global $PgTbl, $RemTbl, $VeTbl;
 
 $rs = mysql_query("SELECT restricted FROM $RemTbl", $db->handle);
 if (!$rs)
@@ -31,9 +31,24 @@ $rs = mysql_query("SELECT version FROM $VeTbl", $db->handle);
 if (!$rs)
 {
     $db->query("DROP TABLE IF EXISTS $VeTbl");
-    $db->query("CREATE TABLE $VeTbl (
-                version TINYINT(3) UNSIGNED DEFAULT 0
-                )");
+    $db->query("CREATE TABLE $VeTbl
+                (version TINYINT(3) UNSIGNED DEFAULT 0)");
+}
+
+$rs = mysql_query("SELECT attributes FROM $PgTbl", $db->handle);
+if (!$rs)
+{
+    // the default value of attributes is 1: bit 1 = mutable
+    $db->query("ALTER TABLE $PgTbl
+                ADD attributes TINYINT UNSIGNED NOT NULL DEFAULT 1
+                AFTER mutable");
+
+    $db->query("UPDATE $PgTbl
+                SET attributes = 0
+                WHERE mutable = 'off'");
+
+    $db->query("ALTER TABLE $PgTbl
+                DROP mutable");
 }
 
 ?>

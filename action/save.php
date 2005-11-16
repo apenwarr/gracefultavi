@@ -13,7 +13,7 @@ function action_save()
     global $EnableSubscriptions, $EmailSuffix, $ErrorPageLocked;
     global $HTTP_POST_VARS, $MaxPostLen, $minoredit, $nextver, $NickName, $page;
     global $pagefrom, $pagestore, $REMOTE_ADDR, $Save, $SaveMacroEngine;
-    global $UserName, $WorkingDirectory;
+    global $template, $UserName, $WorkingDirectory;
 
     if(isset($HTTP_POST_VARS['quickadd'])) $quickadd = $HTTP_POST_VARS['quickadd'];
     if(isset($HTTP_POST_VARS['appending'])) $appending = $HTTP_POST_VARS['appending'];
@@ -60,6 +60,10 @@ function action_save()
     {
         $document = $pg->text;
         $nextver = $pg->version + 1;
+    }
+    else
+    {
+        $pg->template = $template;
     }
 
     // Edit disallowed.

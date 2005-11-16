@@ -272,6 +272,24 @@ class PageStore
         return;
     }
 
+    function getTemplatePages()
+    {
+        global $PgTbl;
+
+        $query = "SELECT title " .
+                 "FROM $PgTbl " .
+                 "WHERE (attributes & ".TEMPLATE_ATTR.") = ".TEMPLATE_ATTR." " .
+                 "ORDER BY lower(title)";
+        $qid = $this->dbh->query($query);
+
+        $list = array();
+        while ($result = $this->dbh->result($qid)) {
+            $list[] = $result[0];
+        }
+
+        return $list;
+    }
+
     // Build a tree from an array of branches
     function getTreeFromBranches($branches)
     {
@@ -778,7 +796,7 @@ class PageStore
 
         $base_qry = "SELECT p.title, c.version, c.author, " .
                     "c.time, c.username, p.bodylength, " .
-                    "c.comment, p.mutable, c.minoredit " .
+                    "c.comment, p.attributes, c.minoredit " .
                     "FROM $PgTbl p, $CoTbl c " .
                     "WHERE p.id=c.page " .
                     "AND p.bodylength>1 " .
@@ -791,8 +809,9 @@ class PageStore
 
         $list = array();
         while ($result = $this->dbh->result($qid)) {
+            $is_mutable = (($result[7] & MUTABLE_ATTR) == MUTABLE_ATTR ? 1 : 0);
             $list[] = array($result[3], $result[0], $result[2], $result[4], $result[5],
-                            $result[6], $result[7] == 'on', $result[1]);
+                            $result[6], $is_mutable, $result[1]);
         }
 
         return $list;

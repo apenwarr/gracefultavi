@@ -54,8 +54,8 @@ $qid = $dbh->prepare("CREATE TABLE " . $prefix . "pages ( "
                      . "lastversion MEDIUMINT UNSIGNED NOT NULL DEFAULT '1', "
                      . "lastversion_major MEDIUMINT UNSIGNED NOT NULL DEFAULT '1', "
                      . "metaphone VARCHAR(80) BINARY NOT NULL DEFAULT '', "
-                     . "bodylength SMALLINT UNSIGNED NOT NULL default '0', "
-                     . "mutable SET('off', 'on') NOT NULL DEFAULT 'on', "
+                     . "bodylength SMALLINT UNSIGNED NOT NULL DEFAULT '0', "
+                     . "attributes TINYINT UNSIGNED NOT NULL DEFAULT 1, "
                      . "createtime TIMESTAMP(14) NOT NULL, "
                      . "updatetime TIMESTAMP(14) NOT NULL, "
                      . "PRIMARY KEY (id), "
@@ -129,23 +129,27 @@ $qid = $dbh->prepare("CREATE TABLE " . $prefix . "poll ( "
                      . "primary key (id) )");
 $qid->execute or die "Error creating table\n";
 
+$qid = $dbh->prepare("CREATE TABLE " . $prefix . "version ( "
+                     . "version TINYINT(3) UNSIGNED DEFAULT 0 )");
+$qid->execute or die "Error creating table\n";
+
 @otb = (
-    "INSERT INTO `" . $prefix . "pages` VALUES (1,'" . $wikiname . "','" . $wikiname . "',1,1,'" . $wikiname . "',271,'on',NULL,NULL);",
-    "INSERT INTO `" . $prefix . "pages` VALUES (2,'GoodWikiKarma','GoodWikiKarma',1,1,'KTWKKRM',1043,'on',NULL,NULL);",
-    "INSERT INTO `" . $prefix . "pages` VALUES (3,'HelpPage','HelpPage',1,1,'HLPJ',894,'on',NULL,NULL);",
-    "INSERT INTO `" . $prefix . "pages` VALUES (4,'HierarchalStructure','HierarchalStructure',1,1,'HRRXLSTRKTR',346,'on',NULL,NULL);",
-    "INSERT INTO `" . $prefix . "pages` VALUES (5,'HowDoIEdit','HowDoIEdit',1,1,'HTTT',945,'on',NULL,NULL);",
-    "INSERT INTO `" . $prefix . "pages` VALUES (6,'HowDoINavigate','HowDoINavigate',1,1,'HTNFKT',353,'on',NULL,NULL);",
-    "INSERT INTO `" . $prefix . "pages` VALUES (7,'JumpSearch','JumpSearch',1,1,'JMPSRX',575,'on',NULL,NULL);",
-    "INSERT INTO `" . $prefix . "pages` VALUES (8,'RecentChanges','RecentChanges',1,1,'RSNTXNJS',8,'off',NULL,NULL);",
-    "INSERT INTO `" . $prefix . "pages` VALUES (9,'RemoteWikiLinks','RemoteWikiLinks',1,1,'RMTWKLNKS',252,'on',NULL,NULL);",
-    "INSERT INTO `" . $prefix . "pages` VALUES (10,'SandBox','SandBox',1,1,'SNTBKS',29,'on',NULL,NULL);",
-    "INSERT INTO `" . $prefix . "pages` VALUES (11,'TextFormattingRules','TextFormattingRules',1,1,'TKSTFRMTNKRLS',603,'on',NULL,NULL);",
-    "INSERT INTO `" . $prefix . "pages` VALUES (12,'WantedPages','WantedPages',1,1,'WNTTPJS',73,'off',NULL,NULL);",
-    "INSERT INTO `" . $prefix . "pages` VALUES (13,'WikiName','WikiName',1,1,'WKNM',185,'on',NULL,NULL);",
-    "INSERT INTO `" . $prefix . "pages` VALUES (14,'WikiWikiWeb','WikiWikiWeb',1,1,'WKWKWB',86,'on',NULL,NULL);",
-    "INSERT INTO `" . $prefix . "pages` VALUES (15,'OpenNit','OpenNit',1,1,'OPNT',41,'on',NULL,NULL);",
-    "INSERT INTO `" . $prefix . "pages` VALUES (16,'RemoteWikiURL','RemoteWikiURL',1,1,'RMTWKRL',26,'on',NULL,NULL);",
+    "INSERT INTO `" . $prefix . "pages` VALUES (1,'" . $wikiname . "','" . $wikiname . "',1,1,'" . $wikiname . "',271,1,NULL,NULL);",
+    "INSERT INTO `" . $prefix . "pages` VALUES (2,'GoodWikiKarma','GoodWikiKarma',1,1,'KTWKKRM',1043,1,NULL,NULL);",
+    "INSERT INTO `" . $prefix . "pages` VALUES (3,'HelpPage','HelpPage',1,1,'HLPJ',894,1,NULL,NULL);",
+    "INSERT INTO `" . $prefix . "pages` VALUES (4,'HierarchalStructure','HierarchalStructure',1,1,'HRRXLSTRKTR',346,1,NULL,NULL);",
+    "INSERT INTO `" . $prefix . "pages` VALUES (5,'HowDoIEdit','HowDoIEdit',1,1,'HTTT',945,1,NULL,NULL);",
+    "INSERT INTO `" . $prefix . "pages` VALUES (6,'HowDoINavigate','HowDoINavigate',1,1,'HTNFKT',353,1,NULL,NULL);",
+    "INSERT INTO `" . $prefix . "pages` VALUES (7,'JumpSearch','JumpSearch',1,1,'JMPSRX',575,1,NULL,NULL);",
+    "INSERT INTO `" . $prefix . "pages` VALUES (8,'RecentChanges','RecentChanges',1,1,'RSNTXNJS',8,0,NULL,NULL);",
+    "INSERT INTO `" . $prefix . "pages` VALUES (9,'RemoteWikiLinks','RemoteWikiLinks',1,1,'RMTWKLNKS',252,1,NULL,NULL);",
+    "INSERT INTO `" . $prefix . "pages` VALUES (10,'SandBox','SandBox',1,1,'SNTBKS',29,1,NULL,NULL);",
+    "INSERT INTO `" . $prefix . "pages` VALUES (11,'TextFormattingRules','TextFormattingRules',1,1,'TKSTFRMTNKRLS',603,1,NULL,NULL);",
+    "INSERT INTO `" . $prefix . "pages` VALUES (12,'WantedPages','WantedPages',1,1,'WNTTPJS',73,0,NULL,NULL);",
+    "INSERT INTO `" . $prefix . "pages` VALUES (13,'WikiName','WikiName',1,1,'WKNM',185,1,NULL,NULL);",
+    "INSERT INTO `" . $prefix . "pages` VALUES (14,'WikiWikiWeb','WikiWikiWeb',1,1,'WKWKWB',86,1,NULL,NULL);",
+    "INSERT INTO `" . $prefix . "pages` VALUES (15,'OpenNit','OpenNit',1,1,'OPNT',41,1,NULL,NULL);",
+    "INSERT INTO `" . $prefix . "pages` VALUES (16,'RemoteWikiURL','RemoteWikiURL',1,1,'RMTWKRL',26,1,NULL,NULL);",
 
     "INSERT INTO `" . $prefix . "content` VALUES (1,1,NULL,NULL,0,'','','','Welcome to [[GetTopLevel]].\\n\\n***Add content here***\\n\\n<hr>\\nAre you new to Wiki? See HelpPage and <a href=\"?action=prefs\">UserOptions</a> to get started.\\n\\nNavigation Hint: use the \"Jump to:\" (JumpSearch) entry box at the top of the page. It\\'s more powerful than you think.\\n');",
     "INSERT INTO `" . $prefix . "content` VALUES (2,1,NULL,NULL,0,'','','','So, you know how to use the Wiki.  Here\\'s how to use it well.\\n\\n- **DON\\'T** delete stuff from documentation pages.  It\\'s always good to have a record of what was discussed, even if it\\'s obsolete.  \\n\\n - There are a million ways of thinking of this, but the above statement is not totally true.  See WikiWikiWeb:GoodWikiCitizen and especially WikiWikiWeb:ThreadMess for some more discussion.  If there\\'s a discussion of whether to do something and how, you don\\'t have to retain the entire discussion: you can *summarize* it instead, which will make it more useful to people in the long run.\\n\\n- **DO** clean pages up.  If page X gets cluttered (and especially if it\\'s hard to tell what\\'s current and what\\'s old) move obsolete items to ObsoleteX and provide a link.\\n\\n - ObsoleteX is not always necessary either.  If the stuff really is obsolete, deleting it is pretty much fine.  (But again, in a discussion, be careful to retain the train of thought that made the \"wrong\" viewpoint obsolete.  Otherwise the argument will just happen again later.)\\n');",
@@ -208,7 +212,9 @@ $qid->execute or die "Error creating table\n";
     "INSERT INTO `" . $prefix . "parents` VALUES ('SandBox','HowDoIEdit');",
     "INSERT INTO `" . $prefix . "parents` VALUES ('TextFormattingRules','HowDoIEdit');",
     "INSERT INTO `" . $prefix . "parents` VALUES ('WikiName','HelpPage');",
-    "INSERT INTO `" . $prefix . "parents` VALUES ('WikiWikiWeb','HelpPage');"
+    "INSERT INTO `" . $prefix . "parents` VALUES ('WikiWikiWeb','HelpPage');",
+
+    "INSERT INTO `" . $prefix . "version` VALUES (3);"
 );
 
 while($temp = pop @otb) {
