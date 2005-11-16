@@ -14,6 +14,7 @@ function sizeLimitCheck(field)
 
 function useTemplate(obj, page)
 {
+    if (obj.selectedIndex == 0) { return; }
     var templateName = obj.options[obj.selectedIndex].value;
     page = page.replace(/\\/g, '\\\\');
     page = page.replace(/'/g, '\\\'');
