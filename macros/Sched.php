@@ -989,7 +989,7 @@ function sch_summary($fixfor, $unfixed_thres, $fixed_thres)
     }
     
     /* mouseovers on bugs */
-    table.schedsum a:hover:link,a:hover:visited,span:hover {
+    table.schedsum a:hover:link,a:hover:visited {
 	color: white; background: green;
     }
 </style>
