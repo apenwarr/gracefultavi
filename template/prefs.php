@@ -7,8 +7,8 @@ function template_prefs()
 {
     global $AuthorDiff, $DayLimit, $EditCols, $EditRows, $EmailSuffix;
     global $EnableSubscriptions, $HistMax, $HTTP_REFERER, $invalid_nick;
-    global $MinEntries, $NickName, $prefs_from, $PrefsScript, $TimeZoneOff;
-    global $UseHotPages, $UserName;
+    global $MinEntries, $NickName, $prefs_from, $PrefsScript;
+    global $SubscriptionsScript, $TimeZoneOff, $UseHotPages, $UserName;
 
     template_common_prologue(array(
         'norobots' => 1,
@@ -57,7 +57,8 @@ function template_prefs()
 
 <?php if ($EnableSubscriptions && isset($EmailSuffix) && $UserName != '') : ?>
   <strong>Subscriptions</strong><br /><br />
-  <input type="button" value="Manage subscriptions" onClick="location='?action=subscriptions'"><br /><br />
+  <input type="button" value="Manage subscriptions"
+    onClick="location='<?php print $SubscriptionsScript; ?>'"><br /><br />
   <hr />
 <?php endif; ?>
 
