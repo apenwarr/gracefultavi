@@ -4,6 +4,7 @@ require_once('template/tree.php');
 
 function toolbar_button($url, $label, $is_selected)
 {
+    $label = str_replace(' ', '&nbsp;', $label);
     if ($url) {
         $class = $is_selected ? 'buttonSelected' : 'button';
         print '<a class="'.$class.'" href="'.$url.'">'.$label.'</a> ';
