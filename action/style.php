@@ -7,8 +7,8 @@ function action_style()
 
     header("Content-type: text/css");
 
+    require('template/wiki.css');
+
     if ($StyleSheetOverride)
         require($StyleSheetOverride);
-    else
-        require('template/wiki.css');
 }
