@@ -16,7 +16,7 @@ require_once('template/common.php');
 function template_preview($args)
 {
     global $categories, $comment, $EditCols, $EditRows, $PageSizeLimit;
-    global $PrefsScript, $UserName;
+    global $PrefsScript, $ShowCategoryBox, $UserName;
 
     template_common_prologue(array(
         'norobots' => 1,
@@ -74,9 +74,11 @@ print '><label for="template">This page is a template</label> ';
   Summary of change:
   <input type="text" name="comment" size="40" value="<?php
     print htmlspecialchars($comment); ?>" /><br />
+<?php if ($ShowCategoryBox) : ?>
   Add document to category:
   <input type="text" name="categories" size="40" value="<?php
     print htmlspecialchars($categories); ?>" /><br />
+<?php endif; ?>    
   <input type="submit" name="Save" value="Save" onClick="return sizeLimitCheck(this.form.document);">
   <input type="submit" name="Preview" value="Preview" onClick="return sizeLimitCheck(this.form.document);">
 <?php

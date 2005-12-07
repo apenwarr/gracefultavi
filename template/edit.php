@@ -16,7 +16,8 @@ require('template/common.php');
 
 function template_edit($args)
 {
-    global $EditCols, $EditRows, $PageSizeLimit, $PrefsScript, $UserName;
+    global $EditCols, $EditRows, $PageSizeLimit, $PrefsScript, $ShowCategoryBox;
+    global $UserName;
 
     template_common_prologue(array(
         'norobots' => 1,
@@ -106,8 +107,10 @@ print '<input id="template" type="checkbox" name="template" value="1"'.
 Summary of change:
 <input type="text" name="comment" size="40" value=""><br>
 
+<?php if ($ShowCategoryBox) : ?>
 Add document to category:
 <input type="text" name="categories" size="40" value=""><br>
+<?php endif; ?>
 
 <input type="submit" name="Save" value="Save" onClick="return sizeLimitCheck(this.form.document);">
 <input type="submit" name="Preview" value="Preview" onClick="return sizeLimitCheck(this.form.document);">

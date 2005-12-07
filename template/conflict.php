@@ -18,7 +18,7 @@ require_once('template/common.php');
 function template_conflict($args)
 {
     global $categories, $comment, $EditCols, $EditRows, $minoredit;
-    global $PageSizeLimit, $PrefsScript, $template, $UserName;
+    global $PageSizeLimit, $PrefsScript, $ShowCategoryBox, $template, $UserName;
 
     template_common_prologue(array(
         'norobots' => 1,
@@ -73,9 +73,12 @@ print '><label for="template">This page is a template</label> ';
 ?>
 <br>
   Summary of change:
-  <input type="text" name="comment" size="40" value="" /><br />
+  <input type="text" name="comment" size="40" value="" />
+<?php if ($ShowCategoryBox) : ?>
+  <br />
   Add document to category:
   <input type="text" name="categories" size="40" value="" />
+<?php endif; ?>
 <hr />
 <h1>Your changes</h1>
   <textarea name="discard" rows="<?php

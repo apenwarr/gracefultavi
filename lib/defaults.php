@@ -184,6 +184,12 @@ $PageTooLongSize = 60000;
 // content and restore the state of the page on RecentChanges.
 $UseSpamRevert = 0;
 
+// $ShowCategoryBox determines whether the categories box should show up on the
+// Edit, Preview, and Conflict pages. If nonzero, the "Add document to category"
+// box is displayed, otherwise, the box is simply not displayed. The categories
+// functionalities are always operational.
+$ShowCategoryBox = 0;
+
 // $ParseEngine indicates what parsing rules will be run when displaying a
 //   wiki page.  To disable a particular rule, you can place a comment at the
 //   beginning of its line.  The order of this list is important.
