@@ -179,6 +179,11 @@ $EmailSuffix = '';
 $PageSizeLimit = 65535;
 $PageTooLongSize = 60000;
 
+// If $UseSpamRevert is set to 1, logged in users will be given the
+// "Spam Revert" button on the Diff page, allowing to easily remove undesired
+// content and restore the state of the page on RecentChanges.
+$UseSpamRevert = 0;
+
 // $ParseEngine indicates what parsing rules will be run when displaying a
 //   wiki page.  To disable a particular rule, you can place a comment at the
 //   beginning of its line.  The order of this list is important.

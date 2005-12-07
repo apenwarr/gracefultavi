@@ -42,6 +42,8 @@ if(!isset($TableSortScript))
   { $TableSortScript = $ScriptName . '?action=js&file=tablesort'; }
 if(!isset($CommonScript))
   { $CommonScript = $ScriptName . '?action=js&file=common'; }
+if(!isset($RevertScript))
+  { $RevertScript = $ScriptName . '?action=revert&page='; }
 
 if(!function_exists('viewURL'))
 {
@@ -156,6 +158,16 @@ function childrenURL($page)
   global $ChildrenBase;
 
   return $ChildrenBase . urlencode($page);
+}
+}
+
+if(!function_exists('revertURL'))
+{
+function revertURL($page)
+{
+  global $RevertScript;
+
+  return $RevertScript . urlencode($page);
 }
 }
 ?>

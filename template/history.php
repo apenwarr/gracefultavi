@@ -20,6 +20,7 @@ function template_history($args)
         'headlink' => $args['page'],
         'headsufx' => '',
         'toolbar'  => 1,
+        'spam_revert' => 1,
 
         'button_selected'  => 'diff',
         'button_view'      => 1,

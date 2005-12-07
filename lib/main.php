@@ -69,6 +69,7 @@ $ActionList = array(
                 'diff'    => array('action/diff.php', 'action_diff', 'search'),
                 'find'    => array('action/find.php', 'action_find', 'search'),
                 'history' => array('action/history.php', 'action_history', 'search'),
+                'revert'  => array('action/revert.php', 'action_revert', 'edit'),
                 'prefs'   => array('action/prefs.php', 'action_prefs', 'view'),
                 'macro'   => array('action/macro.php', 'action_macro', 'search'),
                 'rss'     => array('action/rss.php', 'action_rss', 'view'),

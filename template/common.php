@@ -63,6 +63,8 @@ function toolbar($page, $args)
 //   'headsufx' => A string containing the heading suffix.  If not
 //                 empty, it will be printed after the heading link.
 //   'toolbar'  => An integer; if nonzero, the toolbar will be displayed.
+//   'spam_revert' => Boolean, indicates whether or not to use the spam revert
+//                    button.
 //
 // Button specific parameters:
 //
@@ -79,7 +81,7 @@ function template_common_prologue($args)
     global $AdditionalHeader, $CommonScript, $HomePage, $MetaDescription;
     global $MetaKeywords, $page, $pagestore, $ScriptBase, $SeparateHeaderWords;
     global $SeparateTitleWords, $shortcutIcon, $StyleScript, $TableSortScript;
-    global $UserName, $WikiLogo, $WikiName;
+    global $UserName, $UseSpamRevert, $WikiLogo, $WikiName;
 
     if ($SeparateTitleWords) { $args['title'] = html_split_name($args['title']); }
 ?>
@@ -228,7 +230,18 @@ if (isset($args['tree']))
 </td></tr>
 
 <tr><td>
-<?php toolbar($page, $args); ?>
+    <table width="100%" cellspacing="0" cellpadding="0" border="0">
+    <tr valign="top">
+    <td><?php toolbar($page, $args); ?></td>
+    <?php if ($args['spam_revert'] && $UseSpamRevert && $UserName) : ?>
+        <form name="revertForm" method="post" action="<?php print revertURL($page); ?>">
+        </form>
+        <td align="right">
+        <?php print toolbar_button('javascript:spamRevert();', 'Spam Revert', 0); ?>
+        </td>
+    <?php endif; ?>
+    </tr>
+    </table>
 </td></tr>
 
 </table>

@@ -21,3 +21,8 @@ function useTemplate(obj, page)
     document.location = 'index.php?action=edit&page='+page+
                         '&use_template='+escape(templateName);
 }
+
+function spamRevert()
+{
+    document.forms.revertForm.submit();
+}
