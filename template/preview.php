@@ -72,13 +72,13 @@ print '><label for="template">This page is a template</label> ';
 ?>
 <br>
   Summary of change:
-  <input type="text" name="comment" size="40" value="<?php
+  <input type="text" name="comment" size="40" maxlength="80" value="<?php
     print htmlspecialchars($comment); ?>" /><br />
 <?php if ($ShowCategoryBox) : ?>
   Add document to category:
   <input type="text" name="categories" size="40" value="<?php
     print htmlspecialchars($categories); ?>" /><br />
-<?php endif; ?>    
+<?php endif; ?>
   <input type="submit" name="Save" value="Save" onClick="return sizeLimitCheck(this.form.document);">
   <input type="submit" name="Preview" value="Preview" onClick="return sizeLimitCheck(this.form.document);">
 <?php

@@ -73,7 +73,7 @@ print '><label for="template">This page is a template</label> ';
 ?>
 <br>
   Summary of change:
-  <input type="text" name="comment" size="40" value="" />
+  <input type="text" name="comment" size="40" maxlength="80" value="" />
 <?php if ($ShowCategoryBox) : ?>
   <br />
   Add document to category:

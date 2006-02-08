@@ -105,7 +105,7 @@ print '<input id="template" type="checkbox" name="template" value="1"'.
 <br>
 
 Summary of change:
-<input type="text" name="comment" size="40" value=""><br>
+<input type="text" name="comment" size="40" maxlength="80" value=""><br>
 
 <?php if ($ShowCategoryBox) : ?>
 Add document to category:
