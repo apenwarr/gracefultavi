@@ -294,7 +294,7 @@ function parse_bold($text)
 {
   $text = preg_replace("/&lt;b>(()|[^'].*)&lt;\/b>/Ue", "pair_tokens('bold', q1('\\1'))",
                        $text, -1);
-  
+
   return preg_replace("/'''([^']*)'''/Ue", "pair_tokens('bold', q1('\\1'))",
                       $text, -1);
 }
@@ -525,11 +525,11 @@ function parse_indents($text)
         preg_match('/^(\s*)(:)(-.*\\n?)$/', $text, $result);
     }
 
-    if(array_key_exists(1, $result) && isset($result[1])) 
+    if(array_key_exists(1, $result) && isset($result[1]))
         $indentSpaces = $result[1];
-    if(array_key_exists(2, $result) && isset($result[2])) 
+    if(array_key_exists(2, $result) && isset($result[2]))
         $indentChar = $result[2];
-    if(array_key_exists(3, $result) && isset($result[3])) 
+    if(array_key_exists(3, $result) && isset($result[3]))
         $indentText = $result[3];
 
     // No list on last line, no list on this line. Bail out:
@@ -809,6 +809,11 @@ function parse_wdiff_tags($text)
     static $after_count = 0;
 
     $buffer_size = 4;
+
+    // fix leading spaces
+    $text = preg_replace("/^(<(INS|DEL)>)?(\s+)(.+)/e", "q1('\\1') . ".
+        "new_entity(array('raw', str_repeat('&nbsp;', strlen('\\3')))) . ".
+        "q1('\\4')", $text);
 
     $text = preg_replace("/^(.*)$/e",
                          "q1('\\1') . new_entity(array('raw', '<br>'))", $text);
