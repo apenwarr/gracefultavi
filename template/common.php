@@ -451,7 +451,11 @@ if ($page != $HomePage && $page != 'RecentChanges')
                 }
                 print " (" . date('Y/m/d') . ")</b>: ";
                 print '</textarea>';
-                print '<br><input type="submit" name="append" value="Add a Comment" onClick="return epilogue_quickadd_validate(this.form)">';
+                print '<br>';
+                if (!$UserName && !$NickName) {
+                    print '<small>(Anonymous users, see <a href="'.$PrefsScript.'">UserOptions</a> to set a nickname.)</small>&nbsp;';
+                }
+                print '<input type="submit" name="append" value="Add a Comment" onClick="return epilogue_quickadd_validate(this.form)">';
             }
             ?>
             </div>
