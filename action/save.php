@@ -100,7 +100,7 @@ function action_save()
             // needed. See strpos help for information about "=== false".
             $pos = strpos($quoteAuthor, '-');
             if ($pos === false || $pos > 0)
-                { $quoteAuthor = "-- $quoteAuthor"; }
+                { $quoteAuthor = "&mdash; $quoteAuthor"; }
 
             $quickadd .= " $quoteAuthor";
         }
