@@ -886,7 +886,7 @@ function parse_table($text)
 
     if($csv_download)
     {
-      $img = '<img src="images/csv.gif" alt="Download as CSV" '.
+      $img = '<img src="images/csv.png" alt="Download as CSV" '.
              'title="Download as CSV" width="14" height="15" border="0">';
       $link = "'".'<a href="'.tablecsvURL($page, $table_count).'">'.$img.'</a>'."'.";
     }
