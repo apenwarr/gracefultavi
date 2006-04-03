@@ -902,9 +902,13 @@ function parse_table($text)
     if($csv_download)
     {
       $img = '<img align="top" src="images/csv.png" alt="Download as CSV" '.
-             'title="Download as CSV" hspace="3" width="14" height="15" border="0">';
-      $text = '<a href="'.tablecsvURL($page, $table_count).'">'.$img.
-              '<small>Download as CSV</small></a>'.$text;
+             'title="Download as CSV" hspace="3" width="14" height="15" '.
+             'border="0">';
+      $text = html_table_start().html_table_row_start().html_table_cell_start().
+              '<a href="'.tablecsvURL($page, $table_count).'">'.$img.
+              '<small>Download as CSV</small></a>'.
+              html_table_cell_end().html_table_row_end().html_table_end().
+              $text;
     }
   }
 
