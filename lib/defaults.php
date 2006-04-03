@@ -203,6 +203,7 @@ $ParseEngine = array(
                  'parse_elem_flag',
                  'parse_redirect',
                  'parse_raw_html',
+                 'parse_htmlpre',
                  'parse_htmlisms',
                  'parse_code',
                  'parse_nowiki',
@@ -318,7 +319,7 @@ $DisplayEngine = array(
                    'diff_add'            => 'html_diff_add',
                    'diff_delete'         => 'html_diff_delete'
                  );
-                 
+
 // $SaveMacroEngine determines what save macros will be called after a
 // page is saved.  See parse/save.php
 $SaveMacroEngine = array('parse_define_interwiki',
