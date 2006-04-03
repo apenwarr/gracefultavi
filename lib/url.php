@@ -170,4 +170,15 @@ function revertURL($page)
   return $RevertScript . urlencode($page);
 }
 }
+
+if(!function_exists('tablecsvURL'))
+{
+function tablecsvURL($page, $tablenum)
+{
+  global $ScriptName;
+
+  return $ScriptName . '?action=tablecsv&page='.urlencode($page).
+         '&tablenum='.$tablenum;
+}
+}
 ?>

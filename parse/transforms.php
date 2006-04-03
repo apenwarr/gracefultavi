@@ -862,19 +862,38 @@ function parse_wdiff_tags($text)
 
 function parse_table($text)
 {
+  global $page;
   static $in_table = 0;
+  static $table_count = 0;
 
   $pre = '';
   $post = '';
-  if(preg_match('/^(\|\|)+.*(\|\|)\s*$/', $text))  // Table.
+  if(preg_match('/^\*?(\|\|)+.*(\|\|)\s*$/', $text))  // Table.
   {
+    $csv_download = false;
+    $link = '';
     if(!$in_table)
     {
       $pre = html_table_start();
       $in_table = 1;
+
+      $table_count++;
+      if(preg_match('/^\*(\|\|)+.*(\|\|)\s*$/', $text))
+      {
+        $csv_download = true;
+      }
     }
-    $text = preg_replace('/^((\|\|)+)(.*)\|\|\s*$/e',
+
+    if($csv_download)
+    {
+      $img = '<img src="images/csv.gif" alt="Download as CSV" '.
+             'title="Download as CSV" width="14" height="15" border="0">';
+      $link = "'".'<a href="'.tablecsvURL($page, $table_count).'">'.$img.'</a>'."'.";
+    }
+
+    $text = preg_replace('/^\*?((\|\|)+)(.*)\|\|\s*$/e',
                          "new_entity(array('raw',html_table_row_start().html_table_cell_start(strlen('\\1')/2))).".
+                         $link.
                          "q1('\\3').new_entity(array('raw',html_table_cell_end().html_table_row_end()))",
                          $text, -1);
     $text = preg_replace('/((\|\|)+)/e',
@@ -898,6 +917,44 @@ function parse_table($text)
   }
 
   return $text;
+}
+
+function parse_tablecsv($text)
+{
+    global $tablenum;
+
+    static $in_table = 0;
+    static $table_count = 0;
+
+    if (preg_match('/^(\|\|)+.*(\|\|)\s*$/', $text))
+    {
+        if (!$in_table)
+        {
+            $in_table = 1;
+            $table_count++;
+        }
+        if ($table_count == $tablenum)
+        {
+            $cells = array();
+            foreach (explode('||', $text) as $cell)
+            {
+                $cell = trim($cell);
+                if ($cell)
+                {
+                    $cell = str_replace('"', '""', $cell);
+                    $cells[] = '"'.$cell.'"';
+                }
+            }
+            $text = implode(',', $cells)."\n";
+            return $text;
+        }
+    }
+    else if ($in_table)
+    {
+        $in_table = 0;
+    }
+
+    return;
 }
 
 function parse_redirect($text)

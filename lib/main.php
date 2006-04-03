@@ -28,6 +28,7 @@ if(!ini_get('register_globals'))
   if(isset($HTTP_GET_VARS['invalid_nick'])) $invalid_nick = $HTTP_GET_VARS['invalid_nick'];
   if(isset($HTTP_GET_VARS['prefs_from'])) $prefs_from = $HTTP_GET_VARS['prefs_from'];
   if(isset($HTTP_GET_VARS['use_template'])) $use_template = $HTTP_GET_VARS['use_template'];
+  if(isset($HTTP_GET_VARS['tablenum'])) $tablenum = $HTTP_GET_VARS['tablenum'];
 
   if(isset($HTTP_POST_VARS['Preview'])) $Preview = $HTTP_POST_VARS['Preview'];
   if(isset($HTTP_POST_VARS['Save'])) $Save = $HTTP_POST_VARS['Save'];
@@ -82,7 +83,8 @@ $ActionList = array(
                 'subscriptions' => array('action/subscriptions.php', 'action_subscriptions', 'view'),
                 'imgbar'  => array('action/imgbar.php', 'action_imgbar', ''),
                 'lock'    => array('action/lock.php', 'action_lock', ''),
-                'js'      => array('action/js.php', 'action_js', '')
+                'js'      => array('action/js.php', 'action_js', ''),
+                'tablecsv' => array('action/tablecsv.php', 'action_tablecsv', 'view')
               );
 
 // Default action and page names.
