@@ -863,20 +863,18 @@ function parse_wdiff_tags($text)
 function parse_table($text)
 {
   global $page;
-  static $in_table = 0;
+  static $in_table = false;
   static $table_count = 0;
 
   $pre = '';
   $post = '';
+  $csv_download = false;
   if(preg_match('/^\*?(\|\|)+.*(\|\|)\s*$/', $text))  // Table.
   {
-    $csv_download = false;
-    $link = '';
     if(!$in_table)
     {
       $pre = html_table_start();
-      $in_table = 1;
-
+      $in_table = true;
       $table_count++;
       if(preg_match('/^\*(\|\|)+.*(\|\|)\s*$/', $text))
       {
@@ -884,16 +882,8 @@ function parse_table($text)
       }
     }
 
-    if($csv_download)
-    {
-      $img = '<img src="images/csv.png" alt="Download as CSV" '.
-             'title="Download as CSV" width="14" height="15" border="0">';
-      $link = "'".'<a href="'.tablecsvURL($page, $table_count).'">'.$img.'</a>'."'.";
-    }
-
     $text = preg_replace('/^\*?((\|\|)+)(.*)\|\|\s*$/e',
                          "new_entity(array('raw',html_table_row_start().html_table_cell_start(strlen('\\1')/2))).".
-                         $link.
                          "q1('\\3').new_entity(array('raw',html_table_cell_end().html_table_row_end()))",
                          $text, -1);
     $text = preg_replace('/((\|\|)+)/e',
@@ -902,13 +892,20 @@ function parse_table($text)
   }
   else if($in_table)                    // Have exited table.
   {
-    $in_table = 0;
+    $in_table = false;
     $pre = html_table_end();
   }
 
   if($pre != '')
   {
     $text = new_entity(array('raw', $pre)) . parse_newline($text);
+    if($csv_download)
+    {
+      $img = '<img align="top" src="images/csv.png" alt="Download as CSV" '.
+             'title="Download as CSV" hspace="3" width="14" height="15" border="0">';
+      $text = '<a href="'.tablecsvURL($page, $table_count).'">'.$img.
+              '<small>Download as CSV</small></a>'.$text;
+    }
   }
 
   if($post != '')
@@ -923,14 +920,14 @@ function parse_tablecsv($text)
 {
     global $tablenum;
 
-    static $in_table = 0;
+    static $in_table = false;
     static $table_count = 0;
 
     if (preg_match('/^(\|\|)+.*(\|\|)\s*$/', $text))
     {
         if (!$in_table)
         {
-            $in_table = 1;
+            $in_table = true;
             $table_count++;
         }
         if ($table_count == $tablenum)
@@ -951,7 +948,7 @@ function parse_tablecsv($text)
     }
     else if ($in_table)
     {
-        $in_table = 0;
+        $in_table = false;
     }
 
     return;
