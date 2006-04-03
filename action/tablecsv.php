@@ -10,7 +10,8 @@ function action_tablecsv()
     $pg = $pagestore->page($page);
     $pg->read();
 
-    $csv = parseText($pg->text, array('parse_tablecsv'), $page);
+    $parse_engine = array('parse_htmlpre', 'parse_nowiki', 'parse_tablecsv');
+    $csv = parseText($pg->text, $parse_engine, $page);
 
     header('Content-Type: text/csv');
     header('Content-Disposition: filename="'.$page.'_'.$tablenum.'.csv"');

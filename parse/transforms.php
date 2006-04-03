@@ -927,7 +927,7 @@ function parse_tablecsv($text)
     static $in_table = false;
     static $table_count = 0;
 
-    if (preg_match('/^(\|\|)+.*(\|\|)\s*$/', $text))
+    if (preg_match('/^\*?(\|\|)+.*(\|\|)\s*$/', $text))
     {
         if (!$in_table)
         {
