@@ -51,14 +51,16 @@ class Macro_CsvTable
         }
         else
         {
-            $o .=
-                '<p>Paste in your csv file and hit submit.
+            $o .= '
+                <p>Paste in your csv file and hit submit.
+                <p>Each table cell must be enclosed with double quotes, and each
+                   actual double quote char must be doubled.
                 <form name="csvtowikitableform"
                     action="?page='.htmlspecialchars($page).'" method="POST">
                 <p><input type="submit" value="Submit">
                 <p><textarea name="csvtable" rows="'.$EditRows.'"
-                    cols="'.$EditCols.'" wrap="virtual">'.
-                '</textarea></form>';
+                    cols="'.$EditCols.'" wrap="virtual"></textarea>
+                </form>';
         }
 
         return $o;
