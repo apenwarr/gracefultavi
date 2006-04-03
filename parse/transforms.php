@@ -940,6 +940,7 @@ function parse_tablecsv($text)
             foreach (explode('||', $text) as $cell)
             {
                 $cell = trim($cell);
+                if ($cell == '*') { $cell = ''; }
                 if ($cell)
                 {
                     $cell = str_replace('"', '""', $cell);
