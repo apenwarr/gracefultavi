@@ -39,6 +39,7 @@ class Macro_Attach
         {
             $tmpname = $_FILES["$cleanname"]["tmp_name"];
             move_uploaded_file($tmpname, $fullname);
+            chmod($fullname, 0644);
         }
          
         if (file_exists($fullname))
