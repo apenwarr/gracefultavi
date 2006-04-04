@@ -82,6 +82,22 @@ class Macro_Attach
                  $out .= "<p><pre>$s</pre>";
                  fclose($f);
              }
+             else if ($type == "csv")
+             {
+                 $f = fopen("$fullname", "r");
+                 $out .= "<p><table>";
+                 while (!feof($f))
+                 {
+                     $line = fgets($f, 1024);
+                     $cols = preg_split("/,/", $line);
+                     $out .= "<tr>";
+                     foreach ($cols as $col)
+                         $out .= "<td>$col</td>";
+                     $out .= "</tr>";
+                 }
+                 $out .= "</table>";
+                 fclose($f);
+             }
              else if ($type == "img" || $type == "image")
              {
                  $out .= "<br><img src='$fullname' alt='$filename'>";
