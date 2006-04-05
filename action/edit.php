@@ -42,7 +42,7 @@ function action_edit()
 
   template_edit(array('page'      => $page,
                       'pagefrom'  => $pagefrom,
-                      'text'      => trim($page_text) != '' ? $page_text : "Describe $page here...\n\nPlease provide content before saving.\n\n&mdash; [$UserName]",
+                      'text'      => trim($page_text) != '' ? $page_text : "Describe $page here...\n\nPlease provide content before saving.\n\n-- [$UserName]",
                       'timestamp' => $pg->time,
                       'nextver'   => $pg->version + 1,
                       'archive'   => $archive,
