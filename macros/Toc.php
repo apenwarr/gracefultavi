@@ -14,13 +14,13 @@ $TocJavascriptFunctions = <<<JAVASCRIPT
 <!--
 function hideToc(i)
 {
-    document.getElementById('showtoc' + i).style.display = 'block';
+    document.getElementById('showtoc' + i).style.display = '';
     document.getElementById('toc' + i).style.display = 'none';
 }
 
 function showToc(i)
 {
-    document.getElementById('toc' + i).style.display = 'block';
+    document.getElementById('toc' + i).style.display = '';
     document.getElementById('showtoc' + i).style.display = 'none';
 }
 //-->
