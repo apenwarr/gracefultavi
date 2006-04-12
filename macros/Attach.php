@@ -80,7 +80,7 @@ class Macro_Attach
              {
                  $f = fopen("$fullname", "r");
                  $s = fread($f, 102400);
-                 $out .= "<p><pre>$s</pre>";
+                 $out .= "<p><pre>".htmlspecialchars($s)."</pre>";
                  fclose($f);
              }
              else if ($type == "csv")
