@@ -937,15 +937,13 @@ function parse_tablecsv($text)
         if ($table_count == $tablenum)
         {
             $cells = array();
-            foreach (explode('||', $text) as $cell)
+            $parts = explode('||', $text);
+            for ($i = 1; $i < count($parts)-1; $i++)
             {
-                $cell = trim($cell);
+                $cell = trim($parts[$i]);
                 if ($cell == '*') { $cell = ''; }
-                if ($cell)
-                {
-                    $cell = str_replace('"', '""', $cell);
-                    $cells[] = '"'.$cell.'"';
-                }
+                $cell = str_replace('"', '""', $cell);
+                $cells[] = '"'.$cell.'"';
             }
             $text = implode(',', $cells)."\n";
             return $text;
