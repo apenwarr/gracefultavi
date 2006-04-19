@@ -82,12 +82,13 @@ function html_hr()
   { return "<hr>\n"; }
 function html_newline()
   { return "<br>\n"; }
-function html_head_start($level, $underline, $style_inline)
+function html_head_start($level, $underline, $numbering, $style_inline)
   {
     static $count = 0; $count++;
+    $anchor = $numbering ? "section$numbering" : "toc$count";
     $class = $underline ? ' class="underline"' : '';
     $style = $style_inline ? ' style="display:inline;"': '';
-    return "<a name=\"toc$count\"></a><h$level$class$style>";
+    return "<a name=\"$anchor\"></a><h$level$class$style>";
   }
 function html_head_end($level)
   { return "</h$level>"; }

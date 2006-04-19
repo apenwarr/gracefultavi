@@ -15,12 +15,12 @@ $TocJavascriptFunctions = <<<JAVASCRIPT
 function hideToc(i)
 {
     document.getElementById('showtoc' + i).style.display = '';
-    document.getElementById('toc' + i).style.display = 'none';
+    document.getElementById('thetoc' + i).style.display = 'none';
 }
 
 function showToc(i)
 {
-    document.getElementById('toc' + i).style.display = '';
+    document.getElementById('thetoc' + i).style.display = '';
     document.getElementById('showtoc' + i).style.display = 'none';
 }
 //-->
@@ -37,6 +37,8 @@ class Macro_Toc
         global $pagestore, $MaxHeading, $document, $TocJavascriptFunctions;
         global $ViewMacroEngine;
 
+        $h_regexp = '/^\s*([_@])?(=+)([^=]*)(=+)\s*$/';
+
         $document = parseText($document, array('parse_htmlpre', 'parse_nowiki'), $page);
 
         if (!$max_level) $max_level = $MaxHeading; // maximum for the wiki
@@ -51,11 +53,11 @@ class Macro_Toc
         $found = 0;
         foreach (explode("\n", $document) as $line)
         {
-            if (preg_match('/^\s*_?(=+)([^=]*)(=+)\s*$/', strip_tags($line), $result) &&
-                strlen($result[1]) === strlen($result[3]))
+            if (preg_match($h_regexp, strip_tags($line), $result) &&
+                strlen($result[2]) === strlen($result[4]))
             {
                 $found = 1;
-                $level = min(strlen($result[1]), $max_level);
+                $level = min(strlen($result[2]), $max_level);
                 if ($level < $prev_level)
                     $prev_level = $level;
             }
@@ -68,6 +70,10 @@ class Macro_Toc
         $toc = array();
         $count = 0;
         $level = $prev_level;
+
+        // variables used for numbered headers support
+        $num_headers_count = array();
+        $last_level = 0;
 
         foreach (explode("\n", $document) as $line)
         {
@@ -84,20 +90,18 @@ class Macro_Toc
                 $toc[] = "<li><a href=\"#$anchor_name\">$matches[1]</a>";
                 if ($level+2 <= $max_level)
                 {
-                    #$prev_level = $level+2;
                     $toc[] = '<ol>';
                     foreach ($categories as $id => $name)
                         $toc[] = "<li><a href=\"#$anchor_name$id\">$name</a>";
                     $toc[] = '</ol>';
                 }
-                #$toc[] = '</ol>';
             }
 
             // actual toc based on the headers
-            if (preg_match('/^\s*_?(=+)([^=]*)(=+)\s*$/', strip_tags($line), $result) &&
-                strlen($result[1]) === strlen($result[3]))
+            if (preg_match($h_regexp, strip_tags($line), $result) &&
+                strlen($result[2]) === strlen($result[4]))
             {
-                $level = strlen($result[1]);
+                $level = strlen($result[2]);
                 $count++;
 
                 if ($level <= $max_level)
@@ -114,11 +118,32 @@ class Macro_Toc
 
                     $prev_level = $level;
 
-                    $header = $result[2];
+                    $header = $result[3];
                     $header = preg_replace('/<[^>]+>/', '', $header);
                     $header = preg_replace('/[!\\[\\]]/', '', $header);
 
-                    $toc[] = "<li><a href=\"#toc$count\">$header</a>";
+                    // support for numbered headers
+                    $header_num = '';
+                    if ($result[1])
+                    {
+                        if ($level > $last_level)
+                        {
+                            for ($i = $last_level+1; $i < $level; $i++)
+                                { $num_headers_count[$i] = 1; }
+                            $num_headers_count[$level] = 0;
+                        }
+                        $last_level = $level;
+                        $num_headers_count[$level]++;
+                        for ($i = 1; $i <= $level; $i++)
+                        {
+                            if ($header_num != '') { $header_num .= '.'; }
+                            $header_num .= $num_headers_count[$i];
+                        }
+                    }
+
+                    $anchor = $header_num ? "section$header_num" : "toc$count";
+
+                    $toc[] = "<li><a href=\"#$anchor\">$header</a>";
                 }
             }
         }
@@ -131,11 +156,11 @@ class Macro_Toc
         $return_value = '<table cellspacing="0" cellpadding="3" border=0">' .
                         '<tr id="showtoc' . $this->i . '" style="display: none;">' .
                         '<td><b>Table of contents</b> [ <a href="javascript:showToc(' . $this->i . ');">show</a> ]</td></tr>' .
-                        '<tr id="toc' . $this->i . '"><td><b>Table of contents</b> ' .
+                        '<tr id="thetoc' . $this->i . '"><td><b>Table of contents</b> ' .
                         '[ <a href="javascript:hideToc(' . $this->i . ');">hide</a> ]' . $toc . '</td></tr></table>';
 
         return "$TocJavascriptFunctions\n\n$return_value";
-   }
+    }
 }
 
 return 1;

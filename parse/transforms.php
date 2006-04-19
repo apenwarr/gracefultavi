@@ -704,7 +704,10 @@ function parse_heading($text)
 {
   global $MaxHeading;
 
-  if(!preg_match('/^\s*(_?)(=+)([^=]*)(=+)(\\\\?)(.*)$/', $text, $result))
+  static $c = array();
+  static $last_level = 0;
+
+  if(!preg_match('/^\s*([_@]?)(=+)([^=]*)(=+)(\\\\?)(.*)$/', $text, $result))
     { return $text; }
 
   if(strlen($result[2]) != strlen($result[4]))
@@ -713,9 +716,29 @@ function parse_heading($text)
   if(($level = strlen($result[2])) > $MaxHeading)
     { $level = $MaxHeading; }
 
-  return new_entity(array('head_start', $level, strlen($result[1]),
-                          strlen($result[5]))) .
-         trim($result[3]) . new_entity(array('head_end', $level)) .
+  $style_underline = $result[1] == '_';
+  $headers_numbering = $result[1] == '@';
+
+  $header_num = '';
+  if($headers_numbering)
+  {
+    if($level > $last_level) {
+      for($i = $last_level+1; $i < $level; $i++)
+        { $c[$i] = 1; }
+      $c[$level] = 0;
+    }
+    $last_level = $level;
+    $c[$level]++;
+    for ($i = 1; $i <= $level; $i++) {
+      if ($header_num != '') { $header_num .= '.'; }
+      $header_num .= $c[$i];
+    }
+    $header_num .= ' ';
+  }
+
+  return new_entity(array('head_start', $level, $style_underline,
+                          trim($header_num), strlen($result[5]))) .
+         $header_num.trim($result[3]) . new_entity(array('head_end', $level)) .
          (strlen($result[5]) ? '&nbsp;' : '') . $result[6];
 }
 
