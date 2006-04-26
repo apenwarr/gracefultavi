@@ -20,10 +20,10 @@ Upgrade Notes
 
 2.  Because GracefulTavi is highly customizable, it is necessary sometimes that
     some upgrade tasks must be performed manually. Visit our web site
-    http://open.nit.ca/wiki/?page=DownloadReleases and see each Release Notes
-    from the version you are currently using to the one you're upgrading to. See
-    the section MANUAL UPGRADE to learn about any new configuration changes that
-    you must perform manually.
+    http://open.nit.ca/wiki/?GracefulTavi and see each Release Notes from the
+    version you are currently using to the one you're upgrading to. See the
+    section MANUAL UPGRADE in each Release Notes to learn about any new
+    configuration changes that you must perform manually.
 
 
 GracefulTavi - Installation
