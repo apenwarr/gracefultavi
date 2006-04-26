@@ -706,6 +706,7 @@ function parse_heading($text)
 
   static $c = array();
   static $last_level = 0;
+  static $numbering_level_diff = -1;
 
   if(!preg_match('/^\s*([_@]?)(=+)([^=]*)(=+)(\\\\?)(.*)$/', $text, $result))
     { return $text; }
@@ -722,6 +723,9 @@ function parse_heading($text)
   $header_num = '';
   if($headers_numbering)
   {
+    if($numbering_level_diff < 0) {
+      $numbering_level_diff = $level - 1;
+    }
     if($level > $last_level) {
       for($i = $last_level+1; $i < $level; $i++)
         { $c[$i] = 1; }
@@ -729,7 +733,7 @@ function parse_heading($text)
     }
     $last_level = $level;
     $c[$level]++;
-    for ($i = 1; $i <= $level; $i++) {
+    for ($i = 1+$numbering_level_diff; $i <= $level; $i++) {
       if ($header_num != '') { $header_num .= '.'; }
       $header_num .= $c[$i];
     }
