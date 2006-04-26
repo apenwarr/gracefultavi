@@ -7,6 +7,7 @@ class Macro_Attach
     function parse($args, $page)
     {
         global $pagestore, $ParseEngine, $ParseObject, $WorkingDirectory;
+        global $UserName;
 
         if (!preg_match_all('/"[^"]*"|[^ \t]+/', $args, $words))
             return "regmatch failed!\n";
@@ -106,7 +107,7 @@ class Macro_Attach
 
              $out .= "</td>";
 
-             if (!file_exists($fullname . ".locked"))
+             if ($UserName && !file_exists($fullname . ".locked"))
              {
                  $out .= "<td><form method=POST>"
                    . "<input type='hidden' name='action-$cleanname' value=1 />"
@@ -118,17 +119,24 @@ class Macro_Attach
          else
          {
              $out .= "<td><b>Attachment:</b> $filename";
-             $out .= "<form method=POST enctype='multipart/form-data'>"
-               . "<input type='file' name='$cleanname' />"
-               . "<input type='submit' value='Submit' />"
-               . "</form></td>";
-
-             if (file_exists($delname))
+             if ($UserName)
              {
-                 $out .= "<td><form method=POST>"
-                   . "<input type='hidden' name='action-$cleanname' value=1 />"
-                   . "<input type='submit' name='Undelete' value='Undelete' />"
+                 $out .= "<form method=POST enctype='multipart/form-data'>"
+                   . "<input type='file' name='$cleanname' />"
+                   . "<input type='submit' value='Submit' />"
                    . "</form></td>";
+
+                 if (file_exists($delname))
+                 {
+                     $out .= "<td><form method=POST>"
+                       . "<input type='hidden' name='action-$cleanname' value=1 />"
+                       . "<input type='submit' name='Undelete' value='Undelete' />"
+                       . "</form></td>";
+                 }
+             }
+             else
+             {
+                $out .= "<br>The file has not been uploaded yet.";
              }
          }
 
