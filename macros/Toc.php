@@ -74,6 +74,7 @@ class Macro_Toc
         // variables used for numbered headers support
         $num_headers_count = array();
         $last_level = 0;
+        $numbering_level_diff = -1;
 
         foreach (explode("\n", $document) as $line)
         {
@@ -86,14 +87,14 @@ class Macro_Toc
                 $prev_level = $level+1;
                 $categories = $ViewMacroEngine['ChecklistMaster']->getCategories($matches[1]);
                 $anchor_name = str_replace(' ', '_', $matches[1]);
-                $toc[] = '<ol>';
-                $toc[] = "<li><a href=\"#$anchor_name\">$matches[1]</a>";
+                $toc[] = '<ul>';
+                $toc[] = "<li type=circle><a href=\"#$anchor_name\">$matches[1]</a>";
                 if ($level+2 <= $max_level)
                 {
-                    $toc[] = '<ol>';
+                    $toc[] = '<ul>';
                     foreach ($categories as $id => $name)
-                        $toc[] = "<li><a href=\"#$anchor_name$id\">$name</a>";
-                    $toc[] = '</ol>';
+                        $toc[] = "<li type=circle><a href=\"#$anchor_name$id\">$name</a>";
+                    $toc[] = '</ul>';
                 }
             }
 
@@ -109,12 +110,12 @@ class Macro_Toc
                     $indentIncrease = $level - $prev_level;
                     for ($i = 0; $i < $indentIncrease; $i++)
                     {
-                        $toc[] = '<ol>';
+                        $toc[] = '<ul>';
                         if ($i != ($indentIncrease - 1))
-                            $toc[] = '<li>';
+                            $toc[] = '<li type=circle>';
                     }
                     for ($i = $indentIncrease; $i < 0; $i++)
-                        $toc[] = '</ol>';
+                        $toc[] = '</ul>';
 
                     $prev_level = $level;
 
@@ -126,6 +127,10 @@ class Macro_Toc
                     $header_num = '';
                     if ($result[1])
                     {
+                        if ($numbering_level_diff < 0)
+                        {
+                            $numbering_level_diff = $level - 1;
+                        }
                         if ($level > $last_level)
                         {
                             for ($i = $last_level+1; $i < $level; $i++)
@@ -134,7 +139,7 @@ class Macro_Toc
                         }
                         $last_level = $level;
                         $num_headers_count[$level]++;
-                        for ($i = 1; $i <= $level; $i++)
+                        for ($i = 1+$numbering_level_diff; $i <= $level; $i++)
                         {
                             if ($header_num != '') { $header_num .= '.'; }
                             $header_num .= $num_headers_count[$i];
@@ -143,13 +148,13 @@ class Macro_Toc
 
                     $anchor = $header_num ? "section$header_num" : "toc$count";
 
-                    $toc[] = "<li><a href=\"#$anchor\">$header</a>";
+                    $toc[] = "<li type=circle><a href=\"#$anchor\">$header_num $header</a>";
                 }
             }
         }
 
         for ($i = 0; $i < $prev_level; $i++)
-            $toc[] = '</ol>';
+            $toc[] = '</ul>';
 
         $toc = implode("\n", $toc);
 
