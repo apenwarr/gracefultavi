@@ -81,6 +81,22 @@ function action_content()
             print html_ref($page, $page) . '<br>';
     }
 
+    print '<h3>Bad parenting</h3>';
+    ob_flush();
+    $pages = $pagestore->getAllPageNames();
+    foreach ($pages as $page) {
+        $backlinks = $pagestore->getBacklinks($page);
+        $parents = $pagestore->getParents($page);
+        foreach($parents as $parent) {
+            if (!in_array($parent, $backlinks)){
+                print '<a href="?action=backlinks&page='.rawurlencode($page).
+                      '">'.htmlspecialchars($page).'</a> -- '.
+                      htmlspecialchars($parent).'<br>';
+                ob_flush();
+            }
+        }
+    }
+
     print '</body></html>';
 }
 ?>
