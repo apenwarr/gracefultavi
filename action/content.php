@@ -84,6 +84,7 @@ function action_content()
     print '<h3>Bad parenting</h3>';
     ob_flush();
     $pages = $pagestore->getAllPageNames();
+    $found = 0;
     foreach ($pages as $page) {
         $backlinks = $pagestore->getBacklinks($page);
         $parents = $pagestore->getParents($page);
@@ -93,9 +94,11 @@ function action_content()
                       '">'.htmlspecialchars($page).'</a> -- '.
                       htmlspecialchars($parent).'<br>';
                 ob_flush();
+                $found = 1;
             }
         }
     }
+    if (!$found) { print 'None'; }
 
     print '</body></html>';
 }
