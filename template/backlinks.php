@@ -31,7 +31,7 @@ function template_backlinks($args)
     $page = $args['page'];
     $backlinks = $args['backlinks'];
     $parents = $args['parents'];
-    $form_action = $UserName ? reparentURL($page) : '';
+    $form_action = $UserName ? reparentURL($page) : '?';
 ?>
 
 <h2>Backlinks and Nesting Information</h2>
