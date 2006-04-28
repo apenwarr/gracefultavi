@@ -78,10 +78,11 @@ function toolbar($page, $args)
 
 function template_common_prologue($args)
 {
-    global $AdditionalHeader, $CommonScript, $HomePage, $MetaDescription;
-    global $MetaKeywords, $page, $pagestore, $ScriptBase, $SeparateHeaderWords;
-    global $SeparateTitleWords, $shortcutIcon, $StyleScript, $TableSortScript;
-    global $UserName, $UseSpamRevert, $WikiLogo, $WikiName;
+    global $AdditionalHeader, $CommonScript, $FindScript, $HomePage;
+    global $MetaDescription, $MetaKeywords, $page, $pagestore, $ScriptBase;
+    global $SeparateHeaderWords, $SeparateTitleWords, $shortcutIcon;
+    global $StyleScript, $TableSortScript, $UserName, $UseSpamRevert, $WikiLogo;
+    global $WikiName;
 
     if ($SeparateTitleWords) { $args['title'] = html_split_name($args['title']); }
 ?>
@@ -278,7 +279,7 @@ if (isset($args['tree']))
 
 function template_common_epilogue($args)
 {
-  global $AdditionalFooter, $EmailSuffix, $EnableSubscriptions, $FindScript;
+  global $AdditionalFooter, $EmailSuffix, $EnableSubscriptions;
   global $HomePage, $ndfnow, $NickName, $page, $pagestore, $PageTooLongSize;
   global $PrefsScript, $UserName;
 
