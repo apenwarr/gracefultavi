@@ -1,7 +1,5 @@
 #!/usr/bin/perl
 
-# $Id: configure.pl,v 1.7 2002/01/08 20:36:44 smoonen Exp $
-
 if(!(-t))
   { die "You must execute this script from the command line.\n"; }
 
@@ -115,7 +113,7 @@ while(<SETTINGS>)
 
 if($descriptor ne '')
   { do_variable($descriptor, $prompt, $comment); }
-  
+
 while(<DEFAULTS>) {
    print CONFIG $_;
 }

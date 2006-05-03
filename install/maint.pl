@@ -1,12 +1,10 @@
 #!/usr/bin/perl
 
-# $Id: maint.pl,v 1.3 2002/01/03 22:04:24 smoonen Exp $
-#
 # This script is used by WikkiTikkiTavi versions 0.1 and greater to maintain
 # the list of known remote pages.  This is used by the TwinPages feature.
 # Typically, it will be set up as a cron job to run periodically (e.g.,
 # once per week).
-# 
+#
 # See http://tavi.sourceforge.net/SisterWiki for more information.
 
 $database = "";                         # Database name.
