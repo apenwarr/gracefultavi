@@ -148,6 +148,7 @@ $qid->execute or die "Error creating table\n";
     "INSERT INTO `" . $prefix . "pages` VALUES (14,'WikiWikiWeb','WikiWikiWeb',1,1,'WKWKWB',86,1,NULL,NULL);",
     "INSERT INTO `" . $prefix . "pages` VALUES (15,'OpenNit','OpenNit',1,1,'OPNT',41,1,NULL,NULL);",
     "INSERT INTO `" . $prefix . "pages` VALUES (16,'RemoteWikiURL','RemoteWikiURL',1,1,'RMTWKRL',26,1,NULL,NULL);",
+    "INSERT INTO `" . $prefix . "pages` VALUES (17,'CsvTable','CsvTable',1,1,'KSFTBL',13,1,NULL,NULL);",
 
     "INSERT INTO `" . $prefix . "content` VALUES (1,1,NULL,NULL,0,'','','','Welcome to [[GetTopLevel]].\\n\\n***Add content here***\\n\\n<hr>\\nAre you new to Wiki? See HelpPage and <a href=\"?action=prefs\">UserOptions</a> to get started.\\n\\nNavigation Hint: use the \"Jump to:\" (JumpSearch) entry box at the top of the page. It\\'s more powerful than you think.\\n');",
     "INSERT INTO `" . $prefix . "content` VALUES (2,1,NULL,NULL,0,'','','','So, you know how to use the Wiki.  Here\\'s how to use it well.\\n\\n- **DON\\'T** delete stuff from documentation pages.  It\\'s always good to have a record of what was discussed, even if it\\'s obsolete.  \\n\\n - There are a million ways of thinking of this, but the above statement is not totally true.  See WikiWikiWeb:GoodWikiCitizen and especially WikiWikiWeb:ThreadMess for some more discussion.  If there\\'s a discussion of whether to do something and how, you don\\'t have to retain the entire discussion: you can *summarize* it instead, which will make it more useful to people in the long run.\\n\\n- **DO** clean pages up.  If page X gets cluttered (and especially if it\\'s hard to tell what\\'s current and what\\'s old) move obsolete items to ObsoleteX and provide a link.\\n\\n - ObsoleteX is not always necessary either.  If the stuff really is obsolete, deleting it is pretty much fine.  (But again, in a discussion, be careful to retain the train of thought that made the \"wrong\" viewpoint obsolete.  Otherwise the argument will just happen again later.)\\n');",
@@ -165,6 +166,7 @@ $qid->execute or die "Error creating table\n";
     "INSERT INTO `" . $prefix . "content` VALUES (14,1,NULL,NULL,0,'','','','The original wiki web, and home to a thriving community.\\n\\nRemoteWikiURL: http://www.c2.com/cgi/wiki?\\n');",
     "INSERT INTO `" . $prefix . "content` VALUES (15,1,NULL,NULL,0,'','','','RemoteWikiURL: http://open.nit.ca/wiki/?\\n');",
     "INSERT INTO `" . $prefix . "content` VALUES (16,1,NULL,NULL,0,'','','','#redirect RemoteWikiLinks\\n');",
+    "INSERT INTO `" . $prefix . "content` VALUES (17,1,NULL,NULL,0,'','','','[[CsvTable]]\\n');",
 
     "INSERT INTO `" . $prefix . "interwiki` VALUES ('OpenNit','OpenNit','http://open.nit.ca/wiki/?');",
     "INSERT INTO `" . $prefix . "interwiki` VALUES ('WikiWikiWeb','WikiWikiWeb','http://www.c2.com/cgi/wiki?');",
@@ -189,7 +191,14 @@ $qid->execute or die "Error creating table\n";
     "INSERT INTO `" . $prefix . "links` VALUES ('HelpPage','HowDoINavigate',1);",
     "INSERT INTO `" . $prefix . "links` VALUES ('HowDoIEdit','RemoteWikiLinks',2);",
     "INSERT INTO `" . $prefix . "links` VALUES ('HowDoIEdit','WikiName',2);",
-    "INSERT INTO `" . $prefix . "links` VALUES ('TextFormattingRules','WikiName',1);",
+    "INSERT INTO `" . $prefix . "links` VALUES ('TextFormattingRules','WikiName',3);",
+    "INSERT INTO `" . $prefix . "links` VALUES ('TextFormattingRules','FrontPage',4);",
+    "INSERT INTO `" . $prefix . "links` VALUES ('TextFormattingRules','foo',1);",
+    "INSERT INTO `" . $prefix . "links` VALUES ('TextFormattingRules','CsvTable',1);",
+    "INSERT INTO `" . $prefix . "links` VALUES ('TextFormattingRules','GracefulTavi',2);",
+    "INSERT INTO `" . $prefix . "links` VALUES ('TextFormattingRules','Memo',2);",
+    "INSERT INTO `" . $prefix . "links` VALUES ('TextFormattingRules','ShowHide',8);",
+    "INSERT INTO `" . $prefix . "links` VALUES ('TextFormattingRules','WikiPage',2);",
     "INSERT INTO `" . $prefix . "links` VALUES ('HowDoIEdit','TextFormattingRules',2);",
     "INSERT INTO `" . $prefix . "links` VALUES ('HowDoIEdit','SandBox',2);",
     "INSERT INTO `" . $prefix . "links` VALUES ('HelpPage','HowDoIEdit',1);",
@@ -197,6 +206,7 @@ $qid->execute or die "Error creating table\n";
     "INSERT INTO `" . $prefix . "links` VALUES ('RecentChanges','RecentChanges',1);",
     "INSERT INTO `" . $prefix . "links` VALUES ('" . $wikiname . "','JumpSearch',1);",
     "INSERT INTO `" . $prefix . "links` VALUES ('" . $wikiname . "','HelpPage',1);",
+    "INSERT INTO `" . $prefix . "links` VALUES ('CsvTable','CsvTable',1);",
 
     "INSERT INTO `" . $prefix . "parents` VALUES ('GoodWikiKarma','HelpPage');",
     "INSERT INTO `" . $prefix . "parents` VALUES ('HelpPage','" . $wikiname . "');",
@@ -211,6 +221,7 @@ $qid->execute or die "Error creating table\n";
     "INSERT INTO `" . $prefix . "parents` VALUES ('TextFormattingRules','HowDoIEdit');",
     "INSERT INTO `" . $prefix . "parents` VALUES ('WikiName','HelpPage');",
     "INSERT INTO `" . $prefix . "parents` VALUES ('WikiWikiWeb','HelpPage');",
+    "INSERT INTO `" . $prefix . "parents` VALUES ('CsvTable','TextFormattingRules');",
 
     "INSERT INTO `" . $prefix . "version` VALUES (3);"
 );
