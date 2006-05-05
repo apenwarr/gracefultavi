@@ -88,12 +88,12 @@ class Macro_Toc
                 $categories = $ViewMacroEngine['ChecklistMaster']->getCategories($matches[1]);
                 $anchor_name = str_replace(' ', '_', $matches[1]);
                 $toc[] = '<ul>';
-                $toc[] = "<li type=circle><a href=\"#$anchor_name\">$matches[1]</a>";
+                $toc[] = "<li type=disc><a href=\"#$anchor_name\">$matches[1]</a>";
                 if ($level+2 <= $max_level)
                 {
                     $toc[] = '<ul>';
                     foreach ($categories as $id => $name)
-                        $toc[] = "<li type=circle><a href=\"#$anchor_name$id\">$name</a>";
+                        $toc[] = "<li type=disc><a href=\"#$anchor_name$id\">$name</a>";
                     $toc[] = '</ul>';
                 }
             }
@@ -112,7 +112,7 @@ class Macro_Toc
                     {
                         $toc[] = '<ul>';
                         if ($i != ($indentIncrease - 1))
-                            $toc[] = '<li type=circle>';
+                            $toc[] = '<li type=disc>';
                     }
                     for ($i = $indentIncrease; $i < 0; $i++)
                         $toc[] = '</ul>';
@@ -120,8 +120,11 @@ class Macro_Toc
                     $prev_level = $level;
 
                     $header = $result[3];
+                    // remove tags, brackets around wiki words, and
+                    // exclamations marks disabling wiki words
                     $header = preg_replace('/<[^>]+>/', '', $header);
-                    $header = preg_replace('/[!\\[\\]]/', '', $header);
+                    $header = preg_replace('/[\\[\\]]/', '', $header);
+                    $header = preg_replace('/!(\S)/', '\\1', $header);
 
                     // support for numbered headers
                     $header_num = '';
@@ -148,7 +151,7 @@ class Macro_Toc
 
                     $anchor = $header_num ? "section$header_num" : "toc$count";
 
-                    $toc[] = "<li type=circle><a href=\"#$anchor\">$header_num $header</a>";
+                    $toc[] = "<li type=disc><a href=\"#$anchor\">$header_num $header</a>";
                 }
             }
         }
