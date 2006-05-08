@@ -9,8 +9,8 @@ require('parse/save.php');
 // Commit an edit to the database.
 function action_save()
 {
-    global $Admin, $archive, $categories, $comment, $document;
-    global $EnableSubscriptions, $EmailSuffix, $ErrorPageLocked;
+    global $Admin, $archive, $categories, $comment, $document, $Diff3Cmd;
+    global $EnableDiff3, $EnableSubscriptions, $EmailSuffix, $ErrorPageLocked;
     global $HTTP_POST_VARS, $MaxPostLen, $minoredit, $nextver, $NickName, $page;
     global $pagefrom, $pagestore, $REMOTE_ADDR, $Save, $SaveMacroEngine;
     global $template, $UserName, $WorkingDirectory;
@@ -83,10 +83,64 @@ function action_save()
         && $page_hostname != gethostbyaddr($REMOTE_ADDR) // Wasn't us.
         && !$archive)                   // Not editing an archive version.
     {
-        $pagestore->unlock();
-        include('action/conflict.php');
-        action_conflict();
-        return;
+        $merge_conflict = 1;
+
+        $diff3_test = array();
+        if ($EnableDiff3)
+        {
+            exec($Diff3Cmd . ' --help', $diff3_test);
+        }
+        if (count($diff3_test))
+        {
+            // page conflict, try to merge
+            $your_file_text = $pg->text;
+            $my_file_text = str_replace("\r", "", $document);
+            $pg_old = $pagestore->page($page);
+            $pg_old->version = $nextver-1;
+            $pg_old->read();
+            $old_file_text = $pg_old->text;
+
+            global $TempDir;
+            $num = posix_getpid();  // Comment if running on Windows.
+            // $num = rand();       // Uncomment if running on Windows.
+            $my_file = $TempDir . '/wiki_' . $num . '_my_file.txt';
+            $old_file = $TempDir . '/wiki_' . $num . '_old_file.txt';
+            $your_file = $TempDir . '/wiki_' . $num . '_your_file.txt';
+            if (!($h_my = fopen($my_file, 'w')) ||
+                !($h_old = fopen($old_file, 'w')) ||
+                !($h_your = fopen($your_file, 'w')))
+                { die("ErrorCreatingTemp"); }
+            if (fwrite($h_my, $my_file_text) < 0 ||
+                fwrite($h_old, $old_file_text) < 0 ||
+                fwrite($h_your, $your_file_text) < 0)
+                { die("ErrorWritingTemp"); }
+            fclose($h_my);
+            fclose($h_old);
+            fclose($h_your);
+
+            exec($Diff3Cmd.' -m '.$my_file.' '.$old_file.' '.$your_file, $merge);
+
+            unlink($my_file);
+            unlink($old_file);
+            unlink($your_file);
+
+            $merge = implode("\n", $merge);
+            $regexp = '/[<\|>]{7} '.
+                preg_quote($TempDir.'/wiki_'.$num.'_', '/').'/s';
+            $merge_conflict = preg_match($regexp, $merge);
+        }
+
+        if ($merge_conflict)
+        {
+            $pagestore->unlock();
+            include('action/conflict.php');
+            action_conflict();
+            return;
+        }
+        else
+        {
+            $document = $merge;
+        }
     }
 
     // "Add a Comment" is "Add a Quote" for specific pages like AnnoyingQuote

@@ -96,6 +96,14 @@ $WdiffLibrary = 0;
 //   the cookie to store the diff mode preference.
 $DiffModeCookieName = 'diffmode';
 
+// If $EnableDiff3 is set to 1, the wiki will try to merge conflicting
+//   revisions before showing the manual conflict resolution page. This uses the
+//   external "diff3" executable to perform the merge.
+$EnableDiff3 = 0;
+
+// $Diff3Cmd determines what command to run to merge conflicting revisions.
+//$Diff3Cmd = "/home/nitwiki/Files/diff3"
+
 // $EditRows and $EditCols determine the default dimensions of the wiki edit
 //   box for users that have not set their preferences.
 $EditRows = 20;
