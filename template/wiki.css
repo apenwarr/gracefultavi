@@ -3,10 +3,10 @@
 body {
     background-color: #eeeeee;
     color:            #000000;
-    margin-right:     0%;
-    margin-left:      0%;
-    margin-top:       0%;
-    margin-bottom:    0%;
+    margin-right:     0px;
+    margin-left:      0px;
+    margin-top:       0px;
+    margin-bottom:    0px;
 }
 a:link {
     color:      #0000ff;  /* 4f6997 */
@@ -36,7 +36,7 @@ span.highlightfail {
     font-weight: bold;
 }
 img {
-    border: 0;
+    border: 0px;
 }
 div.logo {
     float: left;
@@ -82,16 +82,19 @@ del {
     text-decoration:  none;
 }
 h1 {
-    margin-bottom: 0;
+    margin-bottom: 0px;
 }
 h2 {
-    margin-bottom: 0;
+    margin-bottom: 0px;
 }
 h1.underline,h2.underline,h3.underline,
 h4.underline,h5.underline,h6.underline {
     padding-top: 0.5em;
     padding-bottom: 0.17em;
     border-bottom: 1px solid #aaaaaa;
+}
+h7 h8 h9 {
+    font-weight: bold;
 }
 hr {
     width: 80%; /* 70% */
@@ -103,11 +106,11 @@ input.fullWidth {
     width: 100%;
 }
 dl, ul, ol {
-    margin-top:    0pt;
-    margin-bottom: 0pt;
+    margin-top:    0px;
+    margin-bottom: 0px;
 }
 form {
-    margin-top: 0pt;
+    margin-top: 0px;
 }
 p.warning {
     color:      #ff3f3f;
@@ -123,6 +126,12 @@ tt {
 pre {
     background: transparent;
     color:      #383838;
+}
+.content {
+    margin-left: 1em;
+}
+.content h1, h2, h3, h4, h5, h6, h7, h8, h9 {
+    margin-left: -0.5em;
 }
 .content table {
     background: #ffffff;

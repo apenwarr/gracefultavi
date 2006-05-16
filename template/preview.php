@@ -35,12 +35,11 @@ function template_preview($args)
     ));
 ?>
 
-<div id="body" class="content">
+<div class="form">
 <form method="post" action="<?php print saveURL($args['page']); ?>">
 <input type="hidden" name="pagesizelimit" value="<?=$PageSizeLimit?>">
-<div class="form">
-  <input type="submit" name="Save" value="Save" onClick="return sizeLimitCheck(this.form.document);">
-  <input type="submit" name="Preview" value="Preview" onClick="return sizeLimitCheck(this.form.document);">
+<input type="submit" name="Save" value="Save" onClick="return sizeLimitCheck(this.form.document);">
+<input type="submit" name="Preview" value="Preview" onClick="return sizeLimitCheck(this.form.document);">
 <?php
   if($UserName != '')
     { print 'Your user name is ' . html_ref($UserName, $UserName); }
@@ -90,6 +89,8 @@ print '><label for="template">This page is a template</label> ';
 user name<?php
   }
 ?>
+
+<div id="body" class="content">
 <h1>Preview</h1>
 <hr />
 <?php print $args['html']; ?>
