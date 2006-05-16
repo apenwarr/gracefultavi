@@ -166,7 +166,7 @@ if (isset($args['redirect_from']) && $args['redirect_from']) {
 <table cellspacing="0" cellpadding="0" border="0">
 <tr>
 <td>Jump to:&nbsp;</td>
-<td><input type="text" name="find" size="20"></td>
+<td><input type="text" name="find" size="20" accesskey=","></td>
 </tr>
 
 <?php
