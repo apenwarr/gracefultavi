@@ -7,6 +7,9 @@ require_once('template/common.php');
 //
 //   page      => A string containing the name of the wiki page being viewed.
 //   text      => A string containing the wiki markup of the wiki page.
+//   section     => An integer, section number being edited
+//   text_before => A string, content of the page before the edited section
+//   text_after  => A string, content of the page after the edited section
 //   html      => A string containing the XHTML rendering of the wiki page.
 //   timestamp => Timestamp of last edit to page.
 //   nextver   => An integer; the expected version of this document when saved.
@@ -18,10 +21,12 @@ function template_preview($args)
     global $categories, $comment, $EditCols, $EditRows, $PageSizeLimit;
     global $PrefsScript, $ShowCategoryBox, $UserName;
 
+    $section_title = $args['section'] ? 'section of ' : '';
+
     template_common_prologue(array(
         'norobots' => 1,
-        'title'    => 'Previewing ' . $args['page'],
-        'heading'  => 'Previewing ',
+        'title'    => 'Previewing ' . $section_title . $args['page'],
+        'heading'  => 'Previewing ' . $section_title,
         'headlink' => $args['page'],
         'headsufx' => '',
         'tree'     => 1,
@@ -38,8 +43,10 @@ function template_preview($args)
 <div class="form">
 <form method="post" action="<?php print saveURL($args['page']); ?>">
 <input type="hidden" name="pagesizelimit" value="<?=$PageSizeLimit?>">
-<input type="submit" name="Save" value="Save" onClick="return sizeLimitCheck(this.form.document);">
-<input type="submit" name="Preview" value="Preview" onClick="return sizeLimitCheck(this.form.document);">
+<input type="submit" name="Save" value="Save"
+    onClick="return sizeLimitCheck(this.form, 'document', 'text_before', 'text_after');">
+<input type="submit" name="Preview" value="Preview"
+    onClick="return sizeLimitCheck(this.form, 'document', 'text_before', 'text_after');">
 <?php
   if($UserName != '')
     { print 'Your user name is ' . html_ref($UserName, $UserName); }
@@ -51,6 +58,11 @@ user name<?php
 ?><br />
   <input type="hidden" name="nextver" value="<?php print $args['nextver']; ?>">
   <input type="hidden" name="pagefrom" value="<?php print $args['pagefrom']; ?>">
+
+  <input type="hidden" name="section" value="<?php print intval($args['section']); ?>">
+  <input type="hidden" name="text_before" value="<?php print htmlspecialchars($args['text_before']); ?>">
+  <input type="hidden" name="text_after" value="<?php print htmlspecialchars($args['text_after']); ?>">
+
 <?php  if($args['archive'])
     {?>
   <input type="hidden" name="archive" value="1" />
@@ -78,8 +90,10 @@ print '><label for="template">This page is a template</label> ';
   <input type="text" name="categories" size="40" value="<?php
     print htmlspecialchars($categories); ?>" /><br />
 <?php endif; ?>
-  <input type="submit" name="Save" value="Save" onClick="return sizeLimitCheck(this.form.document);">
-  <input type="submit" name="Preview" value="Preview" onClick="return sizeLimitCheck(this.form.document);">
+  <input type="submit" name="Save" value="Save"
+    onClick="return sizeLimitCheck(this.form, 'document', 'text_before', 'text_after');">
+  <input type="submit" name="Preview" value="Preview"
+    onClick="return sizeLimitCheck(this.form, 'document', 'text_before', 'text_after');">
 <?php
   if($UserName != '')
     { print 'Your user name is ' . html_ref($UserName, $UserName); }

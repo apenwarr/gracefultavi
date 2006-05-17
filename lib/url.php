@@ -80,6 +80,16 @@ function editURL($page, $version = '', $pagefrom = '')
 }
 }
 
+if(!function_exists('editSectionURL'))
+{
+function editSectionURL($page, $section)
+{
+  global $EditBase;
+
+  return $EditBase . urlencode($page) . "&amp;section=$section";
+}
+}
+
 if(!function_exists('historyURL'))
 {
 function historyURL($page, $full = '')

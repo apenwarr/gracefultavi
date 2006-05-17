@@ -13,7 +13,8 @@ function action_save()
     global $EnableDiff3, $EnableSubscriptions, $EmailSuffix, $ErrorPageLocked;
     global $HTTP_POST_VARS, $MaxPostLen, $minoredit, $nextver, $NickName, $page;
     global $pagefrom, $pagestore, $REMOTE_ADDR, $Save, $SaveMacroEngine;
-    global $template, $UserName, $WorkingDirectory;
+    global $section, $template, $text_before, $text_after, $UserName;
+    global $WorkingDirectory;
 
     if(isset($HTTP_POST_VARS['quickadd'])) $quickadd = $HTTP_POST_VARS['quickadd'];
     if(isset($HTTP_POST_VARS['appending'])) $appending = $HTTP_POST_VARS['appending'];
@@ -66,6 +67,10 @@ function action_save()
     }
     else
     {
+        if ($section)
+        {
+            $document = $text_before."\n\n".trim($document)."\n\n".$text_after;
+        }
         $pg->template = $template;
     }
 

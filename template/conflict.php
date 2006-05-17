@@ -45,8 +45,8 @@ function template_conflict($args)
 <form method="post" action="<?php print saveURL($args['page']); ?>">
 <input type="hidden" name="pagesizelimit" value="<?=$PageSizeLimit?>">
 <div class="form">
-  <input type="submit" name="Save" value="Save" onClick="return sizeLimitCheck(this.form.document);">
-  <input type="submit" name="Preview" value="Preview" onClick="return sizeLimitCheck(this.form.document);">
+  <input type="submit" name="Save" value="Save" onClick="return sizeLimitCheck(this.form, 'document');">
+  <input type="submit" name="Preview" value="Preview" onClick="return sizeLimitCheck(this.form, 'document');">
 <?php
   if($UserName != '')
     { print 'Your user name is ' . html_ref($UserName, $UserName); }

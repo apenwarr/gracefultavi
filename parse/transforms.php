@@ -700,19 +700,31 @@ function entity_listitem($type, $fn)
     { return new_entity(array('cite_item_' . $fn)); }
 }
 
+function parse_heading_regexp()
+{
+  return '/^\s*([_@]?)(=+)([^=]*)(=+)(\\\\?)(.*)$/';
+}
+
 function parse_heading($text)
 {
-  global $MaxHeading;
+  global $action, $MaxHeading, $page, $pagestore, $UserName;
 
   static $c = array();
   static $last_level = 0;
   static $numbering_level_diff = -1;
+  static $show_edit_link;
 
-  if(!preg_match('/^\s*([_@]?)(=+)([^=]*)(=+)(\\\\?)(.*)$/', $text, $result))
+  if(!preg_match(parse_heading_regexp(), $text, $result))
     { return $text; }
 
   if(strlen($result[2]) != strlen($result[4]))
     { return $text; }
+
+  if (!isset($show_edit_link))
+  {
+    $pg = $pagestore->page($page);
+    $show_edit_link = $UserName && $pg->mutable && $action == 'view';
+  }
 
   if(($level = strlen($result[2])) > $MaxHeading)
     { $level = $MaxHeading; }
@@ -741,7 +753,7 @@ function parse_heading($text)
   }
 
   return new_entity(array('head_start', $level, $style_underline,
-                          trim($header_num), strlen($result[5]))) .
+         trim($header_num), strlen($result[5]), $show_edit_link)) .
          $header_num.trim($result[3]) . new_entity(array('head_end', $level)) .
          (strlen($result[5]) ? '&nbsp;' : '') . $result[6];
 }

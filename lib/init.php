@@ -41,6 +41,8 @@ $Entity = array();                      // Global parser entity list.
 if(get_magic_quotes_gpc())
 {
   if(isset($document)) $document = stripslashes($document);
+  if(isset($text_before)) $text_before = stripslashes($text_before);
+  if(isset($text_after)) $text_after = stripslashes($text_after);
   if(isset($categories)) $categories = stripslashes($categories);
   if(isset($comment)) $comment = stripslashes($comment);
   if(isset($page)) $page = stripslashes($page);

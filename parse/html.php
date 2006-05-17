@@ -82,13 +82,22 @@ function html_hr()
   { return "<hr>\n"; }
 function html_newline()
   { return "<br>\n"; }
-function html_head_start($level, $underline, $numbering, $style_inline)
+function html_head_start($level, $underline, $numbering, $style_inline,
+                         $show_edit_link)
   {
     static $count = 0; $count++;
+    $edit_link = '';
+    if ($show_edit_link)
+    {
+      global $page;
+      static $section = 0; $section++;
+      $edit_link = '<div style="float:right;margin-left:5px;">[<a href="'.
+                   editSectionURL($page, $section).'">edit</a>]</div>';
+    }
     $anchor = $numbering ? "section$numbering" : "toc$count";
     $class = $underline ? ' class="underline"' : '';
     $style = $style_inline ? ' style="display:inline;"': '';
-    return "<a name=\"$anchor\"></a><h$level$class$style>";
+    return $edit_link."<a name=\"$anchor\"></a><h$level$class$style>";
   }
 function html_head_end($level)
   { return "</h$level>"; }

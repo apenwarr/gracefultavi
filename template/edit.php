@@ -9,6 +9,9 @@ require('template/common.php');
 //   pagefrom  => A string containing the name of the wiki page where the page
 //                being created is linked.
 //   text      => A string containing the wiki markup of the wiki page.
+//   section     => An integer, section number being edited
+//   text_before => A string, content of the page before the edited section
+//   text_after  => A string, content of the page after the edited section
 //   timestamp => Timestamp of last edit to page.
 //   nextver   => An integer; the expected version of this document when saved.
 //   archive   => An integer.  Will be nonzero if this is not the most recent
@@ -19,10 +22,12 @@ function template_edit($args)
     global $EditCols, $EditRows, $PageSizeLimit, $PrefsScript, $ShowCategoryBox;
     global $UserName;
 
+    $section_title = $args['section'] ? 'section of ' : '';
+
     template_common_prologue(array(
         'norobots' => 1,
-        'title'    => 'Editing ' . $args['page'],
-        'heading'  => 'Editing ',
+        'title'    => 'Editing ' . $section_title . $args['page'],
+        'heading'  => 'Editing ' . $section_title,
         'headlink' => $args['page'],
         'headsufx' => '',
         'tree'     => 1,
@@ -42,6 +47,11 @@ function template_edit($args)
 <input type="hidden" name="pagesizelimit" value="<?=$PageSizeLimit?>">
 <input type="hidden" name="nextver" value="<?php print $args['nextver']; ?>">
 <input type="hidden" name="pagefrom" value="<?php print $args['pagefrom']; ?>">
+
+<input type="hidden" name="section" value="<?php print intval($args['section']); ?>">
+<input type="hidden" name="text_before" value="<?php print htmlspecialchars($args['text_before']); ?>">
+<input type="hidden" name="text_after" value="<?php print htmlspecialchars($args['text_after']); ?>">
+
 <?php
 if($args['archive'])
     print '<input type="hidden" name="archive" value="1">';
@@ -52,8 +62,10 @@ if($args['archive'])
 <table width="100%" cellspacing="0" cellpadding="0" border="0">
 <tr>
 <td>
-<input type="submit" name="Save" value="Save" onClick="return sizeLimitCheck(this.form.document);">
-<input type="submit" name="Preview" value="Preview" onClick="return sizeLimitCheck(this.form.document);">
+<input type="submit" name="Save" value="Save"
+    onClick="return sizeLimitCheck(this.form, 'document', 'text_before', 'text_after');">
+<input type="submit" name="Preview" value="Preview"
+    onClick="return sizeLimitCheck(this.form, 'document', 'text_before', 'text_after');">
 
 <?php
 if($UserName != '')
@@ -64,7 +76,7 @@ else
 </td>
 <td align="right">
 <?php
-if ($args['templates'])
+if ($args['templates'] && !$args['section'])
 {
     print 'Templates: <select name="templateName">'."\n";
     print '<option value="">-- Select a template --'."\n";
@@ -112,8 +124,10 @@ Add document to category:
 <input type="text" name="categories" size="40" value=""><br>
 <?php endif; ?>
 
-<input type="submit" name="Save" value="Save" onClick="return sizeLimitCheck(this.form.document);">
-<input type="submit" name="Preview" value="Preview" onClick="return sizeLimitCheck(this.form.document);">
+<input type="submit" name="Save" value="Save"
+    onClick="return sizeLimitCheck(this.form, 'document', 'text_before', 'text_after');">
+<input type="submit" name="Preview" value="Preview"
+    onClick="return sizeLimitCheck(this.form, 'document', 'text_before', 'text_after');">
 
 <?php
 if($UserName != '')
