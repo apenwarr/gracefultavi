@@ -190,7 +190,7 @@ if ( $args['headlink']
 </form>
 
 </td>
-</td>
+</tr>
 </table>
 
 <?php
