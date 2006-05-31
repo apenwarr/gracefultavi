@@ -251,6 +251,7 @@ if (isset($args['tree']))
 <table width="98%" align="center" border="1" bordercolor="black" cellspacing="0" bgcolor="white" cellpadding="10">
 <tr>
 <td>
+<!-- end prologue -->
 <?php
 }
 
@@ -286,6 +287,7 @@ function template_common_epilogue($args)
   $pg = $pagestore->page($page);
   $pagetext = $pg->text;
 ?>
+<!-- start epilogue -->
 </td>
 </tr>
 </table>

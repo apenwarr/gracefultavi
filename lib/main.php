@@ -58,6 +58,11 @@ if(!ini_get('register_globals'))
   if(isset($HTTP_POST_VARS['tzoff'])) $tzoff = $HTTP_POST_VARS['tzoff'];
 }
 require('lib/init.php');
+
+if (isset($_GET['pdf'])) {
+    $UserName = '';
+}
+
 require('parse/transforms.php');
 
 // Make sure the database version is up to date
