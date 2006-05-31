@@ -15,6 +15,8 @@ function toolbar_button($url, $label, $is_selected)
 
 function toolbar($page, $args)
 {
+    global $PdfEngineUrl, $UserName;
+
     // view
     toolbar_button($args['button_view'] ? viewURL($args['headlink']) : '',
         'View', $args['button_selected']=='view');
@@ -43,6 +45,13 @@ function toolbar($page, $args)
                     backlinksURL($args['headlink']) : '';
     toolbar_button($backlinks_url, 'Backlinks',
         $args['button_selected']=='backlinks');
+
+    // pdf
+    if ($PdfEngineUrl) {
+        $pdf_url = $PdfEngineUrl.'?page='.htmlspecialchars($page).
+                   '&user='.htmlspecialchars($UserName);
+        toolbar_button($pdf_url, 'Save as PDF', false);
+    }
 }
 
 

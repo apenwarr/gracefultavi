@@ -198,6 +198,12 @@ $UseSpamRevert = 0;
 // functionalities are always operational.
 $ShowCategoryBox = 0;
 
+// $PdfEngineUrl allows an experienced administrator to setup a pdf generator.
+// In your configuration file, set $PdfEngineUrl to the url of the generator,
+// without any trailing question mark. It is passed two parameters: "page" and
+// "user".
+$PdfEngineUrl = '';
+
 // $ParseEngine indicates what parsing rules will be run when displaying a
 //   wiki page.  To disable a particular rule, you can place a comment at the
 //   beginning of its line.  The order of this list is important.
