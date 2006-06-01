@@ -15,8 +15,6 @@ function toolbar_button($url, $label, $is_selected)
 
 function toolbar($page, $args)
 {
-    global $PdfEngineUrl, $UserName;
-
     // view
     toolbar_button($args['button_view'] ? viewURL($args['headlink']) : '',
         'View', $args['button_selected']=='view');
@@ -45,13 +43,6 @@ function toolbar($page, $args)
                     backlinksURL($args['headlink']) : '';
     toolbar_button($backlinks_url, 'Backlinks',
         $args['button_selected']=='backlinks');
-
-    // pdf
-    if ($PdfEngineUrl) {
-        $pdf_url = $PdfEngineUrl.'?page='.htmlspecialchars($page).
-                   '&user='.htmlspecialchars($UserName);
-        toolbar_button($pdf_url, 'Save as PDF', false);
-    }
 }
 
 
@@ -291,7 +282,7 @@ function template_common_epilogue($args)
 {
   global $AdditionalFooter, $EmailSuffix, $EnableSubscriptions;
   global $HomePage, $ndfnow, $NickName, $page, $pagestore, $PageTooLongSize;
-  global $PrefsScript, $UserName;
+  global $PdfEngineUrl, $PrefsScript, $UserName;
 
   $pg = $pagestore->page($page);
   $pagetext = $pg->text;
@@ -343,6 +334,7 @@ if ($ndfnow) print '<br><br><a href="?NowOnWednesdays"><img src="images/ndfnow.p
 
 if (isset($args['timestamp']))
 {
+    print '</td>';
     print '<td align="center"><i>Last edited ' . html_time($args['timestamp']);
 
     if ($args['timestamp'] != '')
@@ -365,20 +357,35 @@ if (isset($args['twin']) && $args['twin'] != '')
         {
             print html_twin($twin[$i][0], $twin[$i][1]) . ' ';
         }
-        print '</td>';
     }
+}
+
+print '</td>';
+print '<td align="right">';
+
+// save as pdf
+if ($PdfEngineUrl)
+{
+    $pdf_url = $PdfEngineUrl.'?page='.htmlspecialchars($page).
+               '&user='.htmlspecialchars($UserName);
+    print '<b><a href="'.$pdf_url.'">Save as PDF</a></b>';
+}
+
+if ($PdfEngineUrl && $args['editver'] != -1) {
+    print ' | ';
 }
 
 if (isset($args['edit']))
 {
     if ($args['editver'] == 0)
-        print '<td align="right"><b><a href="' . editURL($args['edit']) . '">Edit this page</a></b></td>';
+        print '<b><a href="' . editURL($args['edit']) . '">'.
+              'Edit this page</a></b>';
     else if ($args['editver'] == -1)
         ; //print 'This document cannot be edited';
     else
     {
-        print '<td align="left"><a href="' . editURL($args['edit'], $args['editver']) . '">';
-        print 'Edit this <em>ARCHIVE VERSION</em> of this document</a></td>';
+        print '<a href="' . editURL($args['edit'], $args['editver']) . '">';
+        print 'Edit this <em>ARCHIVE VERSION</em> of this document</a>';
     }
 }
 ?>
