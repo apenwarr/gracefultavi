@@ -133,7 +133,7 @@ class Macro_Toc
 
                     // support for numbered headers
                     $header_num = '';
-                    if ($result[1])
+                    if ($result[1] == '@')
                     {
                         if ($numbering_level_diff < 0)
                         {
