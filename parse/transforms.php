@@ -295,7 +295,7 @@ function parse_bold($text)
   $text = preg_replace("/&lt;b>(()|[^'].*)&lt;\/b>/Ue", "pair_tokens('bold', q1('\\1'))",
                        $text, -1);
 
-  return preg_replace("/'''([^']*)'''/Ue", "pair_tokens('bold', q1('\\1'))",
+  return preg_replace("/'''(.*)'''/Ue", "pair_tokens('bold', q1('\\1'))",
                       $text, -1);
 }
 
