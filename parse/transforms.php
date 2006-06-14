@@ -354,16 +354,20 @@ function parse_newline($text)
 {
     static $last = array('', '');
 
+    // treat lines with only spaces as empty
+    $thisline = preg_replace('/^ */', '', $text);
+
     // More than two consecutive newlines fold into only two newlines.
-    if ($last[0] == "\n" && $last[1] == "\n" && $text == "\n")
+    if ($last[0] == "\n" && $last[1] == "\n" && $thisline == "\n")
         return '';
     $last[0] = $last[1];
-    $last[1] = $text;
+    $last[1] = $thisline;
 
-    if ($text == "\n" || $text == "\n\r")
-        return "<p>$text";
-    else
-        return $text;
+    if ($thisline == "\n" || $thisline == "\n\r") {
+        $text = '<p>'.$text;
+    }
+
+    return $text;
 }
 
 function parse_horiz($text)
