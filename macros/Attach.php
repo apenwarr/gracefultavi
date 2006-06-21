@@ -26,7 +26,7 @@ class Macro_Attach
 
         $filename = ereg_replace("[^-_.a-zA-Z0-9]", "-", $filename);
         $filename = ereg_replace("^\\.", "x.", $filename);
-        $cleanname = "f-" . ereg_replace("[^a-zA-Z]", "x", $filename);
+        $cleanname = "f-" . preg_replace("/[^-\w]/", "x", $filename);
         $fullname = "attachments/$filename";
         $delname = "attachments/.deleted/$filename";
         $lockname = $fullname . ".locked";
