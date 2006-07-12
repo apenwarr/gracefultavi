@@ -328,7 +328,9 @@ function parse_underline($text)
 
 function parse_singlequote($text)
 {
-  return preg_replace("/(^|\W)\'(.+)\'($|\W)/Ue",
+  global $FlgChr;
+
+  return preg_replace("/(^|[^\w$FlgChr])\'(.+)\'($|[^\w$FlgChr])/Ue",
                       "q1('\\1') . pair_tokens('singlequote', q1('\\2')) . q1('\\3')",
                       $text, -1);
 }
