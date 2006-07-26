@@ -34,7 +34,7 @@ class Macro_Attach
         // $out .= "(Attach '$type' '$fullname')<br>";
         // $out .= var_dump($_FILES);
 
-        $out .= "<table><tr valign=top>";
+        $out = '<span style="background:#eeeeff;">';
 
         if ($_FILES["$cleanname"] && !file_exists($fullname))
         {
@@ -75,74 +75,74 @@ class Macro_Attach
 
         if (file_exists($fullname))
         {
-             $out .= "<td><b>Attachment:</b> <a href=\"$fullname\">$filename</a>";
+            $out .= "<b>Attach:</b> <a href=\"$fullname\">$filename</a> ";
 
-             if ($type == "inline")
-             {
-                 $f = fopen("$fullname", "r");
-                 $s = fread($f, 102400);
-                 $out .= "<p><pre>".htmlspecialchars($s)."</pre>";
-                 fclose($f);
-             }
-             else if ($type == "csv")
-             {
-                 $f = fopen("$fullname", "r");
-                 $out .= "<p><table>";
-                 while (!feof($f))
-                 {
-                     $line = fgets($f, 1024);
-                     $cols = preg_split("/,/", $line);
-                     $out .= "<tr>";
-                     foreach ($cols as $col)
-                         $out .= "<td>$col</td>";
-                     $out .= "</tr>";
-                 }
-                 $out .= "</table>";
-                 fclose($f);
-             }
-             else if ($type == "img" || $type == "image")
-             {
-                 $out .= "<br><img src='$fullname' alt='$filename'>";
-             }
+            if ($UserName && !file_exists($fullname . ".locked"))
+            {
+                $out .= "<form method=POST style=\"display:inline;\">"
+                     . "<input type='hidden' name='action-$cleanname' value=1 />"
+                     . "<input type='submit' name='Delete' value='Delete' />"
+                     . "<input type='submit' name='Lock' value='Lock' />"
+                     . "</form>";
+            }
 
-             $out .= "</td>";
+            if ($type == "inline")
+            {
+                $f = fopen("$fullname", "r");
+                $s = fread($f, 102400);
+                $out .= "<p><pre>".htmlspecialchars($s)."</pre>";
+                fclose($f);
+            }
+            else if ($type == "csv")
+            {
+                $f = fopen("$fullname", "r");
+                $out .= "<p><table>";
+                while (!feof($f))
+                {
+                    $line = fgets($f, 1024);
+                    $cols = preg_split("/,/", $line);
+                    $out .= "<tr>";
+                    foreach ($cols as $col)
+                        $out .= "<td>$col</td>";
+                    $out .= "</tr>";
+                }
+                $out .= "</table>";
+                fclose($f);
+            }
+            else if ($type == "img" || $type == "image")
+            {
+                $out .= "<p><img src='$fullname' alt='$filename'>";
+            }
+        }
+        else
+        {
+            $out .= "<b>Attach:</b> $filename ";
 
-             if ($UserName && !file_exists($fullname . ".locked"))
-             {
-                 $out .= "<td><form method=POST>"
-                   . "<input type='hidden' name='action-$cleanname' value=1 />"
-                   . "<input type='submit' name='Delete' value='Delete' />"
-                   . "<input type='submit' name='Lock' value='Lock' />"
-                   . "</form></td>";
-             }
-         }
-         else
-         {
-             $out .= "<td><b>Attachment:</b> $filename";
-             if ($UserName)
-             {
-                 $out .= "<form method=POST enctype='multipart/form-data'>"
-                   . "<input type='file' name='$cleanname' />"
-                   . "<input type='submit' value='Submit' />"
-                   . "</form></td>";
+            if ($UserName)
+            {
+                $out .= "<form method=POST enctype='multipart/form-data' "
+                     . "style=\"display:inline;\">"
+                     . "<input type='file' name='$cleanname' />"
+                     . "<input type='submit' value='Submit' />"
+                     . "</form>";
 
-                 if (file_exists($delname))
-                 {
-                     $out .= "<td><form method=POST>"
-                       . "<input type='hidden' name='action-$cleanname' value=1 />"
-                       . "<input type='submit' name='Undelete' value='Undelete' />"
-                       . "</form></td>";
-                 }
-             }
-             else
-             {
-                $out .= "<br>The file has not been uploaded yet.";
-             }
-         }
+                if (file_exists($delname))
+                {
+                    $out .= "<form method=POST style=\"display:inline;\">"
+                         . "<input type='hidden' name='action-$cleanname' value=1 />"
+                         . "<input type='submit' name='Undelete' value='Undelete' />"
+                         . "</form>";
+                }
+            }
+            else
+            {
+                $out .= " The file has not been uploaded yet.";
+            }
+        }
 
-         $out .= "</tr></table><p>";
+        $out .= '</span>';
 
-         return $out;
+        return $out;
     }
 }
 
