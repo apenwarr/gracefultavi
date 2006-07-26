@@ -32,9 +32,7 @@ if(!ini_get('register_globals'))
   if(isset($HTTP_GET_VARS['view_source'])) $view_source = $HTTP_GET_VARS['view_source'];
 
   if(isset($HTTP_POST_VARS['archive'])) $archive = $HTTP_POST_VARS['archive'];
-  if(isset($HTTP_POST_VARS['auth'])) $auth = $HTTP_POST_VARS['auth'];
   if(isset($HTTP_POST_VARS['categories'])) $categories = $HTTP_POST_VARS['categories'];
-  if(isset($HTTP_POST_VARS['cols'])) $cols = $HTTP_POST_VARS['cols'];
   if(isset($HTTP_POST_VARS['comment'])) $comment = $HTTP_POST_VARS['comment'];
   if(isset($HTTP_POST_VARS['days'])) $days = $HTTP_POST_VARS['days'];
   if(isset($HTTP_POST_VARS['discard'])) $discard = $HTTP_POST_VARS['discard'];

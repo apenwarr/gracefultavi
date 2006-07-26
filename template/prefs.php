@@ -5,10 +5,10 @@ require_once('template/common.php');
 
 function template_prefs()
 {
-    global $AuthorDiff, $DayLimit, $EditCols, $EditRows, $EmailSuffix;
-    global $EnableSubscriptions, $HistMax, $HTTP_REFERER, $invalid_nick;
-    global $MinEntries, $NickName, $prefs_from, $PrefsScript;
-    global $SubscriptionsScript, $TimeZoneOff, $UseHotPages, $UserName;
+    global $DayLimit, $EditRows, $EmailSuffix, $EnableSubscriptions, $HistMax;
+    global $HTTP_REFERER, $invalid_nick, $MinEntries, $NickName, $prefs_from;
+    global $PrefsScript, $SubscriptionsScript, $TimeZoneOff, $UseHotPages;
+    global $UserName;
 
     template_common_prologue(array(
         'norobots' => 1,
@@ -63,20 +63,13 @@ function template_prefs()
 <?php endif; ?>
 
   <strong>Edit box</strong><br /><br />
-  Rows: <input type="text" name="rows" value="<?php print $EditRows; ?>" /><br />
-  Columns: <input type="text" name="cols" value="<?php
-  print $EditCols; ?>" /><br /><br />
+  Rows: <input type="text" name="rows" value="<?php print $EditRows; ?>" /><br /><br />
   <hr />
 
   <strong>History lists</strong><br /><br />
   Enter here the maximum number of entries to display in a document's history
   list.<br /><br />
   <input type="text" name="hist" value="<?php print $HistMax; ?>" /><br /><br />
-
-  <input type="checkbox" name="auth"<?php
-    if($AuthorDiff) { print ' checked="checked"'; } ?> />
-  History display should show <em>all</em> changes made by the latest
-  author.  Otherwise, show only the last change made.<br /><br />
   <hr />
 
   <strong>RecentChanges</strong><br /><br />

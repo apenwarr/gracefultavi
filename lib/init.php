@@ -63,8 +63,6 @@ if(!empty($prefstr))
 {
   if(ereg("rows=([[:digit:]]+)", $prefstr, $result))
     { $EditRows = $result[1]; }
-  if(ereg("cols=([[:digit:]]+)", $prefstr, $result))
-    { $EditCols = $result[1]; }
   if(ereg("nickname=([^&]*)", $prefstr, $result))
     {
       $NickName = rawurldecode($result[1]);
@@ -72,15 +70,13 @@ if(!empty($prefstr))
     }
   if(ereg("days=([[:digit:]]+)", $prefstr, $result))
     { $DayLimit = $result[1]; }
-  if(ereg("auth=([[:digit:]]+)", $prefstr, $result))
-    { $AuthorDiff = $result[1]; }
   if(ereg("min=([[:digit:]]+)", $prefstr, $result))
     { $MinEntries = $result[1]; }
   if(ereg("hotpages=([[:digit:]]+)", $prefstr, $result))
     { $UseHotPages = $result[1]; }
   if(ereg("hist=([[:digit:]]+)", $prefstr, $result))
     { $HistMax = $result[1]; }
-  if(ereg("tzoff=([[:digit:]]+)", $prefstr, $result))
+  if(ereg("tzoff=(-?[[:digit:]]+)", $prefstr, $result))
     { $TimeZoneOff = $result[1]; }
 }
 

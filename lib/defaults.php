@@ -105,7 +105,9 @@ $EnableDiff3 = 0;
 //$Diff3Cmd = "/home/nitwiki/Files/diff3"
 
 // $EditRows and $EditCols determine the default dimensions of the wiki edit
-//   box for users that have not set their preferences.
+//   box for users that have not set their preferences. $EditCols is not
+//   editable through the preferences since the textarea width is set to 100% in
+//   the css.
 $EditRows = 20;
 $EditCols = 65;
 
@@ -118,11 +120,6 @@ $NickName = '';
 // Default time zone offset (in minutes) for visitors who haven't yet set their
 //   preferences.
 $TimeZoneOff = 0;
-
-// $AuthorDiff indicates whether history pages should show a diff for the last
-//   edit (zero), or for all edits made by the same author (not zero).  The
-//   default here is used if the user has not set their preferences.
-$AuthorDiff = 1;
 
 // $DayLimit determines how many days worth of changes show in a category list.
 //   This default is used if the user has not set their preferences.

@@ -5,8 +5,8 @@ require('template/prefs.php');
 // View or set a user's preferences.
 function action_prefs()
 {
-  global $auth, $cols, $CookieName, $days, $ErrorNameMatch, $hist, $hotpages;
-  global $min, $nickname, $referrer, $rows, $Save, $tzoff, $user;
+  global $CookieName, $days, $ErrorNameMatch, $hist, $hotpages, $min, $nickname;
+  global $referrer, $rows, $Save, $tzoff, $user;
 
   if(!empty($Save))
   {
@@ -26,15 +26,8 @@ function action_prefs()
     ereg("([[:digit:]]*)", $rows, $result);
     if(($rows = $result[1]) <= 0)
       { $rows = 20; }
-    ereg("([[:digit:]]*)", $cols, $result);
-    if(($cols = $result[1]) <= 0)
-      { $cols = 65; }
-    if(strcmp($auth, "") != 0)
-      { $auth = 1; }
-    else
-      { $auth = 0; }
     $hotpages = (strcmp($hotpages, "") != 0) ? 1 : 0;
-    $value = "rows=$rows&amp;cols=$cols&amp;auth=$auth&amp;hotpages=$hotpages";
+    $value = "rows=$rows&amp;hotpages=$hotpages";
     if(strcmp($nickname, '') != 0)
       { $value .= "&amp;nickname=" . rawurlencode(trim($nickname)); }
     if(strcmp($days, "") != 0)
