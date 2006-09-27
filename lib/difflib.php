@@ -213,7 +213,7 @@ class _DiffEngine
      */
     function _diag ($xoff, $xlim, $yoff, $ylim, $nchunks) {
 	$flip = false;
-	
+
 	if ($xlim - $xoff > $ylim - $yoff) {
 	    // Things seems faster (I'm not sure I understand why)
             // when the shortest sequence in X.
@@ -400,7 +400,7 @@ class _DiffEngine
 	     */
 	    while ($j < $other_len && $other_changed[$j])
 		$j++;
-	
+
 	    while ($i < $len && ! $changed[$i]) {
 		USE_ASSERTS && assert('$j < $other_len && ! $other_changed[$j]');
 		$i++; $j++;
@@ -581,7 +581,7 @@ class Diff
      *
      * @return array The sequence of strings.
      */
-    function final() {
+    function finalset() {
         $lines = array();
 
         foreach ($this->edits as $edit) {
@@ -599,13 +599,13 @@ class Diff
     function _check ($from_lines, $to_lines) {
         if (serialize($from_lines) != serialize($this->orig()))
             trigger_error("Reconstructed original doesn't match", E_USER_ERROR);
-        if (serialize($to_lines) != serialize($this->final()))
+        if (serialize($to_lines) != serialize($this->finalset()))
             trigger_error("Reconstructed final doesn't match", E_USER_ERROR);
 
         $rev = $this->reverse();
         if (serialize($to_lines) != serialize($rev->orig()))
             trigger_error("Reversed original doesn't match", E_USER_ERROR);
-        if (serialize($from_lines) != serialize($rev->final()))
+        if (serialize($from_lines) != serialize($rev->finalset()))
             trigger_error("Reversed final doesn't match", E_USER_ERROR);
 
 
