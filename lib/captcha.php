@@ -40,8 +40,10 @@ function get_imgltr($letter)
 {
     $im = imagecreate(15, 20);
 
-    $white = imagecolorallocate($im, 255, 255, 255);
-    $grey = imagecolorallocate($im, 90, 90, 90);
+    #$white = imagecolorallocate($im, 255, 255, 255);
+    #$grey = imagecolorallocate($im, 90, 90, 90);
+    $greypale = imagecolorallocate($im, 192, 192, 192);
+    $grey = imagecolorallocate($im, 127, 127, 127);
 
     imagechar($im, 5, 0, 0, $letter, $grey);
 
@@ -57,8 +59,9 @@ function output_captcha_img($md5)
     $sx = imagesx($im);
     $sy = imagesy($im);
 
-    $white = imagecolorallocate($im, 255, 255, 255);
-    $grey = imagecolorallocate($im, 90, 90, 90);
+    #$white = imagecolorallocate($im, 255, 255, 255);
+    #$grey = imagecolorallocate($im, 90, 90, 90);
+    $greypale = imagecolorallocate($im, 192, 192, 192);
 
     for ($i = 0; $i < $n; $i++) {
         $imltr = get_imgltr(substr($code, $i, 1));
@@ -72,16 +75,40 @@ function output_captcha_img($md5)
     imagecopyresized($im2, $im, 0, 0, 0, 0, $sx2, $sy2, $sx, $sy);
 
     $black = imagecolorallocate($im2, 0, 0, 0);
+    $white = imagecolorallocate($im2, 255, 255, 255);
 
-    for ($i = 3; $i < 256; $i++) {
-        imagecolorallocate($im2, rand(80, 255), rand(80, 255), rand(80, 255));
-    }
-    for ($x = 0; $x < $sx2; $x++) {
-        for ($y = 0; $y < $sy2; $y++) {
-            if (imagecolorat($im2, $x, $y) == 0) {
-                imagesetpixel($im2, $x, $y, rand(0, 255));
-            }
+    #for ($i = 3; $i < 256; $i++) {
+    #    imagecolorallocate($im2, rand(80, 255), rand(80, 255), rand(80, 255));
+    #}
+    #for ($x = 0; $x < $sx2; $x++) {
+    #    for ($y = 0; $y < $sy2; $y++) {
+    #        if (imagecolorat($im2, $x, $y) == 0) {
+    #            imagesetpixel($im2, $x, $y, rand(0, 255));
+    #        }
+    #    }
+    #}
+
+    $random_x = array();
+    while (count($random_x) < 5) {
+        $x = rand(15, $sx2-10);
+        if (!in_array($x, $random_x)) {
+            $random_x[] = $x;
         }
+    }
+
+    $random_y = array();
+    while (count($random_y) < 5) {
+        $y = rand(5, $sy2-10);
+        if (!in_array($y, $random_y)) {
+            $random_y[] = $y;
+        }
+    }
+
+    for ($n = 0; $n < 5; $n++) {
+        $x = $random_x[$n];
+        imageline($im2, $x, 0, $x, $sy2-1, $white);
+        $y = $random_y[$n];
+        imageline($im2, 0, $y, $sx2-1, $y, $white);
     }
 
     imagerectangle($im2, 0, 0, $sx2-1, $sy2-1, $black);
