@@ -1,19 +1,21 @@
 <?php
 
 require('template/save.php');
-require('template/spamconfirm.php');
+#require('template/spamconfirm.php');
 require('lib/category.php');
 require('lib/diff.php');
 require('parse/save.php');
+require('lib/captcha.php');
 
 // Commit an edit to the database.
 function action_save()
 {
-    global $Admin, $archive, $categories, $comment, $document, $Diff3Cmd;
-    global $EnableDiff3, $EnableSubscriptions, $EmailSuffix, $ErrorPageLocked;
-    global $HTTP_POST_VARS, $MaxPostLen, $minoredit, $nextver, $NickName, $page;
-    global $pagefrom, $pagestore, $REMOTE_ADDR, $Save, $SaveMacroEngine;
-    global $section, $template, $text_before, $text_after, $UserName;
+    global $Admin, $archive, $captcha, $categories, $comment, $document;
+    global $Diff3Cmd, $EnableCaptcha, $EnableDiff3, $EnableSubscriptions;
+    global $EmailSuffix, $ErrorPageLocked, $HTTP_POST_VARS, $MaxPostLen;
+    global $minoredit, $nextver, $NickName, $page, $pagefrom, $pagestore;
+    global $REMOTE_ADDR, $Save, $SaveMacroEngine, $section, $template;
+    global $text_before, $text_after, $UserName, $validationcode;
     global $WorkingDirectory;
 
     if(isset($HTTP_POST_VARS['quickadd'])) $quickadd = $HTTP_POST_VARS['quickadd'];
@@ -29,6 +31,16 @@ function action_save()
         if (isset($quoteAuthor)) { $quoteAuthor = stripslashes($quoteAuthor); }
     }
 
+    if (!$UserName && $EnableCaptcha)
+    {
+        if (strtolower(decode_captcha_md5($captcha))
+            !== trim(strtolower($validationcode))) {
+            global $ErrorValidationCode;
+            die($ErrorValidationCode);
+        }
+    }
+
+    /*
     // added for spam detection
     if(isset($HTTP_POST_VARS['isnotspam'])) $isnotspam = $HTTP_POST_VARS['isnotspam'];
 
@@ -47,6 +59,7 @@ function action_save()
             exit;
         }
     }
+    */
 
     if (empty($Save))                   // Didn't click the save button.
     {

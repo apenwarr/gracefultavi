@@ -39,11 +39,13 @@ if(!isset($SubscriptionsScript))
 if(!isset($ChildrenBase))
   { $ChildrenBase = $ScriptName . '?action=children&amp;page='; }
 if(!isset($TableSortScript))
-  { $TableSortScript = $ScriptName . '?action=js&file=tablesort'; }
+  { $TableSortScript = $ScriptName . '?action=js&amp;file=tablesort'; }
 if(!isset($CommonScript))
-  { $CommonScript = $ScriptName . '?action=js&file=common'; }
+  { $CommonScript = $ScriptName . '?action=js&amp;file=common'; }
 if(!isset($RevertScript))
-  { $RevertScript = $ScriptName . '?action=revert&page='; }
+  { $RevertScript = $ScriptName . '?action=revert&amp;page='; }
+if(!isset($CaptchaScript))
+  { $CaptchaScript = $ScriptName . '?action=captcha&amp;md5='; }
 
 if(!function_exists('viewURL'))
 {
@@ -189,6 +191,16 @@ function tablecsvURL($page, $tablenum)
 
   return $ScriptName . '?action=tablecsv&page='.urlencode($page).
          '&tablenum='.$tablenum;
+}
+}
+
+if(!function_exists('captchaURL'))
+{
+function captchaURL($md5)
+{
+  global $CaptchaScript;
+
+  return $CaptchaScript . $md5;
 }
 }
 ?>

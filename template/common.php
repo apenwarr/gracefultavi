@@ -280,7 +280,7 @@ if (isset($args['tree']))
 
 function template_common_epilogue($args)
 {
-  global $AdditionalFooter, $EmailSuffix, $EnableSubscriptions;
+  global $AdditionalFooter, $EmailSuffix, $EnableSubscriptions, $EnableCaptcha;
   global $HomePage, $ndfnow, $NickName, $page, $pagestore, $PageTooLongSize;
   global $PdfEngineUrl, $PrefsScript, $UserName;
 
@@ -401,13 +401,15 @@ if ($page != $HomePage && $page != 'RecentChanges')
     <!--
     function epilogue_quickadd_validate(form)
     {
-        if (form.quickadd.value == '')
-        {
-            alert ('Please provide content for the text field.');
+        if (form.quickadd.value == '') {
+            alert('Please provide content for the text field.');
             return false;
-        }
-        else
+        } else if (form.validationcode && form.validationcode.value == '') {
+            alert('The validation code is required.');
+            return false;
+        } else {
             return true;
+        }
     }
     //-->
     </script>
@@ -452,6 +454,11 @@ if ($page != $HomePage && $page != 'RecentChanges')
                 <td width="99%" nowrap><input class="fullWidth" type="text" name="quoteAuthor" size="20" value=""></td>
                 </tr>
                 </table>
+                <?php
+                if (!$UserName && $EnableCaptcha) {
+                    print_captcha_box();
+                }
+                ?>
                 <input type="submit" name="append" value="Add a Quote" onClick="return epilogue_quickadd_validate(this.form)">
                 <?php
             }
@@ -470,9 +477,14 @@ if ($page != $HomePage && $page != 'RecentChanges')
                 }
                 print " (" . date('Y/m/d') . ")</b>: ";
                 print '</textarea>';
-                print '<br>';
-                if (!$UserName && !$NickName) {
-                    print '<small>(Anonymous users, see <a href="'.$PrefsScript.'">UserOptions</a> to set a nickname.)</small>&nbsp;';
+                print "<br>\n";
+                if (!$UserName) {
+                    if ($EnableCaptcha) {
+                        print_captcha_box();
+                    }
+                    if (!$NickName) {
+                        print '<small>(Anonymous users, see <a href="'.$PrefsScript.'">UserOptions</a> to set a nickname.)</small>&nbsp;'   ;
+                    }
                 }
                 print '<input type="submit" name="append" value="Add a Comment" onClick="return epilogue_quickadd_validate(this.form)">';
             }

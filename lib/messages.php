@@ -20,4 +20,7 @@ $ErrorAdminDisabled   = 'Administration features are disabled for this wiki.' .
                         $ErrorSuffix;
 $ErrorPageLocked      = 'The page you have tried to edit is locked.' .
                         $ErrorSuffix;
+$ErrorValidationCode  = 'The validation code does not match the letters in '.
+                        'the validation picture.<br><br>Click BACK in your '.
+                        'browser and try again.';
 ?>

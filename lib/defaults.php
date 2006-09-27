@@ -201,6 +201,15 @@ $ShowCategoryBox = 0;
 // "user".
 $PdfEngineUrl = '';
 
+// If $EnableCaptcha is set to 1, captcha is enabled for anonymous users. If it
+// is set to 0, captcha is disabled. You may want to check if your php has been
+// compiled with gd and support for png. See Wikipedia for more info on captcha.
+// When enabling captcha, set CaptchaObfuscate to five different numbers from 1
+// to 32, this will be used as a lightweight method to obfuscate the validation
+// code.
+$EnableCaptcha = 0;
+$CaptchaObfuscate= array(0, 0, 0, 0, 0);
+
 // $ParseEngine indicates what parsing rules will be run when displaying a
 //   wiki page.  To disable a particular rule, you can place a comment at the
 //   beginning of its line.  The order of this list is important.

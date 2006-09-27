@@ -18,6 +18,7 @@ if(!ini_get('register_globals'))
   if(isset($HTTP_GET_VARS['find'])) $find = $HTTP_GET_VARS['find'];
   if(isset($HTTP_GET_VARS['full'])) $full = $HTTP_GET_VARS['full'];
   if(isset($HTTP_GET_VARS['invalid_nick'])) $invalid_nick = $HTTP_GET_VARS['invalid_nick'];
+  if(isset($HTTP_GET_VARS['md5'])) $md5 = $HTTP_GET_VARS['md5'];
   if(isset($HTTP_GET_VARS['no_redirect'])) $no_redirect = $HTTP_GET_VARS['no_redirect'];
   if(isset($HTTP_GET_VARS['page'])) $page = $HTTP_GET_VARS['page'];
   if(isset($HTTP_GET_VARS['prefs_from'])) $prefs_from = $HTTP_GET_VARS['prefs_from'];
@@ -32,6 +33,7 @@ if(!ini_get('register_globals'))
   if(isset($HTTP_GET_VARS['view_source'])) $view_source = $HTTP_GET_VARS['view_source'];
 
   if(isset($HTTP_POST_VARS['archive'])) $archive = $HTTP_POST_VARS['archive'];
+  if(isset($HTTP_POST_VARS['captcha'])) $captcha = $HTTP_POST_VARS['captcha'];
   if(isset($HTTP_POST_VARS['categories'])) $categories = $HTTP_POST_VARS['categories'];
   if(isset($HTTP_POST_VARS['comment'])) $comment = $HTTP_POST_VARS['comment'];
   if(isset($HTTP_POST_VARS['days'])) $days = $HTTP_POST_VARS['days'];
@@ -54,6 +56,7 @@ if(!ini_get('register_globals'))
   if(isset($HTTP_POST_VARS['text_after'])) $text_after = $HTTP_POST_VARS['text_after'];
   if(isset($HTTP_POST_VARS['text_before'])) $text_before = $HTTP_POST_VARS['text_before'];
   if(isset($HTTP_POST_VARS['tzoff'])) $tzoff = $HTTP_POST_VARS['tzoff'];
+  if(isset($HTTP_POST_VARS['validationcode'])) $validationcode = $HTTP_POST_VARS['validationcode'];
 }
 require('lib/init.php');
 
@@ -91,7 +94,8 @@ $ActionList = array(
                 'imgbar'  => array('action/imgbar.php', 'action_imgbar', ''),
                 'lock'    => array('action/lock.php', 'action_lock', ''),
                 'js'      => array('action/js.php', 'action_js', ''),
-                'tablecsv' => array('action/tablecsv.php', 'action_tablecsv', 'view')
+                'tablecsv' => array('action/tablecsv.php', 'action_tablecsv', 'view'),
+                'captcha' => array('action/captcha.php', 'action_captcha', 'view')
               );
 
 // Default action and page names.

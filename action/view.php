@@ -5,6 +5,7 @@ require('parse/macros.php');
 require('parse/html.php');
 require('template/view.php');
 require('lib/headers.php');
+require('lib/captcha.php');
 
 // Parse and display a page.
 function action_view()
