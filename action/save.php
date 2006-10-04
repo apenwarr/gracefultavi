@@ -1,7 +1,6 @@
 <?php
 
 require('template/save.php');
-#require('template/spamconfirm.php');
 require('lib/category.php');
 require('lib/diff.php');
 require('parse/save.php');
@@ -33,33 +32,13 @@ function action_save()
 
     if (!$UserName && $EnableCaptcha)
     {
-        if (strtolower(decode_captcha_md5($captcha))
-            !== trim(strtolower($validationcode))) {
+        $captcha_d = strtolower(decode_captcha_md5($captcha));
+        $captcha_v = trim(strtolower($validationcode));
+        if ($captcha_v == '' || $captcha_v !== $captcha_d) {
             global $ErrorValidationCode;
             die($ErrorValidationCode);
         }
     }
-
-    /*
-    // added for spam detection
-    if(isset($HTTP_POST_VARS['isnotspam'])) $isnotspam = $HTTP_POST_VARS['isnotspam'];
-
-    // spam detection
-    if (!$UserName && isset($appending))
-    {
-        $spam_level = look_like_spam($quickadd);
-        if ($spam_level > 1 || ($spam_level == 1 && !isset($isnotspam)))
-        {
-            template_spamconfirm(array('page'           => $page,
-                                       'quickadd'       => $quickadd,
-                                       'comment'        => $comment,
-                                       'appendingQuote' => $appendingQuote,
-                                       'quoteAuthor'    => $quoteAuthor,
-                                       'spam_level'     => $spam_level));
-            exit;
-        }
-    }
-    */
 
     if (empty($Save))                   // Didn't click the save button.
     {
@@ -88,7 +67,7 @@ function action_save()
     }
 
     // Edit disallowed.
-    if (!$pg->mutable || (!$UserName && !isset($appending))) {
+    if (!$pg->mutable || (!$UserName && (!isset($appending) || !$pg->exists))) {
         $pagestore->unlock();
         die($ErrorPageLocked);
     }
