@@ -14,6 +14,7 @@ if(!ini_get('register_globals'))
 
   if(isset($HTTP_GET_VARS['action'])) $action = $HTTP_GET_VARS['action'];
   if(isset($HTTP_GET_VARS['branch_search'])) $branch_search = $HTTP_GET_VARS['branch_search'];
+  if(isset($HTTP_GET_VARS['csstype'])) $csstype = $HTTP_GET_VARS['csstype'];
   if(isset($HTTP_GET_VARS['diff_mode'])) $diff_mode = $HTTP_GET_VARS['diff_mode'];
   if(isset($HTTP_GET_VARS['find'])) $find = $HTTP_GET_VARS['find'];
   if(isset($HTTP_GET_VARS['full'])) $full = $HTTP_GET_VARS['full'];

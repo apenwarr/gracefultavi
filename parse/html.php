@@ -91,7 +91,8 @@ function html_head_start($level, $underline, $numbering, $style_inline,
     {
       global $page;
       static $section = 0; $section++;
-      $edit_link = '<div style="float:right;margin-left:5px;">[<a href="'.
+      $edit_link = '<div style="float:right;margin-left:5px;" '.
+                   'class="printhide">[<a href="'.
                    editSectionURL($page, $section).'">edit</a>]</div>';
     }
     $anchor = $numbering ? "section$numbering" : "toc$count";

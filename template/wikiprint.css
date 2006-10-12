@@ -1,0 +1,19 @@
+/* GracefulTavi default print overrides style sheet. */
+
+.printhide {
+    display: none;
+}
+
+span.quote {
+    display: none;
+}
+
+table.maintable {
+    border-collapse: collapse;
+    border: 0px none;
+    width: 100%;
+}
+
+table.maintable td {
+    padding: 0px;
+}

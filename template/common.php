@@ -94,7 +94,8 @@ function template_common_prologue($args)
 <?php if ($args['norobots']) {?>
     <meta name="ROBOTS" content="NOINDEX, NOFOLLOW">
 <?php } ?>
-<link rel="STYLESHEET" href="<?php print $StyleScript; ?>" type="text/css">
+<link type="text/css" rel="stylesheet" media="screen" href="<?php print $StyleScript; ?>">
+<link type="text/css" rel="stylesheet" media="print" href="<?php print $StyleScript; ?>&amp;csstype=print">
 <script src="<?php print $TableSortScript; ?>" type="text/javascript"></script>
 <script src="<?php print $CommonScript; ?>" type="text/javascript"></script>
 <link rel="SHORTCUT ICON" href="<?=$shortcutIcon?>">
@@ -110,7 +111,7 @@ if ($AdditionalHeader) { include($AdditionalHeader); }
 ?>
 
 <table align="center" class="topbox" border="0">
-<tr valign="top"><td>
+<tr valign="top"><td class="printhide">
 <?php print '<small><a href="' . contentURL($args['headlink']) . '">Entire wiki contents</a></small>'; ?>
 </td></tr>
 
@@ -148,7 +149,7 @@ if (count($twin = $pagestore->twinpages($args['headlink'])))
 print $args['headsufx'] . '</h1>';
 
 if (isset($args['redirect_from']) && $args['redirect_from']) {
-    print '</td></tr><tr><td>';
+    print '</td></tr><tr><td class="printhide">';
     print '<h2>Redirected from <a href="' . viewURL($args['redirect_from']) . '&no_redirect=1">' .
         htmlspecialchars($args['redirect_from']) . '</a></h2>';
 }
@@ -157,7 +158,7 @@ if (isset($args['redirect_from']) && $args['redirect_from']) {
 </tr>
 
 <tr>
-<td>
+<td class="printhide">
 <br>
 <form method="get" action="<?php print $FindScript; ?>">
 <div class="form">
@@ -221,8 +222,8 @@ if (isset($args['tree']))
 
     if (isset($tree[$HomePage]) && count($tree[$HomePage]) > 0)
     {
-        print '</td><td><img src="images/spacer.png" alt="" width="20" height="1" border="0">';
-        print '</td><td valign="top" align="right">';
+        print '</td><td class="printhide"><img src="images/spacer.png" alt="" width="20" height="1" border="0">';
+        print '</td><td class="printhide" valign="top" align="right">';
         drawTree($tree, true, $args['headlink']);
     }
 }
@@ -230,7 +231,7 @@ if (isset($args['tree']))
 
 </td></tr>
 
-<tr><td>
+<tr><td class="printhide">
     <table width="100%" cellspacing="0" cellpadding="0" border="0">
     <tr valign="top">
     <td><?php toolbar($page, $args); ?></td>
@@ -248,7 +249,8 @@ if (isset($args['tree']))
 </table>
 </NOINDEX>
 
-<table width="98%" align="center" border="1" bordercolor="black" cellspacing="0" bgcolor="white" cellpadding="10">
+<table class="maintable" width="98%" align="center" cellspacing="0"
+    cellpadding="10" border="1" bordercolor="black" bgcolor="white">
 <tr>
 <td>
 <!-- end prologue -->
@@ -292,6 +294,7 @@ function template_common_epilogue($args)
 </tr>
 </table>
 <NOINDEX>
+<div class="printhide">
 <div id="footer">
 <table align="center" class="bottombox" border="0">
 <tr>
@@ -514,6 +517,7 @@ if ($page != $HomePage && $page != 'RecentChanges')
 if ($AdditionalFooter)
     include($AdditionalFooter);
 ?>
+</div>
 </NOINDEX>
 </body>
 </html>
