@@ -13,8 +13,8 @@ function template_subscriptions($args)
 {
     template_common_prologue(array(
         'norobots' => 1,
-        'title'    => 'Subscriptions',
-        'heading'  => 'Subscriptions',
+        'title'    => 'Page Subscriptions',
+        'heading'  => 'Page Subscriptions',
         'headlink' => '',
         'headsufx' => '',
         'toolbar'  => 0,
@@ -26,8 +26,6 @@ function template_subscriptions($args)
         'button_backlinks' => 0
     ));
 ?>
-
-<h2>Page Subscriptions</h2>
 
 <form name="subscriptionsForm" action="<?php print $SubscriptionsScript; ?>" method="POST">
 <input type="hidden" name="subscribed_pages[]" value="">
