@@ -9,22 +9,22 @@ body {
     margin-bottom:    0px;
 }
 a:link {
-    color:      #0000ff;  /* 4f6997 */
+    color:      #0000ff;
     background: transparent;
 }
 a:visited {
-    color:      darkblue;  /* 2f2f4e */
+    color:      darkblue;
     background: transparent;
 }
 a:active {
-    color:      #006699;  /* 80307f */
+    color:      #006699;
     background: transparent;
 }
 a.title {
     /* text-decoration: none; */
 }
 span.highlight {
-    background: #ffff00; /* eeeeff */
+    background: #ffff00;
     font-weight: bold;
 }
 span.highlightpass {
@@ -60,16 +60,12 @@ table.diffblock {
     background-color: #efefff;
 }
 td.diff-added {
-    /* background-color: #cfcfff; */
     background-color: #ccffcc;
     color:            #000000;
 }
 td.diff-removed {
-    /* background-color: #efefff; */
     background-color: #ffaaaa;
     color:            #000000;
-    /* font-color:       red; */
-    /* text-decoration:  line-through; */
 }
 ins {
     background-color: #ccffcc;
@@ -97,7 +93,7 @@ h7 h8 h9 {
     font-weight: bold;
 }
 hr {
-    width: 80%; /* 70% */
+    width: 80%;
 }
 textarea {
     width: 100%;
