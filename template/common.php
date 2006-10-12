@@ -107,7 +107,11 @@ function template_common_prologue($args)
 <NOINDEX>
 
 <?php
-if ($AdditionalHeader) { include($AdditionalHeader); }
+if ($AdditionalHeader) {
+    print '<span class="printhide">';
+    include($AdditionalHeader);
+    print '</span>';
+}
 ?>
 
 <table align="center" class="topbox" border="0">
@@ -140,10 +144,10 @@ if ($args['headlink'] != '')
 if (count($twin = $pagestore->twinpages($args['headlink'])))
 {
     // point at the sisterwiki's version
-    print "<sup>";
+    print '<sup class="printhide">';
     foreach ($twin as $site)
       { print " " . html_twin($site[0], $site[1]); }
-    print "</sup>";
+    print '</sup>';
 }
 
 print $args['headsufx'] . '</h1>';
