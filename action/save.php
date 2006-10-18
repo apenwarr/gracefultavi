@@ -67,7 +67,8 @@ function action_save()
     }
 
     // Edit disallowed.
-    if (!$pg->mutable || (!$UserName && (!isset($appending) || !$pg->exists))) {
+    if (!$pg->mutable ||
+        (!$UserName && (!isset($appending) || !$pg->exists()))) {
         $pagestore->unlock();
         die($ErrorPageLocked);
     }

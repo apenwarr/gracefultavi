@@ -3,21 +3,21 @@
 // Abstractor to read and write wiki pages.
 class WikiPage
 {
-    var $page_id;                         // Primary Key ID of page.
-    var $name = '';                       // Name of page.
-    var $dbname = '';                     // Name used in DB queries.
-    var $text = '';                       // Page's text in wiki markup form.
-    var $time = '';                       // Page's modification time.
-    var $hostname = '';                   // Hostname of last editor.
-    var $username = '';                   // Username of last editor.
-    var $comment  = '';                   // Description of last edit.
-    var $version = -1;                    // Version number of page.
-    var $mutable = 1;                     // Whether page may be edited.
-    var $template = 0;                    // Whether page is a template.
-    var $exists = 0;                      // Whether page already exists.
-    var $db;                              // Database object.
-    var $createtime;                      // Creation time of page.
-    var $updatetime;                      // Update time of page.
+    var $page_id;       // Primary Key ID of page.
+    var $name = '';     // Name of page.
+    var $dbname = '';   // Name used in DB queries.
+    var $text = '';     // Page's text in wiki markup form.
+    var $time = '';     // Page's modification time.
+    var $hostname = ''; // Hostname of last editor.
+    var $username = ''; // Username of last editor.
+    var $comment  = ''; // Description of last edit.
+    var $version = -1;  // Version number of page.
+    var $mutable = 1;   // Whether page may be edited.
+    var $template = 0;  // Whether page is a template.
+    var $exists = 0;    // Whether page has a record in the db.
+    var $db;            // Database object.
+    var $createtime;    // Creation time of page.
+    var $updatetime;    // Update time of page.
 
     function WikiPage($db_, $name_ = '')
     {
@@ -27,8 +27,10 @@ class WikiPage
         $this->dbname = str_replace('\'', '\\\'', $this->dbname);
     }
 
-    // Check whether a page exists.
-    // Returns: boolean if page exists in database.
+    // Checks whether the page exists. Returns true if the page exists in the
+    // database and has content. Otherwise, returns false. Not to confuse with
+    // the "exists" property of this class, which is true when the page exists
+    // in the database only, no matter if it has content or not.
     function exists()
     {
         global $PgTbl, $page;
