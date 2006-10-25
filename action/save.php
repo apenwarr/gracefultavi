@@ -240,7 +240,7 @@ function action_save()
 
     $pagestore->unlock();               // End "transaction".
 
-    // Handles page subscriptions in background
+    // Handles page subscriptions
     if ($EnableSubscriptions && isset($EmailSuffix)) {
         if ($subscribed_users = $pg->getSubscribedUsers($UserName)) {
             global $ScriptBase, $WikiName;
