@@ -84,7 +84,7 @@ if ($args['diff'])
 {
     print '<div class="diff">';
     print $args['diff'];
-    print '</div';
+    print '</div>';
 }
 else
     print 'There were no differences between the selected versions.';
