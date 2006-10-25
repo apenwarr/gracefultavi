@@ -30,13 +30,29 @@ function action_save()
         if (isset($quoteAuthor)) { $quoteAuthor = stripslashes($quoteAuthor); }
     }
 
-    if (!$UserName && $EnableCaptcha)
+    // validations for unlogged users
+    if (!$UserName)
     {
-        $captcha_d = strtolower(decode_captcha_md5($captcha));
-        $captcha_v = trim(strtolower($validationcode));
-        if ($captcha_v == '' || $captcha_v !== $captcha_d) {
-            global $ErrorValidationCode;
-            die($ErrorValidationCode);
+        if ($EnableCaptcha)
+        {
+            $captcha_d = strtolower(decode_captcha_md5($captcha));
+            $captcha_v = trim(strtolower($validationcode));
+            if ($captcha_v == '' || $captcha_v !== $captcha_d) {
+                global $ErrorValidationCode;
+                die($ErrorValidationCode);
+            }
+        }
+
+        // prevent empty posts
+        if (strlen(trim($quickadd)) <= 50)
+        {
+            $ptrn = '/^<hr><b>.+?@\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3} '.
+                    '\(\d{4}\/\d{2}\/\d{2}\)<\/b>:$/';
+            if (preg_match($ptrn, trim($quickadd)))
+            {
+                global $ErrorEmptyComment;
+                die($ErrorEmptyComment);
+            }
         }
     }
 
