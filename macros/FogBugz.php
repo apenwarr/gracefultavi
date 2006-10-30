@@ -3,25 +3,25 @@
 class FogTable
 {
     var $a; // the array we're using
-    
+
     function FogTable(&$new_a)
     {
 	$this->a = $new_a;
     }
-    
+
     // return an anonymous function that retrieves a particular field
     // from the given object.  used by first().
     function fieldfunc($field)
     {
 	return create_function('&$x', "return \$x->$field;");
     }
-    
+
     // return the keys of the array, in order
     function keys()
     {
 	return array_keys($this->a);
     }
-    
+
     // return the first item where the given field equals the given value.
     function first($field, $value)
     {
@@ -31,7 +31,7 @@ class FogTable
 	      return $v;
 	return $notdef;
     }
-    
+
     // return the first item where the given field starts with the given value.
     function first_prefix($field, $prefix)
     {
@@ -61,7 +61,7 @@ class Person
     var $email;
     var $username;
     var $deleted;
-    
+
     function Person($a, $b, $c, $d)
     {
 	$this->ix = $a;
@@ -79,7 +79,7 @@ class PersonTable extends FogTable
     {
 	$p = array();
 	$res = bug_query("select ixPerson, sFullName, sEmail, fDeleted " .
-			 "  from Person");
+			 "  from Person where sFullName <> 'Administrator'");
 	while ($r = mysql_fetch_row($res))
 	  $p[$r[0]] = new Person($r[0], $r[1], $r[2], $r[3]);
 	$this->FogTable($p);
@@ -93,7 +93,7 @@ class Project
     var $name;
     var $owner;
     var $deleted;
-    
+
     function Project($a, $b, $c, $d)
     {
 	$this->ix = $a;
@@ -127,7 +127,7 @@ class FixFor
     var $deleted;
     var $project;
     var $release_date;
-    
+
     function FixFor($a, $b, $c, $d, $e, $f)
     {
 	$this->ix = $a;
@@ -137,7 +137,7 @@ class FixFor
 	$this->project = $e;
 	$this->release_date = $f ? $f : "2099-09-09"; // no release date? in the future...;
     }
-    
+
     // returns true if this is due before the fixfor $f.
     function due_before($f)
     {
@@ -166,7 +166,7 @@ class FixForTable extends FogTable
     {
 	$p = array();
 	$res = bug_query
-	    ("SELECT ff.ixFixFor, ff.sFixFor, " . 
+	    ("SELECT ff.ixFixFor, ff.sFixFor, " .
              "    IFNULL(m.dtDue, ff.dt) bouncedate, " .
 	     "    ff.bDeleted, ff.ixProject, ff.dt releasedate " .
 	     "FROM FixFor ff " .
@@ -189,7 +189,7 @@ class FixForTable extends FogTable
 	uasort($p, "fixfor_compare");
 	$this->FogTable($p);
     }
-    
+
     // return the last fixfor with a due date <= the given date.
     function last_before($date)
     {
@@ -200,7 +200,7 @@ class FixForTable extends FogTable
 	    else
                 return $match; // passed the last one
 	}
-	
+
 	return $match;
     }
 }
@@ -227,9 +227,9 @@ class Bug
     var $my_user;
     var $category;
     var $manual_ix;
-    
+
     function Bug($a, $b, $c, $d, $e, $f, $g, $h,
-		 $i, $j, $k, $l, $m, $n, $o, $p, $q, $r, 
+		 $i, $j, $k, $l, $m, $n, $o, $p, $q, $r,
 		 $_manual_ix=0)
     {
 	$this->ix = $a;
@@ -251,35 +251,35 @@ class Bug
 	$this->my_user = $q;
 	$this->category = $r;
 	$this->manual_ix = $_manual_ix;
-	
+
 	if ($this->isresolved())
             $this->elapsed = $this->currest;
     }
-    
+
     function isopen()
         { return $this->open == 1; }
-    
+
     function isresolved()
         { return $this->status != 1; }
-    
+
     function isactive()
         { return $this->isopen() && !$this->isresolved(); }
-    
+
     function isdone()
-        { return $this->isresolved() 
+        { return $this->isresolved()
 	         && $this->my_user->ix != $this->assignto->ix; }
-    
+
     function get_priority()
         { return $this->priority; }
-    
+
     function hyperlink()
     {
 	$title = htmlentities($this->name, ENT_QUOTES);
 	return "<a href=\"http://nits/fogbugz3/?$this->ix\" " .
-	  "title=\"Bug #$this->ix: " . htmlentities($title) 
+	  "title=\"Bug #$this->ix: " . htmlentities($title)
 	    . "\">$this->ix</a>";
     }
-    
+
     function finish()
     {
 	// FIXME: for safety, I don't want to modify the fogbugz database
@@ -289,7 +289,7 @@ class Bug
 	// and not get an error regardless of whether the task is a Bug or
 	// and XTask.
     }
-    
+
     function assign($personix)
     {
 	// see finish()
@@ -333,7 +333,7 @@ class BugTable extends FogTable
     // stolen tasks is an array of:
     //      ixBug => (ixBug, dtResolved)
     // where the bug indices are for bugs that were stolen
-    function BugTable($where, $_my_userix, $_resolved_tasks, $_stolen_tasks, 
+    function BugTable($where, $_my_userix, $_resolved_tasks, $_stolen_tasks,
 		      $_persons, $_projects, $_fixfors)
     {
         $this->resolved_tasks = $_resolved_tasks;
@@ -428,8 +428,8 @@ class XTask
     var $assignto;
     var $my_user;
     var $manual_ix;
-    
-    function XTask($a, $b, $c, $d, $e, $f, 
+
+    function XTask($a, $b, $c, $d, $e, $f,
 		   $_manual_ix=0)
     {
 	$this->ix = $a;
@@ -440,21 +440,21 @@ class XTask
 	$this->my_user = $f;
 	$this->manual_ix = $_manual_ix;
     }
-    
+
     function isdone()
         { return $this->my_user != $this->assignto; }
-    
+
     function get_priority()
         { return 7; } // currently XTask is always low-priority
-    
+
     function hyperlink()
-    { 
+    {
 	if ($this->manual_ix > 0)
 	    return $this->task;
-	else 
-	    return "TM#".$this->ix; 
+	else
+	    return "TM#".$this->ix;
     }
-    
+
     function assign($personix)
     {
 	bug_query
@@ -462,7 +462,7 @@ class XTask
 	   "  set ixPersonAssignedTo=$personix " .
 	   "  where ixXTask=$this->ix");
     }
-    
+
     function finish()
     {
 	$this->assign(1);
@@ -509,8 +509,8 @@ class Estimate
     var $my_user;
     var $loadfactor;
     var $id;
-    
-    function Estimate($fake, $be_done, $aa, $a, $b, $c, $d, $e, $f, $g, $h, 
+
+    function Estimate($fake, $be_done, $aa, $a, $b, $c, $d, $e, $f, $g, $h,
         $loadfactor = -1)
     {
 	$this->fake = $fake;
@@ -530,13 +530,13 @@ class Estimate
 	else
             $this->id = $this->task->ix;
     }
-    
+
     function get_resolvedate()
     {
 	return $this->resolvedate ? $this->resolvedate
             : ($this->isbug ? $this->task->resolvedate : '');
     }
-    
+
     function est_orig()
     {
 	if ($this->origest !== '')
@@ -549,7 +549,7 @@ class Estimate
 	else
             return 0;
     }
-    
+
     function est_curr()
     {
 	if ($this->currest !== '')
@@ -562,7 +562,7 @@ class Estimate
 	else
             return 0;
     }
-    
+
     function est_elapsed()
     {
 	if ($this->elapsed !== '')
@@ -575,7 +575,7 @@ class Estimate
 	else
             return 0;
     }
-    
+
     function est_remain()
     {
 	if ($this->isestimated())
@@ -588,7 +588,7 @@ class Estimate
     {
 	return $this->est_curr() !== '' && $this->est_elapsed() !== '';
     }
-    
+
     function isdone()
     {
 	return $this->be_done;
@@ -598,7 +598,7 @@ class Estimate
     {
 	return $this->isbug && $this->task->isresolved() && !$this->isdone();
     }
-    
+
     function update($currest, $elapsed)
     {
 	// make sure they're valid numbers
@@ -606,10 +606,10 @@ class Estimate
             $currest = 0;
 	if ($elapsed == 0)
             $elapsed = 0;
-	
+
 	$userix = $this->assignto->ix;
 	$taskix = $this->task->ix;
-	
+
 	$u = $this->assignto;
 	bug_query
 	  ("insert ignore into schedulator.Estimate " .
@@ -625,8 +625,8 @@ class Estimate
             $this->task->finish();
 	else
             $this->task->assign($this->my_user->ix);
-	
-	$resolv = $this->est_remain() 
+
+	$resolv = $this->est_remain()
             ? "dtResolved=null, " : "dtResolved=now(), ";
 	bug_query
 	  ("update schedulator.Estimate " .
@@ -636,7 +636,7 @@ class Estimate
 	   "  where fIsBug=$this->isbug and ixTask=$taskix and " .
 	   "        ixPerson=$userix ");
     }
-    
+
     function nice_title()
     {
 	if (!$this->isbug)
@@ -689,7 +689,7 @@ class EstimateTable extends FogTable
 	$did_bug = array();
 	$did_xtask = array();
 	$me = $persons->a[$my_userix];
-	
+
 	$res = bug_query
 	  ("select ixEstimate, ixPerson, fIsBug, ixTask, " .
 	   "    hrsOrigEst, hrsCurrEst, hrsElapsed, dtResolved " .
@@ -725,7 +725,7 @@ class EstimateTable extends FogTable
 	    else
 		$did_xtask[$bug->ix] = 1;
 	}
-	
+
 	foreach ($bugs->a as $bug)
 	{
 	    if (!$did_bug[$bug->ix])
@@ -737,14 +737,14 @@ class EstimateTable extends FogTable
 				     $me);
 	    }
 	}
-	
+
 	foreach ($xtasks->a as $task)
 	{
 	    if (!$did_xtask[$task->ix])
 	    {
 		$p[] = &new Estimate(1, // fake (not in database)
 				     $task->isdone(),
-				     "", $me, 0, 
+				     "", $me, 0,
 				     $task, "", "", "", "",
 				     $me);
 	    }
@@ -752,7 +752,7 @@ class EstimateTable extends FogTable
 	$this->FogTable($p);
 	$this->do_sort();
     }
-    
+
     function do_sort()
     {
 	uasort($this->a, "estimate_compare");
@@ -773,7 +773,7 @@ function sql_simple($query)
     $result = mysql_query($query, $bug_h);
     if (!$result)
       print(mysql_error($bug_h));
-    
+
     $ret = array();
     while ($row = mysql_fetch_row($result))
     {
@@ -784,15 +784,15 @@ function sql_simple($query)
 	else
             $ret[$row[0]] = $row;
     }
-    
+
     return $ret;
 }
-    
+
 
 class FogTables
 {
     var $my_userix;
-    
+
     var $person;
     var $project;
     var $fixfor;
@@ -805,7 +805,7 @@ class FogTables
 	$this->person = new PersonTable();
 	$this->project = new ProjectTable($this->person);
 	$this->fixfor = new FixForTable($this->project);
-	
+
 	// clean up the fixforix
 	if (!$fixforix || $fixforix==1)
 	    $fixforix = 0;
@@ -841,9 +841,9 @@ class FogTables
 	}
 	else
 	    $and_user = $and_useras = $and_userrb = "";
-	$and_dtresolved = "and (dtResolved >= '$start_date' " . 
-            "or ISNULL(dtResolved))"; 
- 
+	$and_dtresolved = "and (dtResolved >= '$start_date' " .
+            "or ISNULL(dtResolved))";
+
 	$whichbugs = sql_simple("select ixTask from schedulator.Estimate " .
 				"    where 1 $and_user " .
 				"      $and_dtresolved " .
@@ -851,12 +851,12 @@ class FogTables
 	$whichbugs += sql_simple("select ixBug from Bug " .
 				 "    where 1 $and_useras " .
 				 "     $and_fixfor");
-	
+
 	// this mess is referred to by the mysql people as the 'max-concat'
 	// trick.  It returns the list of bug numbers that are currently
 	// resolved *and* the most recent person to resolve them was the
 	// specified user.
-	$q = 
+	$q =
 	  ("select e.ixBug, " .
 	   "   substring(max(concat(lpad(ixBugEvent,12,' '),ixPerson)),13) " .
 	   "       as ixLastPersonResolvedBy, " .
@@ -879,29 +879,29 @@ class FogTables
         if ($and_user != "")
         {
             // Retrieve all bugs that the user ever resolved.
-            $stolen_query = 
+            $stolen_query =
                ("select e.ixBug, e.ixPerson, e.dt as dtResolved " .
                 " from BugEvent e, Bug b " .
                 " where e.ixBug = b.ixBug " .
                 "   and b.ixStatus > 1 and e.sVerb like 'RESOLVED%' " .
                 "   and sVerb != 'Resolved (Again)'" .
-                "   $and_user " . 
+                "   $and_user " .
                 "   $and_fixfor " .
                 " having 1 $and_dtresolved" .
-                " order by e.ixBug "); 
+                " order by e.ixBug ");
             $all_resolved_tasks = sql_simple($stolen_query);
 
 	    // Find all bugs that the user has resolved at some point, but was
 	    // not the most recent person to resolve.
-            $stolen_keys = array_diff(array_keys($all_resolved_tasks), 
+            $stolen_keys = array_diff(array_keys($all_resolved_tasks),
                 array_keys($resolved_tasks));
 
             foreach ($stolen_keys as $b)
                 $stolen_bugs[$b] = array($b, $all_resolved_tasks[$b][2]);
         }
-	
+
 	$whichbugs += array_keys($resolved_tasks);
-	
+
 	$whichtasks = sql_simple("select ixTask from schedulator.Estimate " .
 				 "    where 1 $and_user " .
 				 "      $and_dtresolved " .
@@ -909,13 +909,13 @@ class FogTables
 	$whichtasks += sql_simple("select ixXTask from schedulator.XTask " .
 				  "    where 1 $and_useras " .
 				  "      $and_fixfor");
-	$bugwhere = count($whichbugs) 
+	$bugwhere = count($whichbugs)
 	  ? " where ixBug in (" . join(",", $whichbugs) . ")"
 	  : " where 1=0";
 	$taskwhere = count($whichtasks)
 	  ? " where ixXTask in (" . join(",", $whichtasks) . ")"
 	  : " where 1=0";
-	
+
 	$this->bug = new BugTable($bugwhere, $userix, $resolved_tasks,
 				  $stolen_bugs, $this->person,
 				  $this->project, $this->fixfor);
