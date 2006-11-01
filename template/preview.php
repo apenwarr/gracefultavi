@@ -15,11 +15,13 @@ require_once('template/common.php');
 //   nextver   => An integer; the expected version of this document when saved.
 //   archive   => An integer.  Will be nonzero if this is not the most recent
 //                version of the page.
+//   diff      => A computed diff of the changes from the current edit.
+//   diff_mode => A flag indicating the diff mode currently used.
 
 function template_preview($args)
 {
-    global $categories, $comment, $EditCols, $EditRows, $PageSizeLimit;
-    global $PrefsScript, $ShowCategoryBox, $UserName;
+    global $categories, $comment, $EditCols, $EditRows, $EnableWordDiff;
+    global $PageSizeLimit, $PrefsScript, $ShowCategoryBox, $UserName;
 
     $section_title = $args['section'] ? 'section of ' : '';
 
@@ -38,6 +40,17 @@ function template_preview($args)
         #'editver'         => $args['editver']  no edit
         'button_backlinks' => 1
     ));
+
+    if ($args['diff_mode'] == 1)
+    {
+        $regular_diff_checked = '';
+        $word_diff_checked = ' checked';
+    }
+    else
+    {
+        $regular_diff_checked = ' checked';
+        $word_diff_checked = '';
+    }
 ?>
 
 <div class="form">
@@ -55,7 +68,9 @@ function template_preview($args)
 ?>  Visit <a href="<?php print $PrefsScript; ?>">Preferences</a> to set your
 user name<?php
   }
-?><br />
+?>
+ | <a href="#changes">View changes in this edit</a>
+  <br />
   <input type="hidden" name="nextver" value="<?php print $args['nextver']; ?>">
   <input type="hidden" name="pagefrom" value="<?php print $args['pagefrom']; ?>">
 
@@ -103,6 +118,7 @@ print '><label for="template">This page is a template</label> ';
 user name<?php
   }
 ?>
+ | <a href="#changes">View changes in this edit</a>
 
 <div id="body" class="content">
 <h1>Preview</h1>
@@ -113,6 +129,28 @@ user name<?php
 <strong>Confirm changes to above document?</strong><br>
 <input type="submit" name="Save" value="Save" onClick="return sizeLimitCheck(this.form.document);">
 <input type="submit" name="Preview" value="Preview" onClick="return sizeLimitCheck(this.form.document);">
+
+<hr />
+
+<a name="changes"></a>
+<h1>Changes in this edit</h1>
+
+<?php if ($EnableWordDiff) : ?>
+<br>
+Diff method:
+<input type="radio" id="regular_diff" name="diff_mode" value="0"<?=$regular_diff_checked?>><label for="regular_diff">Regular diff</label>
+<input type="radio" id="word_diff" name="diff_mode" value="1"<?=$word_diff_checked?>><label for="word_diff">Word diff</label>
+<?php endif; ?>
+
+<hr />
+
+<?php
+if ($args['diff'])
+    print '<div class="diff">' . $args['diff'] . '</div>';
+else
+    print 'There were no changes made in this edit.';
+?>
+
 </div>
 </form>
 <?php

@@ -38,6 +38,7 @@ if(!ini_get('register_globals'))
   if(isset($HTTP_POST_VARS['categories'])) $categories = $HTTP_POST_VARS['categories'];
   if(isset($HTTP_POST_VARS['comment'])) $comment = $HTTP_POST_VARS['comment'];
   if(isset($HTTP_POST_VARS['days'])) $days = $HTTP_POST_VARS['days'];
+  if(isset($HTTP_POST_VARS['diff_mode'])) $diff_mode = $HTTP_POST_VARS['diff_mode'];
   if(isset($HTTP_POST_VARS['discard'])) $discard = $HTTP_POST_VARS['discard'];
   if(isset($HTTP_POST_VARS['document'])) $document = $HTTP_POST_VARS['document'];
   if(isset($HTTP_POST_VARS['hist'])) $hist = $HTTP_POST_VARS['hist'];

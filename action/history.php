@@ -1,17 +1,51 @@
 <?php
 
-require('parse/main.php');
-require('parse/macros.php');
-require('parse/html.php');
-require('lib/diff.php');
+require_once('parse/main.php');
+require_once('parse/macros.php');
+require_once('parse/html.php');
+require_once('lib/diff.php');
 require('template/history.php');
 require('lib/headers.php');
+
+function do_diff($body1, $body2)
+{
+    global $diff_mode, $DiffModeCookieName, $EnableWordDiff, $HTTP_COOKIE_VARS;
+
+    if ($EnableWordDiff)
+    {
+        if (!isset($diff_mode))
+            if (isset($HTTP_COOKIE_VARS[$DiffModeCookieName]))
+                $diff_mode = $HTTP_COOKIE_VARS[$DiffModeCookieName];
+            else
+                $diff_mode = 0;
+        if (!isset($HTTP_COOKIE_VARS[$DiffModeCookieName]) ||
+            $diff_mode != $HTTP_COOKIE_VARS[$DiffModeCookieName])
+            setcookie($DiffModeCookieName, $diff_mode, time() + 157680000, "/",
+                      false);
+    }
+    else
+        $diff_mode = 0;
+
+    // diff mode: 0 = regular diff, 1 = word diff
+    if ($diff_mode == 1)
+    {
+        $diff = wdiff_compute($body1, $body2);
+        $diff = wdiff_parse($diff);
+    }
+    else
+    {
+        $diff = diff_compute($body1, $body2);
+        $diff = diff_parse($diff);
+    }
+
+    return $diff;
+}
 
 // Display the known history of a page's edits.
 function action_history()
 {
-    global $diff_mode, $DiffModeCookieName, $EnableWordDiff, $full, $HistMax;
-    global $HTTP_COOKIE_VARS, $page, $pagestore, $UserName, $ver1, $ver2;
+    global $diff_mode, $full, $HistMax, $page, $pagestore, $UserName, $ver1;
+    global $ver2;
 
     $history = $pagestore->history($page);
 
@@ -42,31 +76,7 @@ function action_history()
     $p2 = $pagestore->page($page);
     $p2->version = $latest_ver;
 
-    if ($EnableWordDiff)
-    {
-        if (!isset($diff_mode))
-            if (isset($HTTP_COOKIE_VARS[$DiffModeCookieName]))
-                $diff_mode = $HTTP_COOKIE_VARS[$DiffModeCookieName];
-            else
-                $diff_mode = 0;
-        if (!isset($HTTP_COOKIE_VARS[$DiffModeCookieName]) ||
-            $diff_mode != $HTTP_COOKIE_VARS[$DiffModeCookieName])
-            setcookie($DiffModeCookieName, $diff_mode, time() + 157680000, "/", false);
-    }
-    else
-        $diff_mode = 0;
-
-    // diff mode: 0 = regular diff, 1 = word diff
-    if ($diff_mode == 1)
-    {
-        $diff = wdiff_compute($p1->read(), $p2->read());
-        $diff = wdiff_parse($diff);
-    }
-    else
-    {
-        $diff = diff_compute($p1->read(), $p2->read());
-        $diff = diff_parse($diff);
-    }
+    $diff = do_diff($p1->read(), $p2->read());
 
     template_history(array(
         'page'      => $page,
