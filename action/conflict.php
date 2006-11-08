@@ -6,7 +6,7 @@ require('template/conflict.php');
 // just saved.
 function action_conflict()
 {
-  global $pagestore, $page, $document, $ParseEngine;
+  global $document, $merge, $page, $pagestore, $ParseEngine;
 
   $pg = $pagestore->page($page);
   $pg->read();
@@ -16,6 +16,7 @@ function action_conflict()
                           'html'      => parseText($pg->text,
                                                    $ParseEngine, $page),
                           'usertext'  => $document,
+                          'merge'     => $merge,
                           'timestamp' => $pg->time,
                           'nextver'   => $pg->version + 1));
 }

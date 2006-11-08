@@ -9,12 +9,12 @@ require('lib/captcha.php');
 // Commit an edit to the database.
 function action_save()
 {
-    global $Admin, $archive, $captcha, $categories, $comment, $document;
-    global $Diff3Cmd, $EnableCaptcha, $EnableDiff3, $EnableSubscriptions;
-    global $EmailSuffix, $ErrorPageLocked, $HTTP_POST_VARS, $MaxPostLen;
-    global $minoredit, $nextver, $NickName, $page, $pagefrom, $pagestore;
-    global $REMOTE_ADDR, $Save, $SaveMacroEngine, $section, $template;
-    global $text_before, $text_after, $UserName, $validationcode;
+    global $Admin, $archive, $captcha, $categories, $comment, $Diff3Cmd;
+    global $document, $EmailSuffix, $EnableCaptcha, $EnableDiff3;
+    global $EnableSubscriptions, $ErrorPageLocked, $HTTP_POST_VARS, $MaxPostLen;
+    global $merge, $minoredit, $nextver, $NickName, $page, $pagefrom;
+    global $pagestore, $REMOTE_ADDR, $Save, $SaveMacroEngine, $section;
+    global $template, $text_after, $text_before, $UserName, $validationcode;
     global $WorkingDirectory;
 
     if(isset($HTTP_POST_VARS['quickadd'])) $quickadd = $HTTP_POST_VARS['quickadd'];
@@ -98,6 +98,7 @@ function action_save()
         && !$archive)                   // Not editing an archive version.
     {
         $merge_conflict = 1;
+        $merge = '';
 
         $diff3_test = array();
         if ($EnableDiff3)
@@ -132,15 +133,17 @@ function action_save()
             fclose($h_old);
             fclose($h_your);
 
-            exec($Diff3Cmd.' -m '.$my_file.' '.$old_file.' '.$your_file, $merge);
+            $diff3_options = '-mE -L "Your modifications" -L "Original file" '.
+                             '-L "Someone else\'s modifications"';
+            exec($Diff3Cmd.' '.$diff3_options.' '.$my_file.' '.$old_file.' '.
+                 $your_file, $merge);
 
             unlink($my_file);
             unlink($old_file);
             unlink($your_file);
 
             $merge = implode("\n", $merge);
-            $regexp = '/[<\|>]{7} '.
-                preg_quote($TempDir.'/wiki_'.$num.'_', '/').'/s';
+            $regexp = '/<{7} Your modifications/s';
             $merge_conflict = preg_match($regexp, $merge);
         }
 
