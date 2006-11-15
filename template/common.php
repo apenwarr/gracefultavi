@@ -287,7 +287,7 @@ if (isset($args['tree']))
 function template_common_epilogue($args)
 {
   global $AdditionalFooter, $EmailSuffix, $EnableSubscriptions, $EnableCaptcha;
-  global $HomePage, $ndfnow, $NickName, $page, $pagestore, $PageTooLongSize;
+  global $HomePage, $NickName, $page, $pagestore, $PageTooLongSize;
   global $PdfEngineUrl, $PrefsScript, $UserName;
 
   $pg = $pagestore->page($page);
@@ -336,8 +336,6 @@ if (!$UserName) {
 <?php
 print html_ref('RecentChanges', 'RecentChanges') . ', ' .
                '<a href="' . $PrefsScript . '">UserOptions</a>';
-
-if ($ndfnow) print '<br><br><a href="?NowOnWednesdays"><img src="images/ndfnow.png"></a>';
 
 if (isset($args['timestamp']))
 {
