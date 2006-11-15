@@ -71,8 +71,8 @@ class Macro_BugReport
     {
         $method = $use_post ? 'POST' : 'GET';
         $action = $action ? 'action="'.$action.'"' : '';
-        $this->out('<form enctype="multipart/form-data" '.
-                   $action.' method="'.$method.'" name="bugreportform">');
+        $this->out('<form '.$action.' method="'.$method.'" '.
+                   'name="bugreportform">');
         $this->form_hidden("page", $this->page);
     }
 
