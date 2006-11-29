@@ -192,4 +192,5 @@ string $EmailSuffix ''
 Enter the email suffix of your company. For example, if your email is
 'me@mycompany.org', enter '@mycompany.org'.
 // $EmailSuffix specifies the email address suffix that should be appended to
-// the username when sending the page subscription email.
+// the username when sending the page subscription email. The first character 
+// must be '@'.

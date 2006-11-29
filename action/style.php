@@ -13,6 +13,7 @@ function action_style()
         require('template/wikiprint.css');
     }
 
-    if ($StyleSheetOverride)
+    if ($StyleSheetOverride) {
         require($StyleSheetOverride);
+    }
 }

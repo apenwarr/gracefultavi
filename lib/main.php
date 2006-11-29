@@ -61,11 +61,6 @@ if(!ini_get('register_globals'))
   if(isset($HTTP_POST_VARS['validationcode'])) $validationcode = $HTTP_POST_VARS['validationcode'];
 }
 require('lib/init.php');
-
-if (isset($_GET['pdf'])) {
-    $UserName = '';
-}
-
 require('parse/transforms.php');
 
 // Make sure the database version is up to date

@@ -34,11 +34,6 @@ class Macro_Toc
 
     function parse($max_level, $page)
     {
-        if (isset($_GET['pdf']))
-        {
-            return '';
-        }
-
         global $pagestore, $MaxHeading, $document, $TocJavascriptFunctions;
         global $ViewMacroEngine;
 

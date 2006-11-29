@@ -2,7 +2,7 @@
 
 function action_lock()
 {
-    global $dbh, $page, $pagestore, $PgTbl;
+    global $page, $pagestore, $PgTbl;
 
     $dbname = str_replace('\\', '\\\\', $page);
     $dbname = str_replace('\'', '\\\'', $dbname);

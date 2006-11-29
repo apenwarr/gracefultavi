@@ -19,8 +19,8 @@ require_once('template/common.php');
 
 function template_conflict($args)
 {
-    global $categories, $comment, $EditCols, $EditRows, $minoredit;
-    global $PageSizeLimit, $PrefsScript, $ShowCategoryBox, $template, $UserName;
+    global $categories, $comment, $EditCols, $EditRows, $MaxPostLen, $minoredit;
+    global $PrefsScript, $ShowCategoryBox, $template, $UserName;
 
     template_common_prologue(array(
         'norobots' => 1,
@@ -60,7 +60,7 @@ function template_conflict($args)
 </p>
 <h1><?php print $editBoxTitle?></h1>
 <form method="post" action="<?php print saveURL($args['page']); ?>">
-<input type="hidden" name="pagesizelimit" value="<?=$PageSizeLimit?>">
+<input type="hidden" name="pagesizelimit" value="<?=$MaxPostLen?>">
 <div class="form">
   <input type="submit" name="Save" value="Save" onClick="return sizeLimitCheck(this.form, 'document');">
   <input type="submit" name="Preview" value="Preview" onClick="return sizeLimitCheck(this.form, 'document');">

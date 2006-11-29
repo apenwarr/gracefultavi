@@ -21,7 +21,7 @@ require_once('template/common.php');
 function template_preview($args)
 {
     global $categories, $comment, $EditCols, $EditRows, $EnableWordDiff;
-    global $PageSizeLimit, $PrefsScript, $ShowCategoryBox, $UserName;
+    global $MaxPostLen, $PrefsScript, $ShowCategoryBox, $UserName;
 
     $section_title = $args['section'] ? 'section of ' : '';
 
@@ -55,7 +55,7 @@ function template_preview($args)
 
 <div class="form">
 <form method="post" action="<?php print saveURL($args['page']); ?>">
-<input type="hidden" name="pagesizelimit" value="<?=$PageSizeLimit?>">
+<input type="hidden" name="pagesizelimit" value="<?=$MaxPostLen?>">
 <input type="submit" name="Save" value="Save"
     onClick="return sizeLimitCheck(this.form, 'document', 'text_before', 'text_after');">
 <input type="submit" name="Preview" value="Preview"

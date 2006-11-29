@@ -80,7 +80,7 @@ function template_common_prologue($args)
 {
     global $AdditionalHeader, $CommonScript, $FindScript, $HomePage;
     global $MetaDescription, $MetaKeywords, $page, $pagestore, $ScriptBase;
-    global $SeparateHeaderWords, $SeparateTitleWords, $shortcutIcon;
+    global $SeparateHeaderWords, $SeparateTitleWords, $ShortcutIcon;
     global $StyleScript, $TableSortScript, $UserName, $UseSpamRevert, $WikiLogo;
     global $WikiName;
 
@@ -98,7 +98,9 @@ function template_common_prologue($args)
 <link type="text/css" rel="stylesheet" media="print" href="<?php print $StyleScript; ?>&amp;csstype=print">
 <script src="<?php print $TableSortScript; ?>" type="text/javascript"></script>
 <script src="<?php print $CommonScript; ?>" type="text/javascript"></script>
-<link rel="SHORTCUT ICON" href="<?=$shortcutIcon?>">
+<?php if ($ShortcutIcon) : ?>
+    <link rel="SHORTCUT ICON" href="<?=$ShortcutIcon?>">
+<?php endif; ?>
 <link rel="ALTERNATE" title="<?=htmlspecialchars($WikiName)?>" href="<?=$ScriptBase?>?action=rss" TYPE="application/rss+xml">
 <title><?php print $args['title'] . ' - ' . htmlspecialchars($WikiName); ?></title>
 </head>
@@ -257,7 +259,6 @@ if (isset($args['tree']))
     cellpadding="10" border="1" bordercolor="black" bgcolor="white">
 <tr>
 <td>
-<!-- end prologue -->
 <?php
 }
 
@@ -287,13 +288,12 @@ if (isset($args['tree']))
 function template_common_epilogue($args)
 {
   global $AdditionalFooter, $EmailSuffix, $EnableSubscriptions, $EnableCaptcha;
-  global $HomePage, $NickName, $page, $pagestore, $PageTooLongSize;
-  global $PdfEngineUrl, $PrefsScript, $UserName;
+  global $HomePage, $NickName, $page, $pagestore, $PageTooLongLen, $PrefsScript;
+  global $UserName;
 
   $pg = $pagestore->page($page);
   $pagetext = $pg->text;
 ?>
-<!-- start epilogue -->
 </td>
 </tr>
 </table>
@@ -365,23 +365,11 @@ if (isset($args['twin']) && $args['twin'] != '')
     }
 }
 
-print '</td>';
-print '<td align="right">';
-
-// save as pdf
-if ($PdfEngineUrl)
-{
-    $pdf_url = $PdfEngineUrl.'?page='.htmlspecialchars($page).
-               '&user='.htmlspecialchars($UserName);
-    print '<b><a href="'.$pdf_url.'">Save as PDF</a></b>';
-}
-
-if ($PdfEngineUrl && $args['editver'] != -1) {
-    print ' | ';
-}
-
 if (isset($args['edit']))
 {
+    print '</td>';
+    print '<td align="right">';
+
     if ($args['editver'] == 0)
         print '<b><a href="' . editURL($args['edit']) . '">'.
               'Edit this page</a></b>';
@@ -427,7 +415,7 @@ if ($page != $HomePage && $page != 'RecentChanges')
     <?php
     if ($args['edit'])
     {
-        if ($args['page_length'] > $PageTooLongSize)
+        if ($args['page_length'] > $PageTooLongLen)
         {
             print '<div style="color:red;font-weight:bold">'.
                   'This page is too long. Comments are disabled.</div>';

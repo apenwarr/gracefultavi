@@ -8,7 +8,7 @@
 
 function template_rss($args)
 {
-  global $Charset, $InterWikiPrefix, $MetaDescription, $ScriptBase, $WikiName;
+  global $Charset, $MetaDescription, $ScriptBase, $WikiName;
 
   header('Content-type: text/xml');
 ?>

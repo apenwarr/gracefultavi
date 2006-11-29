@@ -2,7 +2,7 @@ Feedback
 --------
 
 Your feedback is welcome to help make these installation instructions more
-useful, understandable, and complete.  If you have any suggestions, criticisms,
+useful, understandable, and complete. If you have any suggestions, criticisms,
 questions, or other comments, please visit the home of GracefulTavi on the Web:
 http://open.nit.ca/wiki/?GracefulTavi.
 
@@ -29,14 +29,14 @@ Upgrade Notes
 GracefulTavi - Installation
 ---------------------------
 
-1.  Choose a location in which to install GracefulTavi.  You do not need to
+1.  Choose a location in which to install GracefulTavi. You do not need to
     install GracefulTavi under your webspace; in fact, it is recommended that
-    you do not do so.  This is best for security purposes to leave as few
-    scripts exposed to the web as possible.
+    you do not do so. This is best for security purposes to leave as few scripts
+    exposed to the web as possible.
 
     Additionally, if you install GracefulTavi in a central location, you can use
-    it once for multiple wikis on your web server.  This makes administration of
-    virtual hosts or wiki farms much simpler.  Upgrading to a later version of
+    it once for multiple wikis on your web server. This makes administration of
+    virtual hosts or wiki farms much simpler. Upgrading to a later version of
     GracefulTavi also is simplified, as you can upgrade multiple wikis in one
     step.
 
@@ -49,37 +49,38 @@ GracefulTavi - Installation
     use it without complication; there is no reason that GracefulTavi *must* be
     installed in a central location, although it is recommended.
 
-2.  Download the GracefulTavi archive into the installation directory.  You can
+2.  Download the GracefulTavi archive into the installation directory. You can
     find it at http://open.nit.ca/wiki/index.php?page=DownloadReleases
 
 3.  Unpack the archive in the installation directory.
 
 4.  Run install/create-db.pl to create the database tables for your wiki:
 
-    Its first parameter should be the name of the (already created) MySQL
-    database where the tables will be created.  If you have not yet created the
+    Its first parameter is the name of the wiki.
+
+    Its second parameter should be the name of the (already created) MySQL
+    database where the tables will be created. If you have not yet created the
     database, you should do so before running the script.
 
-    Its second and third parameters are the user name and password to use to
+    Its third and fourth parameters are the user name and password to use to
     access the database.
 
-    Optionally, you can include a fourth parameter to specify a prefix to be
-    prepended to the table names.  If you have access to only one MySQL
-    database, you can use this feature to install multiple wikis in the same
-    database.
+    Optionally, you can include a fifth parameter to specify a prefix to be
+    prepended to the table names. If you have access to only one MySQL database,
+    you can use this feature to install multiple wikis in the same database.
 
-    You may also include a fifth parameter to specify the hostname or IP address
+    You may also include a sixth parameter to specify the hostname or IP address
     of the database server, if it is not the local host.
 
     Examples:
 
-      perl ./create-db.pl wiki joe passwd
-      perl ./create-db.pl project sally pass wiki_ database.example.com
-      perl ./create-db.pl common jim key "" mysql.example.com
+      perl ./create-db.pl JoeWiki wiki joe passwd
+      perl ./create-db.pl SallyWiki project sally pass wiki_ db.example.com
+      perl ./create-db.pl JimWiki common jim key "" mysql.example.com
 
 5.  In the install/ directory, run the "configure.pl" script to generate a
-    configuration file for your wiki.  It takes one parameter, the location of
-    the configuration file.  For example:
+    configuration file for your wiki. It takes one parameter, the location of
+    the configuration file. For example:
 
       perl ./configure.pl /home/u/user12/gracefultavi/config.php
       perl ./configure.pl ../config.php
@@ -88,7 +89,9 @@ GracefulTavi - Installation
     of your wiki, database information, etc.
 
     As with the GracefulTavi source, it is recommended that you keep your
-    configuration file in a location that cannot be accessed from the web.
+    configuration file in a location that cannot be accessed from the web. We
+    recommend to put it in the directory where GracefulTavi has been installed
+    (see Instllation step 1. above).
 
     You may wish to double-check the 'config.php' file that was created by the
     configuration script, to make sure that the settings are correct.
@@ -96,44 +99,44 @@ GracefulTavi - Installation
 6.  If you installed GracefulTavi in your webspace, then skip this step, since
     index.php is already accessible from the web.
 
-    A. Now you have to create an entry point to your wiki.  Choose a directory
-       in your webspace to be the base point for your wiki.  For sake of
-       example, we will use /home/joe/public_html/mywiki/.
+    A. Now you have to create an entry point to your wiki. Choose a directory in
+       your webspace to be the base point for your wiki. For sake of example, we
+       will use /home/joe/public_html/mywiki/.
 
-    B. Create a subdirectory named 'admin/' in this directory.  E.g.,
+    B. Create a subdirectory named 'admin/' in this directory. E.g.,
        /home/joe/public_html/mywiki/admin.
 
     C. In the base directory, create a symbolic link to the index.php in the
-       GracefulTavi installation.  For example, create
+       GracefulTavi installation. For example, create
        /home/joe/public_html/mywiki/index.php that is a link to
        /usr/local/lib/gracefultavi/index.php.
 
     D. In the admin/ subdirectory, create a symbolic link to the index.php in
-       the admin subdirectory in the GracefulTavi installation.  For example,
+       the admin subdirectory in the GracefulTavi installation. For example,
        create: /home/joe/public_html/mywiki/admin/index.php that is a link to
        /usr/local/lib/gracefultavi/admin/index.php.
 
 7.  Configure your script so that it can access the GracefulTavi scripts and so
-    that it can access your configuration file.  If you have installed
+    that it can access your configuration file. If you have installed
     GracefulTavi in your webspace, and you have placed the config.php file in
-    the root of that location, then you can skip this step.  Otherwise,
-    continue:
+    the root of that location, then you can skip this step. Otherwise, continue:
 
-    A. Locate the directories for your GracefulTavi installation and for your
-       config.php file.  For example, they might be:
+    A. Locate the directories for the web space, for your config.php file, and
+       for your GracefulTavi installation. For example, they might be:
 
+         /home/joe/public_html/mywiki
+         /home/joe/
          /usr/local/lib/gracefultavi/
-         /home/joe/gracefultavi/mywiki
 
     B. If you are running PHP as mod_php under Apache, add the directories to
-       the .htaccess file in the directory where the wiki resides.  Separate
-       them with colons:
+       the .htaccess file in the directory where the wiki resides. Separate them
+       with colons:
 
-      php_value include_path "/home/joe/tavi/mywiki:/usr/local/lib/gracefultavi"
+         php_value include_path "/home/joe/public_html/mywiki:/home/joe/:/usr/local/lib/gracefultavi/"
 
-    C. If, instead, you are running PHP as a CGI program, then you will have to
-       similarly change the include_path in your php.ini file to point to the
-       given directories.
+    C. If instead you are running PHP as a CGI program, or on a Net Integrator,
+       then you will have to similarly change the include_path in your php.ini
+       file to point to the given directories.
 
 8.  [Optional, but recommended.]
 
@@ -148,4 +151,120 @@ GracefulTavi - Installation
     B. If, instead, you are running PHP as a CGI program, then you will have to
        similarly change the register_globals setting in your php.ini file.
 
-9. Visit your wiki and start creating pages!
+9.  Visit your wiki and start creating pages!
+
+
+Features To Set Manually
+------------------------
+
+See lib/defaults.php for more details about these config variables. Remember to
+set them in your config.php file, DO NOT EDIT lib/defaults.
+
+- Additional header and footer showing above and below everything
+    $AdditionalHeader
+    $AdditionalFooter
+
+- Shortcut icon, html defined icon instead of standard favicon.ico
+    $ShortcutIcon
+
+- Stylesheet override
+    $StyleSheetOverride
+
+- Worddiff as an additional diff method
+    $EnableWordDiff
+    $WdiffCmd
+    $WdiffLibrary
+
+- Conflict merge using diff3
+    $EnableDiff3
+    $Diff3Cmd
+
+- Captcha system to prevent spam
+    $EnableCaptcha
+    $CaptchaObfuscate
+
+- Easy spam removal
+    $UseSpamRevert
+
+
+Additionnal Features - For Advanced Users
+-----------------------------------------
+
+-  Login system using Apache authentication
+
+   1. Go to the wiki directory in your web space.
+
+   2. If you installed GracefulTavi in your webspace (see Installation step 6.
+      above), then skip this step.
+
+      Remove the index.php symbolic link and copy the file from the GracefulTavi
+      installation, /usr/local/lib/gracefultavi/index.php in our example.
+
+   3. Edit the index.php file, it should look something like this:
+
+      <?php
+      $_SERVER[PHP_AUTH_USER]="";
+      require('lib/main.php');
+      ?>
+
+   4. Create a subdirectory named 'login'. In this subdirectory:
+
+      A. Create a symbolic link to the index.php in the GracefulTavi
+         installation. For example, create
+         /home/joe/public_html/mywiki/login/index.php that is a link to
+         /usr/local/lib/gracefultavi/index.php. You might need to chown the file
+         to the user or team in which GracefulTavi is installed.
+
+      B. Create these symbolic links:
+
+         images --> ../images
+         attachments --> ../attachments
+
+      C. Create (or edit) an ".htaccess" file containing something like this:
+
+         AuthUserFile <path to the .htpasswd file> <--- this line is optional
+         AuthName "<Your Wiki Name>"
+         AuthType Basic
+         require valid-user
+
+      D. Create a subdirectory named 'admin'. In this subdirectory, create this
+         symbolic link: index.php -> ../../admin/index.php
+
+
+-  Attach macro
+
+   The Attach macro is installed by default. It doesn't need any switch to be
+   turned on as the presence of the Attach.php file in the macros directory is
+   sufficient to activate it. However, it requires a little touch of the system
+   administrator to be fully operational.
+
+   1. Go to the wiki directory in your web space.
+
+   2. If you installed GracefulTavi in your webspace (see Installation step 6.
+      above), then skip this step.
+
+      Create the following subdirectory:
+
+        attachments
+        attachments/.deleted
+
+   3. Both subdirectories must be writable by the user or process running PHP.
+      This means they either need to be publicly writable (chmod 777) or have
+      the SUID permission (chmod g+s).
+
+
+-  Remote Pages, aka as Twin Pages, or SisterWiki
+
+   This feature is useful when you want to link your wiki pages to pages with
+   the same name on other wikis. When setted up, links to the remote pages
+   appear next to the title at the top of the page.
+
+   Take a look at the install/crosswiki.sh file. It is provided with
+   GracefulTavi only as an example and requires to be configured independantly
+   from the GracefulTavi config.php file mentionned above in the installation
+   procedure. It is recommended to set it up as a cron job so the database is
+   updated regularly.
+
+   The 6th parameter of the putwiki function, called RESTRICTED, is a boolean
+   value (either 0 or 1). When set to 1, the remote pages links will be visible
+   only to logged in users.

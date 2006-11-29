@@ -19,7 +19,7 @@ require('template/common.php');
 
 function template_edit($args)
 {
-    global $EditCols, $EditRows, $PageSizeLimit, $PrefsScript, $ShowCategoryBox;
+    global $EditCols, $EditRows, $MaxPostLen, $PrefsScript, $ShowCategoryBox;
     global $UserName;
 
     $section_title = $args['section'] ? 'section of ' : '';
@@ -44,7 +44,7 @@ function template_edit($args)
 <div id="body">
 
 <form method="post" action="<?php print saveURL($args['page']); ?>">
-<input type="hidden" name="pagesizelimit" value="<?=$PageSizeLimit?>">
+<input type="hidden" name="pagesizelimit" value="<?=$MaxPostLen?>">
 <input type="hidden" name="nextver" value="<?php print $args['nextver']; ?>">
 <input type="hidden" name="pagefrom" value="<?php print $args['pagefrom']; ?>">
 
