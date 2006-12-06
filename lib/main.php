@@ -22,6 +22,7 @@ if(!ini_get('register_globals'))
   if(isset($HTTP_GET_VARS['md5'])) $md5 = $HTTP_GET_VARS['md5'];
   if(isset($HTTP_GET_VARS['no_redirect'])) $no_redirect = $HTTP_GET_VARS['no_redirect'];
   if(isset($HTTP_GET_VARS['page'])) $page = $HTTP_GET_VARS['page'];
+  if(isset($HTTP_GET_VARS['pagefrom'])) $pagefrom = $HTTP_GET_VARS['pagefrom'];
   if(isset($HTTP_GET_VARS['prefs_from'])) $prefs_from = $HTTP_GET_VARS['prefs_from'];
   if(isset($HTTP_GET_VARS['q'])) $q = $HTTP_GET_VARS['q'];
   if(isset($HTTP_GET_VARS['redirect_from'])) $redirect_from = $HTTP_GET_VARS['redirect_from'];

@@ -67,6 +67,7 @@ function action_save()
 
     $pg = $pagestore->page($page);
     $pg->read();
+    $pageWasEmpty = strlen($pg->text) <= 1;
 
     if (isset($appending))
     {
@@ -223,7 +224,7 @@ function action_save()
     }
 
     // Parenting stuff for new pages.
-    if ($pg->version == 1)
+    if ($pageWasEmpty)
     {
         // Ensures that $pagefrom is really a backlink.
         if ($pagefrom)
