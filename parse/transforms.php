@@ -151,9 +151,9 @@ function interwiki_token($prefix, $ref)
         }
 
         return new_entity(array('interwiki', $url, $prefix . ':' . $ref));
-  }
+    }
 
-  return $prefix . ':' . $ref;
+    return $prefix . ':' . $ref;
 }
 
 // Ensures that links won't be created inside html <a> tags, i.e. between <a>
