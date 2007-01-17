@@ -556,7 +556,7 @@ class PageStore
     {
         global $CoTbl, $PgTbl;
 
-        $text = strtolower($text);
+        $text = addslashes(strtolower($text));
 
         $qid = $this->dbh->query("SELECT p.title " .
                                  "FROM $PgTbl p, $CoTbl c " .

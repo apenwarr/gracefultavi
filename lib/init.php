@@ -40,13 +40,14 @@ $Entity = array();                      // Global parser entity list.
 // Strip slashes from incoming variables.
 if(get_magic_quotes_gpc())
 {
-  if(isset($document)) $document = stripslashes($document);
-  if(isset($text_before)) $text_before = stripslashes($text_before);
-  if(isset($text_after)) $text_after = stripslashes($text_after);
   if(isset($categories)) $categories = stripslashes($categories);
   if(isset($comment)) $comment = stripslashes($comment);
-  if(isset($page)) $page = stripslashes($page);
+  if(isset($document)) $document = stripslashes($document);
+  if(isset($find)) $find = stripslashes($find);
   if(isset($nickname)) $nickname = stripslashes($nickname);
+  if(isset($page)) $page = stripslashes($page);
+  if(isset($text_after)) $text_after = stripslashes($text_after);
+  if(isset($text_before)) $text_before = stripslashes($text_before);
 }
 
 // Read username from htaccess login
