@@ -12,7 +12,7 @@ function action_lock()
     $result = $pagestore->dbh->result($qid);
 
     if ($result[0]) {
-        $qry = "UPDATE $PgTbl SET attriubtes=".($result[0]^MUTABLE_ATTR)." ".
+        $qry = "UPDATE $PgTbl SET attributes=".($result[0]^MUTABLE_ATTR)." ".
                "WHERE title='$dbname'";
         $pagestore->dbh->query($qry);
     }
