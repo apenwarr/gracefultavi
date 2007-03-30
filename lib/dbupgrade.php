@@ -13,7 +13,7 @@ function get_db_version()
 
     // try using the version table, new since version 3
     if ($VeTbl) {
-        $rs = mysql_query("select version from $VeTbl", $db->handle);
+        $rs = mysql_query("SELECT version FROM $VeTbl", $db->handle);
         if ($rs) {
             $row = mysql_fetch_assoc($rs);
             if ($row && is_numeric($row['version'])) {
@@ -24,11 +24,11 @@ function get_db_version()
 
     // check for the content table, new since version 1
     if (!$CoTbl) { return 0; }
-    $rs = mysql_query("describe $CoTbl", $db->handle);
+    $rs = mysql_query("DESCRIBE $CoTbl", $db->handle);
     if (!$rs) { return 0; }
 
     // check for the table of the WikiPoll macro, new since version 2
-    $rs = mysql_query("describe ${DBTablePrefix}poll", $db->handle);
+    $rs = mysql_query("DESCRIBE ${DBTablePrefix}poll", $db->handle);
     if (!$rs) { return 1; }
 
     // the db is in the state right before the versioning system was implemented
@@ -48,12 +48,8 @@ function db_upgrade($cur_ver, $ver)
             require($file);
     }
 
-    mysql_query("delete from $VeTbl", $db->handle);
-    mysql_query("insert into $VeTbl values ($ver)", $db->handle);
-
-    #TODO
-    # delete from vetbl
-    # insert into vetbl
+    mysql_query("DELETE FROM $VeTbl", $db->handle);
+    mysql_query("INSERT INTO $VeTbl VALUES ($ver)", $db->handle);
 }
 
 ?>

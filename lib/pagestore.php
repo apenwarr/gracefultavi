@@ -466,7 +466,7 @@ class PageStore
             $qid = $this->dbh->query("SELECT title FROM $PgTbl");
 
             while ($result = $this->dbh->result($qid)) {
-                if (levenshtein($result[0], $pageLower) <= $toleratedDistance) {
+                if (levenshtein($result[0], $page) <= $toleratedDistance) {
                     $list[] = $result[0];
                 }
             }
@@ -556,18 +556,98 @@ class PageStore
     {
         global $CoTbl, $PgTbl;
 
-        $text = addslashes(strtolower($text));
+        if (trim($text) == '')
+        {
+            return $this->getAllPageNames();
+        }
 
-        $qid = $this->dbh->query("SELECT p.title " .
-                                 "FROM $PgTbl p, $CoTbl c " .
-                                 "WHERE p.id=c.page " .
-                                 "AND p.lastversion=c.version " .
-                                 "AND p.bodylength>1 " .
-                                 "AND (lower(body) LIKE '%$text%' " .
-                                 "OR title_notbinary LIKE '%$text%')");
+        $text = strtolower($text);
+
+        // split in words
+        $quoted_words = array();
+        if (preg_match_all('/[-\+]?"[^"]+"/', $text, $matches))
+        {
+            $quoted_words = $matches[0];
+            foreach ($quoted_words as $word)
+            {
+                $text = str_replace($word, '', $text);
+            }
+        }
+        $words = preg_split('/\s+/', $text, -1, PREG_SPLIT_NO_EMPTY);
+        $words = array_merge($words, $quoted_words);
+
+        // filter out words required to match or not
+        // remove quotes from quoted words
+        // cleanup for sql strings
+        $text = addslashes($text);
+        foreach ($words as $word)
+        {
+            preg_match('/^([-\+]?)(.+)$/', $word, $matches);
+            $word = preg_replace('/^"(.+)"$/', '\\1', $matches[2]);
+            $word = addslashes($word);
+            switch ($matches[1])
+            {
+                case '+':
+                    $score_words[] = $word;
+                    $with_words[] = $word;
+                    break;
+                case '-':
+                    $without_words[] = $word;
+                    break;
+                default:
+                    $score_words[] = $word;
+                    break;
+            }
+        }
+
+        // build qry
+        $qry = "SELECT title,";
+        if (count($words) > 1)
+        {
+            $qry .= "
+                (100 * IF (body LIKE '%$text%', 1, 0)) +";
+        }
+        $qry .= "
+            ((1 ";
+        foreach ($score_words as $word)
+        {
+            $qry .= "* IF (title_notbinary LIKE '%$word%', 2, 1) ";
+        }
+        $qry .= ")*10) + (1 ";
+        foreach ($score_words as $word)
+        {
+            $qry .= "* IF (body LIKE '%$word%', 2, 1) ";
+        }
+        $qry .= ") score
+            FROM $PgTbl
+            WHERE bodylength>1
+            AND (0";
+        foreach ($score_words as $word)
+        {
+            $qry .= "
+                OR title_notbinary LIKE '%$word%'
+                OR body LIKE '%$word%'";
+        }
+        $qry .= "
+            )";
+        foreach ($with_words as $word)
+        {
+            $qry .= "
+                AND body LIKE '%$word%'";
+        }
+        foreach ($without_words as $word)
+        {
+            $qry .= "
+                AND body NOT LIKE '%$word%'";
+        }
+        $qry .= "
+            ORDER BY score DESC";
+
+        $qid = $this->dbh->query($qry);
         $list = array();
-        while ($result = $this->dbh->result($qid)) {
-            $list[] = $result[0];
+        while ($row = $this->dbh->result($qid))
+        {
+            $list[] = $row[0];
         }
 
         return $list;

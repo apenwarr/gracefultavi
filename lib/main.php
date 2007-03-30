@@ -2,7 +2,7 @@
 
 // Database version used by this software version.
 // remember to update install/create-db.pl when changing this value
-define('DB_VERSION', 3);
+define('DB_VERSION', 4);
 
 // If register_globals is off, we need to harvest the script parameters
 // at this point.

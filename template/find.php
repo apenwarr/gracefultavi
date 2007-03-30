@@ -47,20 +47,12 @@ if ($args['pages'])
 {
     print '<br><hr align=left><br>';
 
-    if ($pageExists)
-        print 'Other pages ';
-    else
-        print 'Pages ';
+    print 'Search results for "' . htmlentities($find) . '"<br>';
 
     if ($args['branch_search'])
-        print '(children of ' . $args['branch_search'] . ') ';
-
-    if ($pageExists)
-        print 'related to ';
-    else
-        print 'containing ';
-
-    print "'" . htmlentities($find) . "'" . ':<br>';
+    {
+        print 'Restricted to children of ' . $args['branch_search'] . '<br>';
+    }
 
     print $args['pages'];
 }

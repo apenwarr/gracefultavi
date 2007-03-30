@@ -33,7 +33,7 @@ class WikiPage
     // in the database only, no matter if it has content or not.
     function exists()
     {
-        global $PgTbl, $page;
+        global $PgTbl;
 
         $qid = $this->db->query("SELECT id " .
                                 "FROM $PgTbl " .
@@ -55,8 +55,9 @@ class WikiPage
             $qry_version = $this->version;
         }
 
-        $qry = "SELECT id, time, author, body, attributes, version, " .
-               "username, comment, createtime, updatetime " .
+        // do not use table aliases here, as it doesn't work with table locks
+        $qry = "SELECT id, time, author, $CoTbl.body, attributes, " .
+               "version, username, comment, createtime, updatetime " .
                "FROM $PgTbl, $CoTbl " .
                "WHERE title='$this->dbname' " .
                "AND id=page " .
@@ -116,7 +117,7 @@ class WikiPage
         if ($this->exists) {
             // get roolback information
             $qry = "SELECT lastversion, lastversion_major, bodylength, " .
-                   "attributes, createtime, updatetime " .
+                   "attributes, createtime, updatetime, body " .
                    "FROM $PgTbl " .
                    "WHERE id=$page_id";
             $qid = $this->db->query($qry);
@@ -125,7 +126,8 @@ class WikiPage
             $qry = "UPDATE $PgTbl SET lastversion=$this->version, " .
                    "bodylength=$body_length, " .
                    "attributes=$attributes, " .
-                   "createtime='$this->createtime'";
+                   "createtime='$this->createtime', " .
+                   "body='$this->text'";
             if ($insertMinorEdit) {
                 $qry .= ", updatetime='$this->updatetime'";
             } else {
@@ -138,10 +140,10 @@ class WikiPage
             $metaphone = substr(metaphone($this->name), 0, 80);
             $qry = "INSERT INTO $PgTbl (title, title_notbinary, " .
                    "lastversion, lastversion_major, metaphone, bodylength, " .
-                   "attributes, createtime, updatetime) " .
+                   "attributes, createtime, updatetime, body) " .
                    "VALUES ('$this->dbname', '$this->dbname', " .
                    "$this->version, $this->version, '$metaphone', " .
-                   "$body_length, $attributes, null, null)";
+                   "$body_length, $attributes, null, null, '$this->text')";
             $this->db->query($qry);
             $page_id = mysql_insert_id($this->db->handle);
             if (!$page_id) { return false; }
@@ -163,7 +165,8 @@ class WikiPage
                        "bodylength = $rollback[2], " .
                        "attributes = $rollback[3], " .
                        "createtime = '$rollback[4]', " .
-                       "updatetime = '$rollback[5]' " .
+                       "updatetime = '$rollback[5]', " .
+                       "body = '$rollback[6]' " .
                        "WHERE id=$page_id";
             } else {
                 $qry = "DELETE FROM $PgTbl " .

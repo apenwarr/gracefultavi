@@ -13,8 +13,10 @@
  *   www.net-itech.com
  *
  * Description:
- *   Adds a new field in the "remote_pages" table and creates the "version"
- *   table for the new versioning system.
+ *   Adds a new field in the "remote_pages" table.
+ *   Creates the "version" table for the new database versioning system.
+ *   Turns the "mutable" field into "attributes" so it can hold multiple flags.
+ *   Current flags are: "mutable" and "template".
  */
 
 global $PgTbl, $RemTbl, $VeTbl;
