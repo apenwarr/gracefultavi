@@ -116,89 +116,76 @@ if ($AdditionalHeader) {
 }
 ?>
 
-<table align="center" class="topbox" border="0">
-<tr valign="top"><td class="printhide">
-<?php print '<small><a href="' . contentURL($args['headlink']) . '">Entire wiki contents</a></small>'; ?>
-</td></tr>
-
-<tr valign="top"><td>
 <div id="header">
 
-<div class="logo">
-<a href="<?php print viewURL($HomePage); ?>"><img src="<?php print $WikiLogo; ?>" alt="[Home]"></a>
-</div>
-
-<table cellspacing="0" cellpadding="0" border="0">
+<table align="center" class="topbox" border="0">
 <tr>
 <td>
-<?php
-print '<h1>' . $args['heading'];
-if ($args['headlink'] != '')
-{
-    print '<a class="title" href="' . backlinksURL($args['headlink']) . '">';
-    if ($SeparateHeaderWords)
-        print html_split_name($args['headlink']);
-    else
-        print $args['headlink'];
-    print '</a>';
-}
+    <table cellspacing="2" cellpadding="1" border="0">
+    <tr valign="top">
+    <td class="printhide">
+        <div class="logo">
+        <a href="<?php print viewURL($HomePage); ?>"><img src="<?php print $WikiLogo; ?>" alt="[Home]"></a>
+        </div>
+    </td>
+    <td class="printhide">
+        <h2><?php print htmlspecialchars($WikiName); ?></h2>
 
-if (count($twin = $pagestore->twinpages($args['headlink'])))
-{
-    // point at the sisterwiki's version
-    print '<sup class="printhide">';
-    foreach ($twin as $site)
-      { print " " . html_twin($site[0], $site[1]); }
-    print '</sup>';
-}
+        <form method="get" action="<?php print $FindScript; ?>">
+        <div class="form">
+        <input type="hidden" name="action" value="find">
 
-print $args['headsufx'] . '</h1>';
+        <table cellspacing="0" cellpadding="0" border="0">
+        <tr>
+        <td>Jump to:&nbsp;</td>
+        <td><input type="text" name="find" size="20" accesskey=","></td>
+        </tr>
 
-if (isset($args['redirect_from']) && $args['redirect_from']) {
-    print '</td></tr><tr><td class="printhide">';
-    print '<h2>Redirected from <a href="' . viewURL($args['redirect_from']) . '&no_redirect=1">' .
-        htmlspecialchars($args['redirect_from']) . '</a></h2>';
-}
-?>
+        <?php
+        if ( $args['headlink']
+             && $args['headlink'] != $HomePage
+             && $args['headlink'] != 'RecentChanges'
+             && $pagestore->getChildren($args['headlink']) )
+        {
+        ?>
+        <tr>
+        <td></td>
+        <td>
+        <input type="checkbox" name="branch_search" value="<?php print htmlspecialchars($args['headlink']) ?>">
+        <small>Search only children of <b><?=$args['headlink']?></b></small>
+        </td>
+        </tr>
+        <?php } ?>
+        </table>
+
+        </div>
+        </form>
+    </td>
+    </tr>
+    </table>
+</td>
+
+<td class="printhide" valign="top" align="right">
+
+    <table cellspacing="2" cellpadding="1" border="0">
+    <tr>
+    <td>
+
+    <?php
+    if (isset($args['tree']))
+    {
+        $tree = $pagestore->getTreeFromLeaves($HomePage, $args['headlink']);
+        if (isset($tree[$HomePage]) && count($tree[$HomePage]) > 0)
+        {
+            drawTree($tree, true, $args['headlink']);
+        }
+    }
+    ?>
+
+    </td></tr></table>
+
 </td>
 </tr>
-
-<tr>
-<td class="printhide">
-<br>
-<form method="get" action="<?php print $FindScript; ?>">
-<div class="form">
-<input type="hidden" name="action" value="find">
-
-<table cellspacing="0" cellpadding="0" border="0">
-<tr>
-<td>Jump to:&nbsp;</td>
-<td><input type="text" name="find" size="20" accesskey=","></td>
-</tr>
-
-<?php
-if ( $args['headlink']
-     && $args['headlink'] != $HomePage
-     && $args['headlink'] != 'RecentChanges'
-     && $pagestore->getChildren($args['headlink']) )
-{
-?>
-<tr>
-<td></td>
-<td>
-<input type="checkbox" name="branch_search" value="<?php print htmlspecialchars($args['headlink']) ?>">
-<small>Search only children of <b><?=$args['headlink']?></b></small>
-</td>
-</tr>
-<?php } ?>
-</table>
-
-</div>
-</form>
-
-</td>
-</tr>
-</table>
 
 <?php
 if (isset($args['quote']))
@@ -208,51 +195,70 @@ if (isset($args['quote']))
     if ($quotepage->exists())
     {
         global $ParseEngine;
-        foreach (explode("\n\n", $quotepage->text) as $line);
-        $yada = $line;
+        $paragraphs = explode("\n\n", $quotepage->text);
+        $last_paragraph = parseText(trim(array_pop($paragraphs)), $ParseEngine, $page);
+        print '<tr><td colspan="2" align="center">'."\n";
+        print '<table cellspacing="0" cellpadding="0" border="0"><tr><td>';
         print '<div align="right"><span class="quote">';
-        $yada = parseText($yada, $ParseEngine, $page);
-        if (strtolower(substr($yada, 0, 3)) != '<p>') { $yada = '<p>' . $yada; }
-        print $yada;
+        print $last_paragraph;
         print '</span></div>';
+        print '</td></tr></table>'."\n";
+        print '</td></tr>';
     }
 }
 ?>
+
+<tr>
+<td>
+    <?php
+    print '<h1>' . $args['heading'];
+    if ($args['headlink'] != '')
+    {
+        if ($SeparateHeaderWords)
+            print html_split_name($args['headlink']);
+        else
+            print $args['headlink'];
+    }
+    if (count($twin = $pagestore->twinpages($args['headlink'])))
+    {
+        // point at the sisterwiki's version
+        print '<sup class="printhide">';
+        foreach ($twin as $site)
+            print " " . html_twin($site[0], $site[1]);
+        print '</sup>';
+    }
+    print $args['headsufx'] . '</h1>';
+
+    if (isset($args['redirect_from']) && $args['redirect_from']) {
+        print '(Redirected from <a href="' . viewURL($args['redirect_from']) . '&no_redirect=1">';
+        if ($SeparateHeaderWords)
+            print htmlspecialchars(html_split_name($args['redirect_from']));
+        else
+            print htmlspecialchars($args['redirect_from']);
+        print '</a>)';
+    }
+    ?>
+</td>
+
+<td class="printhide" valign="bottom" align="right">
+    <table cellspacing="0" cellpadding="0" border="0">
+    <tr valign="top" align="right">
+    <?php if ($args['spam_revert'] && $UseSpamRevert && $UserName) : ?>
+        <form name="revertForm" method="post" action="<?php print revertURL($page); ?>"></form>
+        <td>
+        <?php print toolbar_button('javascript:spamRevert();', 'Spam Revert', 0); ?>
+        </td>
+        <td><img src="spacer.png" alt="" width="40" height="1" border="0"></td>
+    <?php endif; ?>
+    <td><?php toolbar($page, $args); ?></td>
+    </tr>
+    </table>
+</td>
+</tr>
+</table>
 
 </div>
 
-<?php
-if (isset($args['tree']))
-{
-    $tree = $pagestore->getTreeFromLeaves($HomePage, $args['headlink']);
-
-    if (isset($tree[$HomePage]) && count($tree[$HomePage]) > 0)
-    {
-        print '</td><td class="printhide"><img src="images/spacer.png" alt="" width="20" height="1" border="0">';
-        print '</td><td class="printhide" valign="top" align="right">';
-        drawTree($tree, true, $args['headlink']);
-    }
-}
-?>
-
-</td></tr>
-
-<tr><td class="printhide">
-    <table width="100%" cellspacing="0" cellpadding="0" border="0">
-    <tr valign="top">
-    <td><?php toolbar($page, $args); ?></td>
-    <?php if ($args['spam_revert'] && $UseSpamRevert && $UserName) : ?>
-        <form name="revertForm" method="post" action="<?php print revertURL($page); ?>">
-        </form>
-        <td align="right">
-        <?php print toolbar_button('javascript:spamRevert();', 'Spam Revert', 0); ?>
-        </td>
-    <?php endif; ?>
-    </tr>
-    </table>
-</td></tr>
-
-</table>
 </NOINDEX>
 
 <table class="maintable" width="98%" align="center" cellspacing="0"
@@ -335,6 +341,7 @@ if (!$UserName) {
 <tr><td>
 <?php
 print html_ref('RecentChanges', 'RecentChanges') . ', ' .
+               '<a href="' . contentURL($args['headlink']) . '">Wiki Tree</a>, ' .
                '<a href="' . $PrefsScript . '">UserOptions</a>';
 
 if (isset($args['timestamp']))
@@ -348,8 +355,6 @@ if (isset($args['timestamp']))
             print ' by ' . $args['euser'];
         else
             print ' anonymously';
-
-        print ' <a href="' . historyURL($args['history']) . '">(diff)</a></i>';
     }
 }
 
@@ -362,23 +367,6 @@ if (isset($args['twin']) && $args['twin'] != '')
         {
             print html_twin($twin[$i][0], $twin[$i][1]) . ' ';
         }
-    }
-}
-
-if (isset($args['edit']))
-{
-    print '</td>';
-    print '<td align="right">';
-
-    if ($args['editver'] == 0)
-        print '<b><a href="' . editURL($args['edit']) . '">'.
-              'Edit this page</a></b>';
-    else if ($args['editver'] == -1)
-        ; //print 'This document cannot be edited';
-    else
-    {
-        print '<a href="' . editURL($args['edit'], $args['editver']) . '">';
-        print 'Edit this <em>ARCHIVE VERSION</em> of this document</a>';
     }
 }
 ?>

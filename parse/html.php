@@ -292,7 +292,7 @@ function html_interwiki($url, $text)
 }
 function html_twin($whichwiki, $ref)
 {
-  return html_twin_x($whichwiki, "[$whichwiki]", $ref);
+  return html_twin_x($whichwiki, $whichwiki, $ref);
 }
 function html_twin_x($whichwiki, $linktext, $ref)
 {
