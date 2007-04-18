@@ -341,8 +341,8 @@ if (!$UserName) {
 <tr><td>
 <?php
 print html_ref('RecentChanges', 'RecentChanges') . ', ' .
-               '<a href="' . contentURL($args['headlink']) . '">Wiki Tree</a>, ' .
-               '<a href="' . $PrefsScript . '">UserOptions</a>';
+               '<a href="' . $PrefsScript . '">UserOptions</a>, ' .
+               '<a href="' . contentURL($args['headlink']) . '">WikiTree</a>';
 
 if (isset($args['timestamp']))
 {
