@@ -341,8 +341,8 @@ if (!$UserName) {
 <tr><td>
 <?php
 print html_ref('RecentChanges', 'RecentChanges') . ', ' .
-               '<a href="' . $PrefsScript . '">UserOptions</a>, ' .
-               '<a href="' . contentURL($args['headlink']) . '">WikiTree</a>';
+      '<a href="' . $PrefsScript . '">UserOptions</a>, ' .
+      html_ref('HelpPage', 'HelpPage');
 
 if (isset($args['timestamp']))
 {

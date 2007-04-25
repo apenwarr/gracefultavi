@@ -49,39 +49,39 @@ function action_content()
     print "<head>\n";
     print "<meta name=\"ROBOTS\" content=\"NOINDEX, NOFOLLOW\">\n";
     print "<link rel=\"SHORTCUT ICON\" href=\"images/niti-logo.ico\">\n";
-    print "<title>Wiki content</title>\n";
+    print "<title>Wiki Content</title>\n";
     print "</head>\n";
     print "<body>";
 
     if (isset($drawFrontPage))
-        print '<a href="#content">Wiki content</a><br>';
+        print '<a href="#content">Wiki Content</a><br>';
 
     if (isset($drawOutside))
-        print '<a href="#outside">Singletons, lost branches and cycles</a><br>';
+        print '<a href="#outside">Singletons, Lost Branches and Cycles</a><br>';
 
     if (isset($drawOther))
-        print '<a href="#other">Other mysterious cases</a><br>';
+        print '<a href="#other">Other Mysterious Cases</a><br>';
 
     if (isset($drawFrontPage))
     {
-        print '<a name="content"><h3>Wiki content</h3></a>';
+        print '<a name="content"><h3>Wiki Content</h3></a>';
         drawTree($content, false, $page);
     }
 
     if (isset($drawOutside))
     {
-        print '<a name="outside"><h3>Singletons, lost branches and cycles</h3></a>';
+        print '<a name="outside"><h3>Singletons, Lost Branches and Cycles</h3></a>';
         drawTree($tree, false, $page);
     }
 
     if (isset($drawOther))
     {
-        print '<a name="other"><h3>Other mysterious cases</h3></a>';
+        print '<a name="other"><h3>Other Mysterious Cases</h3></a>';
         foreach ($otherPages as $page)
             print html_ref($page, $page) . '<br>';
     }
 
-    print '<h3>Bad parenting</h3>';
+    print '<h3>Bad Parenting</h3>';
     ob_flush();
     $pages = $pagestore->getAllPageNames();
     $found = 0;
