@@ -96,7 +96,7 @@ function parse_freelink($text, $validate = 0)
   {
     // Space removed from links between brackets
     // $basePtn = "\\[([-A-Za-z0-9 _+\\/.,']+)((\|[-A-Za-z0-9 _+\\/.,']+)?)((\#[-A-Za-z0-9]+)?)\\]";
-    $basePtn = "\\[([-A-Za-z0-9_+\\/.,']+)((\|[-A-Za-z0-9 _+\\/.,']+)?)((\#[-A-Za-z0-9]+)?)\\]";
+    $basePtn = "\\[([-A-Za-z0-9_+\\/.,']+)((\|[-A-Za-z0-9 _+\\/.,':]+)?)((\#[-A-Za-z0-9]+)?)\\]";
 
     // tranform freelinks with the "!" prefix into raw text
     $ptn = "/!$basePtn/e";
