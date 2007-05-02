@@ -20,7 +20,7 @@ $UpperPtn = "[A-Z\xc0-\xde]";
 $LowerPtn = "[a-z\xdf-\xff]";
 $AlphaPtn = "[A-Za-z\xc0-\xff]";
 $LinkPtn = $UpperPtn . $AlphaPtn . '*' . $LowerPtn . '+' .
-           $UpperPtn . $AlphaPtn . '*()';
+           $UpperPtn . $AlphaPtn . '*()()()';
 
 // $UrlPtn establishes the format for URLs in this wiki.
 //   Note that changing this requires a change to parse/transforms.php so
