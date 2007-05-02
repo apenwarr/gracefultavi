@@ -65,7 +65,7 @@ function parse_wikiname($text, $validate = 0)
     { $ptn = "/(^|[^A-Za-z])(!?$LinkPtn)((\#[-A-Za-z0-9]+)?)(\"\")?/e"; }
 
   return preg_replace($ptn,
-                      "q1('\\1') . wikiname_token(q1('\\2'), '\\6')",
+                      "q1('\\1') . wikiname_token(q1('\\2'), '\\7')",
                       $text, -1);
 }
 
@@ -170,7 +170,7 @@ function avoid_links($text)
 
   // disable wikinames
   $text = preg_replace("/(^|[^A-Za-z!])($LinkPtn)((\#[-A-Za-z0-9]+)?)(\"\")?/e",
-                       "q1('\\1') . '!' . q1('\\2') . '\\6'",
+                       "q1('\\1') . '!' . q1('\\2') . '\\7'",
                        $text, -1);
 
   return $text;
