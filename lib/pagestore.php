@@ -562,6 +562,7 @@ class PageStore
         }
 
         $text = strtolower($text);
+        $text0 = $text;
 
         // split in words
         $quoted_words = array();
@@ -580,6 +581,7 @@ class PageStore
         // remove quotes from quoted words
         // cleanup for sql strings
         $text = addslashes($text);
+        $text0 = addslashes($text0);
         foreach ($words as $word)
         {
             preg_match('/^([-\+]?)(.+)$/', $word, $matches);
@@ -605,7 +607,7 @@ class PageStore
         if (count($words) > 1)
         {
             $qry .= "
-                (100 * IF (body LIKE '%$text%', 1, 0)) +";
+                (100 * IF (body LIKE '%$text0%', 1, 0)) +";
         }
         $qry .= "
             ((1 ";
