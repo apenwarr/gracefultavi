@@ -119,7 +119,7 @@ if ($AdditionalHeader) {
 <div id="header">
 
 <table align="center" class="topbox" border="0">
-<tr>
+<tr valign="top">
 <td>
     <table cellspacing="2" cellpadding="1" border="0">
     <tr valign="top">
