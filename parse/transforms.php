@@ -127,10 +127,14 @@ function freelink_token($link, $appearance, $anchor, $anchor_appearance)
 function parse_interwiki($text)
 {
   global $InterwikiPtn;
-
-  return preg_replace("/(^|[^A-Za-z])($InterwikiPtn)(\$|[^\\/=&~A-Za-z0-9])/e",
-                      "q1('\\1') . interwiki_token(q1('\\3'), q1('\\4')) . q1('\\6')",
-                      $text, -1);
+  $tmp = '';
+  while ($tmp != $text) {
+    $tmp = $text;
+    $text = preg_replace("/(^|[^A-Za-z])($InterwikiPtn)(\$|[^\\/=&~A-Za-z0-9])/e",
+                         "q1('\\1') . interwiki_token(q1('\\3'), q1('\\4')) . q1('\\6')",
+                         $text, 1);
+  }
+  return $text;
 }
 
 function interwiki_token($prefix, $ref)
