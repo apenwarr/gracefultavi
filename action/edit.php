@@ -56,8 +56,7 @@ function action_edit()
 
     foreach ($lines as $line)
     {
-      if (preg_match(parse_heading_regexp(), $line, $result) &&
-          (strlen($result[2]) == strlen($result[4])) &&
+      if ((($result = parse_heading_line_match(strip_tags($line))) !== false) &&
           (!$found_level || strlen($result[2]) <= $found_level))
       {
         $section_count++;

@@ -710,9 +710,22 @@ function entity_listitem($type, $fn)
     { return new_entity(array('cite_item_' . $fn)); }
 }
 
-function parse_heading_regexp()
+function parse_heading_regexp($level)
 {
-  return '/^\s*([_@]?)(=+)([^=]*)(=+)(\\\\?)(.*)$/';
+  return '/^\s*([_@]?)(={'.$level.'})(.*)(={'.$level.'})(\\\\?)(.*)$/';
+}
+
+function parse_heading_line_match($text)
+{
+  if(!preg_match('/^\s*[_@]?(=+)/', $text, $result))
+    { return false; }
+
+  $level = strlen($result[1]);
+
+  if(!preg_match(parse_heading_regexp($level), $text, $result))
+    { return false; }
+
+  return $result;
 }
 
 function parse_heading($text)
@@ -724,16 +737,13 @@ function parse_heading($text)
   static $numbering_level_diff = -1;
   static $show_edit_link;
 
-  if(!preg_match(parse_heading_regexp(), $text, $result))
-    { return $text; }
-
-  if(strlen($result[2]) != strlen($result[4]))
+  if (($result = parse_heading_line_match($text)) === false)
     { return $text; }
 
   if (!isset($show_edit_link))
   {
     $pg = $pagestore->page($page);
-    $show_edit_link = $UserName && $pg->mutable && $action == 'view';
+    $show_edit_link = $UserName && $pg->mutable && ($action == 'view');
   }
 
   if(($level = strlen($result[2])) > $MaxHeading)

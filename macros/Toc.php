@@ -37,8 +37,6 @@ class Macro_Toc
         global $pagestore, $MaxHeading, $document, $TocJavascriptFunctions;
         global $ViewMacroEngine;
 
-        $h_regexp = '/^\s*([_@])?(=+)([^=]*)(=+)\s*$/';
-
         $document = parseText($document, array('parse_htmlpre', 'parse_nowiki'), $page);
 
         if (!$max_level) $max_level = $MaxHeading; // maximum for the wiki
@@ -53,8 +51,7 @@ class Macro_Toc
         $found = 0;
         foreach (explode("\n", $document) as $line)
         {
-            if (preg_match($h_regexp, strip_tags($line), $result) &&
-                strlen($result[2]) === strlen($result[4]))
+            if (($result = parse_heading_line_match(strip_tags($line))) !== false)
             {
                 $found = 1;
                 $level = min(strlen($result[2]), $max_level);
@@ -99,8 +96,7 @@ class Macro_Toc
             }
 
             // actual toc based on the headers
-            if (preg_match($h_regexp, strip_tags($line), $result) &&
-                strlen($result[2]) === strlen($result[4]))
+            if (($result = parse_heading_line_match(strip_tags($line))) !== false)
             {
                 $level = strlen($result[2]);
                 $count++;
