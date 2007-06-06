@@ -339,8 +339,11 @@ if (!$UserName) {
 <tr><td colspan="3">
 <?php
 print html_ref('RecentChanges', 'RecentChanges') . ', ' .
-      '<a href="' . $PrefsScript . '">UserOptions</a>, ' .
-      html_ref('HelpPage', 'HelpPage');
+      '<a href="' . $PrefsScript . '">UserOptions</a>';
+$help_page = $pagestore->page('HelpPage');
+if ($help_page->exists()) {
+    print ', ' . html_ref('HelpPage', 'HelpPage');
+}
 ?>
 </td></tr>
 
