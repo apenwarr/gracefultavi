@@ -44,9 +44,11 @@ function action_find()
             }
         }
 
-        template_find(array('find'  => $find,
-                            'pages' => $text,
-                            'branch_search' => $branch_search));
+        template_find(array(
+            'find'          => $find,
+            'pages'         => $text,
+            'branch_search' => $branch_search
+        ));
     }
 }
 ?>

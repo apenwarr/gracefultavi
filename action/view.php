@@ -44,18 +44,18 @@ function action_view()
     }
 
     template_view(array(
-        'page'      => $page,
-        'page_length' => strlen($pg->text),
-        'html'      => $html,
-        'view_source' => $view_source,
-        'editable'  => $UserName && $pg->mutable,
-        'timestamp' => $pg->time,
-        'archive'   => $version != '',
-        'version'   => $pg->version,
-        'edituser'  => $pg->username,
+        'page'          => $page,
+        'page_length'   => strlen($pg->text),
+        'html'          => $html,
+        'view_source'   => $view_source,
+        'editable'      => $UserName && $pg->mutable,
+        'timestamp'     => $pg->time,
+        'archive'       => $version != '',
+        'version'       => $pg->version,
+        'edituser'      => $pg->username,
         'redirect_from' => $redirect_from,
-        'editver'   => ($UserName && $pg->mutable) ?
-                       (($version == '') ? 0 : $version) : -1
+        'editver'       => ($UserName && $pg->mutable) ?
+                           (($version == '') ? 0 : $version) : -1
     ));
 }
 ?>

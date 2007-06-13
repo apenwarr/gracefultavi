@@ -14,13 +14,13 @@ function action_backlinks()
     gen_headers($pg->time);
 
     template_backlinks(array(
-        'page'      => $page,
-        'backlinks' => $pagestore->getBacklinks($page),
+        'page'        => $page,
+        'backlinks'   => $pagestore->getBacklinks($page),
         'haschildren' => $pagestore->getChildren($page) ? 1 : 0,
-        'parents'   => $pagestore->getParents($page),
-        'timestamp' => $pg->time,
-        'edituser'  => $pg->username,
-        'editver'   => ($UserName && $pg->mutable) ? 0 : -1
+        'parents'     => $pagestore->getParents($page),
+        'timestamp'   => $pg->time,
+        'edituser'    => $pg->username,
+        'editver'     => ($UserName && $pg->mutable) ? 0 : -1
     ));
 }
 ?>

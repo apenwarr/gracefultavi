@@ -88,20 +88,22 @@ function action_edit()
                  "saving.\n\n-- [$UserName]";
   }
 
-  template_edit(array('page'      => $page,
-                      'pagefrom'  => $pagefrom,
-                      'text'      => $page_text,
-                      'section'   => $section,
-                      'text_before' => $text_before,
-                      'text_after'  => $text_after,
-                      'timestamp' => $pg->time,
-                      'nextver'   => $pg->version + 1,
-                      'archive'   => $archive,
-                      'template'  => $pg->template,
-                      'templates' => $pagestore->getTemplatePages(),
-                      'use_template' => $use_template,
-                      'edituser'  => $pg->username,
-                      'editver'   => ($UserName && $pg->mutable) ?
-                                     (($version == '') ? 0 : $version) : -1));
+  template_edit(array(
+      'page'         => $page,
+      'pagefrom'     => $pagefrom,
+      'text'         => $page_text,
+      'section'      => $section,
+      'text_before'  => $text_before,
+      'text_after'   => $text_after,
+      'timestamp'    => $pg->time,
+      'nextver'      => $pg->version + 1,
+      'archive'      => $archive,
+      'template'     => $pg->template,
+      'templates'    => $pagestore->getTemplatePages(),
+      'use_template' => $use_template,
+      'edituser'     => $pg->username,
+      'editver'      => ($UserName && $pg->mutable) ?
+                        (($version == '') ? 0 : $version) : -1
+  ));
 }
 ?>

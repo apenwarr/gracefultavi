@@ -113,12 +113,13 @@ else if($blocking)                      // Blocking/unblocking IP addrs.
 }
 else                                    // Display main menu for admin.
 {
-  template_admin(array('html' => html_url($AdminScript . '?locking=1',
-                                          'Lock / unlock pages') .
-                                 html_newline() .
-                                 html_url($AdminScript . '?blocking=1',
-                                          'Block / unblock hosts') .
-                                 html_newline()));
+  template_admin(array(
+      'html' => html_url(
+          $AdminScript . '?locking=1', 'Lock / unlock pages') .
+          html_newline() .
+          html_url($AdminScript . '?blocking=1', 'Block / unblock hosts') .
+          html_newline())
+  );
 }
 
 ?>

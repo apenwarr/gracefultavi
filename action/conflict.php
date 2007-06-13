@@ -11,13 +11,14 @@ function action_conflict()
   $pg = $pagestore->page($page);
   $pg->read();
 
-  template_conflict(array('page'      => $page,
-                          'text'      => $pg->text,
-                          'html'      => parseText($pg->text,
-                                                   $ParseEngine, $page),
-                          'usertext'  => $document,
-                          'merge'     => $merge,
-                          'timestamp' => $pg->time,
-                          'nextver'   => $pg->version + 1));
+  template_conflict(array(
+      'page'      => $page,
+      'text'      => $pg->text,
+      'html'      => parseText($pg->text, $ParseEngine, $page),
+      'usertext'  => $document,
+      'merge'     => $merge,
+      'timestamp' => $pg->time,
+      'nextver'   => $pg->version + 1
+  ));
 }
 ?>

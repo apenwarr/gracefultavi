@@ -1,19 +1,18 @@
 function sizeLimitCheck()
 {
-    var argv = sizeLimitCheck.arguments;
-    if (argv.length < 2) {
+    if (arguments.length < 2) {
         return;
     }
 
-    var form = argv[0];
+    var form = arguments[0];
     if (!form || !form.pagesizelimit || !form.pagesizelimit.value) {
         return;
     }
 
     var field;
     var pageLength = 0;
-    for (var i = 1; i < argv.length; i++) {
-        field = form[argv[i]];
+    for (var i = 1; i < arguments.length; i++) {
+        field = form[arguments[i]];
         if (field && field.value && field.value.length) {
             pageLength += field.value.length;
         }
@@ -31,7 +30,7 @@ function sizeLimitCheck()
 
 function useTemplate(obj, page)
 {
-    if (obj.selectedIndex == 0) { return; }
+    if (obj.selectedIndex === 0) { return; }
     var templateName = obj.options[obj.selectedIndex].value;
     page = page.replace(/\\/g, '\\\\');
     page = page.replace(/'/g, '\\\'');

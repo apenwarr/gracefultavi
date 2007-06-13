@@ -28,21 +28,22 @@ function action_preview()
   }
   $diff = do_diff($body1, $body2);
 
-  template_preview(array('page'      => $page,
-                         'pagefrom'  => $pagefrom,
-                         'text'      => $document,
-                         'section'   => $section,
-                         'text_before' => $text_before,
-                         'text_after'  => $text_after,
-                         'html'      => parseText($document,
-                                                  $ParseEngine, $page),
-                         'diff'      => $diff,
-                         'diff_mode' => $diff_mode,
-                         'timestamp' => $pg->time,
-                         'nextver'   => $nextver,
-                         'archive'   => $archive,
-                         'minoredit' => $minoredit,
-                         'template'  => $template,
-                         'edituser'  => $pg->username));
+  template_preview(array(
+      'page'        => $page,
+      'pagefrom'    => $pagefrom,
+      'text'        => $document,
+      'section'     => $section,
+      'text_before' => $text_before,
+      'text_after'  => $text_after,
+      'html'        => parseText($document, $ParseEngine, $page),
+      'diff'        => $diff,
+      'diff_mode'   => $diff_mode,
+      'timestamp'   => $pg->time,
+      'nextver'     => $nextver,
+      'archive'     => $archive,
+      'minoredit'   => $minoredit,
+      'template'    => $template,
+      'edituser'    => $pg->username
+  ));
 }
 ?>

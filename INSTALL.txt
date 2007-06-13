@@ -50,7 +50,7 @@ GracefulTavi - Installation
     installed in a central location, although it is recommended.
 
 2.  Download the GracefulTavi archive into the installation directory. You can
-    find it at http://open.nit.ca/wiki/index.php?page=DownloadReleases
+    find it at http://open.nit.ca/wiki/?DownloadReleases
 
 3.  Unpack the archive in the installation directory.
 
@@ -148,8 +148,9 @@ GracefulTavi - Installation
 
          php_flag register_globals off
 
-    B. If, instead, you are running PHP as a CGI program, then you will have to
-       similarly change the register_globals setting in your php.ini file.
+    B. If, instead, you are running PHP as a CGI program, or on a Net
+       Integrator, then you will have to similarly change the register_globals
+       setting in your php.ini file.
 
 9.  Visit your wiki and start creating pages!
 

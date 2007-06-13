@@ -35,7 +35,7 @@
 /**
  * Queuing system for functions to run on window.onLoad event.
  */
-_onLoad = new Array();
+_onLoad = [];
 addEvent(window, "load", doOnLoad);
 
 function doOnLoad()
@@ -52,11 +52,12 @@ function doOnLoad()
  */
 function addEvent(elm, evType, fn, useCapture)
 {
+    var r;
     if (elm.addEventListener) {
         elm.addEventListener(evType, fn, useCapture);
         return true;
     } else if (elm.attachEvent) {
-        var r = elm.attachEvent("on" + evType, fn);
+        r = elm.attachEvent("on" + evType, fn);
         return r;
     }
 }
@@ -66,8 +67,9 @@ function addEvent(elm, evType, fn, useCapture)
 _onLoad.push('tablesortInit()');
 
 // flag so other libraries know that TableSort has been loaded up
+var TABLESORT;
 if (document.getElementsByTagName) {
-    var TABLESORT = true;
+    TABLESORT = true;
 }
 
 var SORT_COLUMN_INDEX;
@@ -78,8 +80,9 @@ function tablesortInit()
 
     // Find all tables with attribute tablesort and make them sortable
     var tbls = document.getElementsByTagName("table");
+    var thisTbl;
     for (var ti = 0; ti < tbls.length; ti++) {
-        var thisTbl = tbls[ti];
+        thisTbl = tbls[ti];
         if (thisTbl.getAttribute('tablesort')) {
             thisTbl.className = 'tablesort';
             ts_makeSortable(thisTbl);
@@ -89,19 +92,20 @@ function tablesortInit()
 
 function ts_makeSortable(table)
 {
-    var id;
+    var firstRow, id;
     if (table.rows && table.rows.length > 0) {
-        var firstRow = table.rows[0];
+        firstRow = table.rows[0];
     }
     if (!firstRow) { return; }
     // We have a first row: assume it's the header, and make its contents
     // clickable links.
+    var cell, txt;
     for (var i=0;i<firstRow.cells.length;i++) {
-        var cell = firstRow.cells[i];
+        cell = firstRow.cells[i];
         cell.style.backgroundColor = '#eee';
         cell.style.color = '#666666';
         cell.style.fontWeight = 'bold';
-        var txt = ts_getInnerText(cell);
+        txt = ts_getInnerText(cell);
         id = Math.random();
         cell.innerHTML = '<a id="'+id+'" href="#" '+
             'style="text-decoration: none; display: block;" '+
@@ -174,8 +178,8 @@ function ts_resortTable_do(id)
     if (itm.match(/^-?[\d]+ min$/)) { sortfn = ts_sort_numeric; }
     if (itm.match(/^[\d]+\.[\d]+\.[\d]+\.[\d]+$/)) { sortfn = ts_sort_ipaddress; }
     SORT_COLUMN_INDEX = column;
-    var firstRow = new Array();
-    var newRows = new Array();
+    var firstRow = [];
+    var newRows = [];
     for (i = 0; i < table.rows[0].length; i++) {
         firstRow[i] = table.rows[0][i];
     }
@@ -212,9 +216,9 @@ function ts_resortTable_do(id)
     }
 
     // Delete any other arrows there may be showing
-    var tbl;
+    var allspans, tbl;
     if ((tbl = getParent(lnk,"table"))) {
-        var allspans = tbl.getElementsByTagName("span");
+        allspans = tbl.getElementsByTagName("span");
         for (ci = 0; ci < allspans.length; ci++) {
             // IE is silly, it gets unstable unless innerHTML is changed only
             // when really necessary
@@ -244,7 +248,7 @@ function getParent(el, pTagName)
 function ts_sort_date(a, b)
 {
     // y2k notes: two digit years less than 50 are treated as 20XX, greater
-    // than 50 are treated as 19XX
+    // than or equal to 50 are treated as 19XX
     var aa = ts_getInnerText(a.cells[SORT_COLUMN_INDEX]);
     var bb = ts_getInnerText(b.cells[SORT_COLUMN_INDEX]);
     var dt1, dt2, yr;
@@ -252,14 +256,14 @@ function ts_sort_date(a, b)
         dt1 = aa.substr(6,4)+aa.substr(3,2)+aa.substr(0,2);
     } else {
         yr = aa.substr(6,2);
-        if (parseInt(yr) < 50) { yr = '20'+yr; } else { yr = '19'+yr; }
+        if (parseInt(yr, 10) < 50) { yr = '20'+yr; } else { yr = '19'+yr; }
         dt1 = yr+aa.substr(3,2)+aa.substr(0,2);
     }
     if (bb.length == 10) {
         dt2 = bb.substr(6,4)+bb.substr(3,2)+bb.substr(0,2);
     } else {
         yr = bb.substr(6,2);
-        if (parseInt(yr) < 50) { yr = '20'+yr; } else { yr = '19'+yr; }
+        if (parseInt(yr, 10) < 50) { yr = '20'+yr; } else { yr = '19'+yr; }
         dt2 = yr+bb.substr(3,2)+bb.substr(0,2);
     }
     if (dt1 == dt2) { return 0; }
