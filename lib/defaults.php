@@ -191,6 +191,9 @@ $RateEdit   = 20;
 // $TempDir determines the location of temp files used for computing diffs.
 $TempDir = '/tmp';
 
+// Allow anonymous posts
+$AllowAnonymousPosts = 1;
+
 // $MaxPostLen determines the size, in bytes, of the largest edit allowed. Along
 //   with $TooLongPostLen, used to control when pages are too long for the
 //   supporting database backend and prevent data from being lost. Currently,

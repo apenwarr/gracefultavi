@@ -9,13 +9,19 @@ require('lib/captcha.php');
 // Commit an edit to the database.
 function action_save()
 {
-    global $Admin, $archive, $captcha, $categories, $comment, $Diff3Cmd;
-    global $document, $EmailSuffix, $EnableCaptcha, $EnableDiff3;
-    global $EnableSubscriptions, $ErrorPageLocked, $HTTP_POST_VARS, $MaxPostLen;
-    global $merge, $minoredit, $nextver, $NickName, $page, $pagefrom;
-    global $pagestore, $REMOTE_ADDR, $Save, $SaveMacroEngine, $section;
-    global $template, $text_after, $text_before, $UserName, $validationcode;
-    global $WorkingDirectory;
+    global $Admin, $AllowAnonymousPosts, $archive, $captcha, $categories;
+    global $comment, $Diff3Cmd, $document, $EmailSuffix, $EnableCaptcha;
+    global $EnableDiff3, $EnableSubscriptions, $ErrorPageLocked;
+    global $HTTP_POST_VARS, $MaxPostLen, $merge, $minoredit, $nextver;
+    global $NickName, $page, $pagefrom, $pagestore, $REMOTE_ADDR, $Save;
+    global $SaveMacroEngine, $section, $template, $text_after, $text_before;
+    global $UserName, $validationcode, $WorkingDirectory;
+
+    if (!($UserName) && !($AllowAnonymousPosts))
+    {
+        global $ErrorNoAnonComments;
+        die($ErrorNoAnonComments);
+    }
 
     if(isset($HTTP_POST_VARS['quickadd'])) $quickadd = $HTTP_POST_VARS['quickadd'];
     if(isset($HTTP_POST_VARS['appending'])) $appending = $HTTP_POST_VARS['appending'];

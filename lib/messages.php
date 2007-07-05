@@ -25,4 +25,6 @@ $ErrorValidationCode  = 'The validation code does not match the letters in ' .
                         'browser and try again.';
 $ErrorEmptyComment    = 'The comment you submitted is empty.<br><br>Click ' .
                         'BACK in your browser and try again.';
+$ErrorNoAnonComments  = 'Anonymous comments are disabled on this wiki.' .
+                        $ErrorSuffix;
 ?>

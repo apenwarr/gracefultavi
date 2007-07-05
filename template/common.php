@@ -293,9 +293,9 @@ if (isset($args['quote']))
 
 function template_common_epilogue($args)
 {
-  global $AdditionalFooter, $EmailSuffix, $EnableSubscriptions, $EnableCaptcha;
-  global $HomePage, $NickName, $page, $pagestore, $PageTooLongLen, $PrefsScript;
-  global $UserName;
+  global $AdditionalFooter, $AllowAnonymousPosts, $EmailSuffix;
+  global $EnableSubscriptions, $EnableCaptcha, $HomePage, $NickName, $page;
+  global $pagestore, $PageTooLongLen, $PrefsScript, $UserName;
 
   $pg = $pagestore->page($page);
   $pagetext = $pg->text;
@@ -376,7 +376,8 @@ if (isset($args['twin']) && $args['twin'] != '')
 </td></tr>
 
 <?php
-if ($page != $HomePage && $page != 'RecentChanges')
+if (!in_array($page, array($HomePage, 'RecentChanges')) &&
+    ($UserName || $AllowAnonymousPosts))
 {
 ?>
     <tr><td colspan="3">
