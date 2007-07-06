@@ -172,7 +172,8 @@ noprompt_var $AdminEnabled 0
 // If $AdminEnabled is set to 0, administrator control will be disallowed.
 ----
 string $WorkingDirectory ''
-Enter the complete working directory for your wiki files without trailing slashes.
+Enter the complete working directory for your wiki files without trailing
+slashes.
 
 To get the current working directory, type 'pwd' at a shell prompt.
 
@@ -181,8 +182,8 @@ For example, /home/mich/wiki/gracefultavi
 // Complete working directory of the wiki files, no trailing slashes
 ----
 boolean $EnableSubscriptions 0
-Would you like page subscriptions to be enabled on your wiki? This feature allows
-users to receive an email when specified pages are updated.
+Would you like page subscriptions to be enabled on your wiki? This feature
+allows users to receive an email when specified pages are updated.
 // If $EnableSubscriptions is set to 1, users will be allowed to subscribe to
 // pages and receive an email when they're updated. If it is set to 0, this
 // feature will be disabled.
