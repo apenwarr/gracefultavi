@@ -96,7 +96,7 @@ $descriptor = '';
 
 while(<SETTINGS>)
 {
-  if(/^----$/)                          # New variable.
+  if(/^----\s*$/)                       # New variable.
   {
     if($descriptor ne '')
       { do_variable($descriptor, $prompt, $comment); }
