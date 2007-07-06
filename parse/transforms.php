@@ -507,7 +507,7 @@ function parse_indents($text)
     static $pending_p = '';
 
     // Indentation increase of more than on level will be corrected to only one.
-    $auto_fix_indent_leap = 1;
+    $auto_fix_indent_leap = 1; // this value is boolean
 
     // Fix notation for ordered list, changes:
     //  - '[0-9].' to '#'
