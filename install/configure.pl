@@ -23,7 +23,7 @@ sub do_variable
 
   if($descriptor =~ /^noprompt_var/)    # Write out value without question.
   {
-    $descriptor =~ /(\S+)\s+(\S+)\s+(.+)/;
+    $descriptor =~ /(\S+)\s+(\S+)\s+([^\s]+)\s*/;
     $variable = $2;
     $value    = $3;
     print CONFIG $comment;
@@ -31,7 +31,7 @@ sub do_variable
   }
   elsif($descriptor =~ /^noprompt_const/)  # Write out const without question.
   {
-    $descriptor =~ /(\S+)\s+(\S+)\s+(.+)/;
+    $descriptor =~ /(\S+)\s+(\S+)\s+([^\s]+)\s*/;
     $variable = $2;
     $value    = $3;
     print CONFIG $comment;
@@ -76,7 +76,7 @@ sub do_variable
       }
     }
 
-    $descriptor =~ /(\S+)\s+(\S+)\s+(.+)/;
+    $descriptor =~ /(\S+)\s+(\S+)\s+([^\s]+)\s*/;
     $variable = $2;
     print CONFIG $comment;
     print CONFIG "$variable = $value;\n\n";
