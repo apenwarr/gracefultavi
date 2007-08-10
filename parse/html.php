@@ -146,7 +146,7 @@ function html_time($timestamp)
   $time = mktime(substr($timestamp, 8, 2),  substr($timestamp, 10, 2),
                  substr($timestamp, 12, 2), substr($timestamp, 4, 2),
                  substr($timestamp, 6, 2),  substr($timestamp, 0, 4));
-  return date('D, M d, Y H:i:s', $time + $TimeZoneOff * 60);
+  return date('D, d M Y H:i:s', $time + $TimeZoneOff * 60);
 }
 function html_time2($timestamp)
 {
@@ -170,7 +170,7 @@ function html_timestamp($timestamp)
   $time = mktime(substr($timestamp, 8, 2),  substr($timestamp, 10, 2),
                  substr($timestamp, 12, 2), substr($timestamp, 4, 2),
                  substr($timestamp, 6, 2),  substr($timestamp, 0, 4));
-  return date('Y-m-d H:i:s', $time + $TimeZoneOff * 60);
+  return date('Y.m.d H:i:s', $time + $TimeZoneOff * 60);
 }
 function html_url($url, $text)
 {

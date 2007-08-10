@@ -119,7 +119,7 @@ if ($AdditionalHeader) {
 <div id="header">
 
 <table align="center" class="topbox" border="0">
-<tr valign="top">
+<tr>
 <td>
     <table cellspacing="2" cellpadding="1" border="0">
     <tr valign="top">
@@ -336,7 +336,9 @@ if (!$UserName) {
 <td colspan="2" align="right"><?php toolbar($page, $args); ?></td>
 </tr>
 
-<tr><td colspan="3">
+<tr><td colspan="3">&nbsp;</td></tr>
+
+<tr><td>
 <?php
 print html_ref('RecentChanges', 'RecentChanges') . ', ' .
       '<a href="' . $PrefsScript . '">UserOptions</a>';
@@ -347,11 +349,11 @@ if ($help_page->exists()) {
 ?>
 </td></tr>
 
-<tr><td align="center" colspan="3">
-<?php
 if (isset($args['timestamp']))
 {
-    print '<i>Last edited ' . html_time($args['timestamp']);
+    print '</td>';
+    print '<td align="center"><i>Last edited ' . html_time($args['timestamp']);
+
     if ($args['timestamp'] != '')
     {
         if (isset($args['euser']))
@@ -365,7 +367,7 @@ if (isset($args['twin']) && $args['twin'] != '')
 {
     if (count($twin = $pagestore->twinpages($args['twin'])))
     {
-        print '<br>See twins of this page: ';
+        print '<br>See twins of this page in: ';
         for ($i = 0; $i < count($twin); $i++)
         {
             print html_twin($twin[$i][0], $twin[$i][1]) . ' ';

@@ -38,7 +38,7 @@ while (($row = $db->result($rs))) {
 foreach ($bodies as $id => $body) {
     $body = addslashes($body);
     $db->query("UPDATE $PgTbl " .
-               "SET body = '$body', createtime = createtime, updatetime = updatetime " .
+               "SET body = '$body' " .
                "WHERE id = $id");
 }
 

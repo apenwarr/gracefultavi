@@ -14,8 +14,7 @@ function diff_compute($text1, $text2)
 
 function wdiff_compute($text1, $text2)
 {
-    global $ErrorCreatingTemp, $ErrorWritingTemp, $TempDir, $WdiffCmd;
-    global $WdiffLibrary;
+    global $TempDir, $WdiffCmd, $WdiffLibrary;
 
     $num = posix_getpid();  // Comment if running on Windows.
     // $num = rand();       // Uncomment if running on Windows.
@@ -24,10 +23,10 @@ function wdiff_compute($text1, $text2)
     $temp2 = $TempDir . '/wiki_' . $num . '_2.txt';
 
     if(!($h1 = fopen($temp1, 'w')) || !($h2 = fopen($temp2, 'w')))
-        { die($ErrorCreatingTemp); }
+        { die("ErrorCreatingTemp"); }
 
     if(fwrite($h1, $text1) < 1 || fwrite($h2, $text2) < 1)
-        { die($ErrorWritingTemp); }
+        { die("ErrorWritingTemp"); }
 
     fclose($h1);
     fclose($h2);
