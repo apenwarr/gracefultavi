@@ -154,7 +154,7 @@ a.button {
     border: 1px solid black;
     padding: 2px 4px 3px 4px;
     text-align: center;
-    font-size: 11pt;
+    font-size: 10pt;
     text-decoration: none;
     color: blue;
     font-weight: bold;
@@ -165,7 +165,7 @@ a.button:visited {
     border: 1px solid black;
     padding: 2px 4px 3px 4px;
     text-align: center;
-    font-size: 11pt;
+    font-size: 10pt;
     text-decoration: none;
     color: blue;
     font-weight: bold;
@@ -176,7 +176,7 @@ a.button:active {
     border: 1px solid black;
     padding: 2px 4px 3px 4px;
     text-align: center;
-    font-size: 11pt;
+    font-size: 10pt;
     text-decoration: none;
     color: blue;
     font-weight: bold;
@@ -187,7 +187,7 @@ a.button:hover {
     border: 1px solid black;
     padding: 2px 4px 3px 4px;
     text-align: center;
-    font-size: 11pt;
+    font-size: 10pt;
     text-decoration: none;
     color: blue;
     font-weight: bold;
@@ -198,7 +198,7 @@ a.buttonSelected {
     border: 1px solid black;
     padding: 2px 4px 3px 4px;
     text-align: center;
-    font-size: 11pt;
+    font-size: 10pt;
     text-decoration: none;
     color: white;
     font-weight: bold;
@@ -209,7 +209,7 @@ a.buttonSelected:visited {
     border: 1px solid black;
     padding: 2px 4px 3px 4px;
     text-align: center;
-    font-size: 11pt;
+    font-size: 10pt;
     text-decoration: none;
     color: white;
     font-weight: bold;
@@ -220,7 +220,7 @@ a.buttonSelected:active {
     border: 1px solid black;
     padding: 2px 4px 3px 4px;
     text-align: center;
-    font-size: 11pt;
+    font-size: 10pt;
     text-decoration: none;
     color: white;
     font-weight: bold;
@@ -231,7 +231,7 @@ a.buttonSelected:hover {
     border: 1px solid black;
     padding: 2px 4px 3px 4px;
     text-align: center;
-    font-size: 11pt;
+    font-size: 10pt;
     text-decoration: none;
     color: white;
     font-weight: bold;
@@ -242,7 +242,7 @@ span.buttonDisabled {
     border: 1px solid #808080;
     padding: 2px 4px 3px 4px;
     text-align: center;
-    font-size: 11pt;
+    font-size: 10pt;
     text-decoration: none;
     color: #c0c0c0;
     font-weight: bold;

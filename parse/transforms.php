@@ -65,7 +65,7 @@ function parse_wikiname($text, $validate = 0)
     { $ptn = "/(^|[^A-Za-z])(!?$LinkPtn)((\#[-A-Za-z0-9]+)?)(\"\")?/e"; }
 
   return preg_replace($ptn,
-                      "q1('\\1') . wikiname_token(q1('\\2'), '\\4')",
+                      "q1('\\1') . wikiname_token(q1('\\2'), '\\7')",
                       $text, -1);
 }
 
@@ -96,7 +96,7 @@ function parse_freelink($text, $validate = 0)
   {
     // Space removed from links between brackets
     // $basePtn = "\\[([-A-Za-z0-9 _+\\/.,']+)((\|[-A-Za-z0-9 _+\\/.,']+)?)((\#[-A-Za-z0-9]+)?)\\]";
-    $basePtn = "\\[([-A-Za-z0-9_+\\/.,']+)((\|[-A-Za-z0-9 _+\\/.,']+)?)((\#[-A-Za-z0-9]+)?)\\]";
+    $basePtn = "\\[([-A-Za-z0-9_+\\/.,']+)((\|[-A-Za-z0-9 _+\\/.,':]+)?)((\#[-A-Za-z0-9]+)?)\\]";
 
     // tranform freelinks with the "!" prefix into raw text
     $ptn = "/!$basePtn/e";
@@ -127,10 +127,14 @@ function freelink_token($link, $appearance, $anchor, $anchor_appearance)
 function parse_interwiki($text)
 {
   global $InterwikiPtn;
-
-  return preg_replace("/(^|[^A-Za-z])($InterwikiPtn)(\$|[^\\/=&~A-Za-z0-9])/e",
-                      "q1('\\1') . interwiki_token(q1('\\3'), q1('\\4')) . q1('\\6')",
-                      $text, -1);
+  $tmp = '';
+  while ($tmp != $text) {
+    $tmp = $text;
+    $text = preg_replace("/(^|[^A-Za-z])($InterwikiPtn)(\$|[^\\/=&~A-Za-z0-9])/e",
+                         "q1('\\1') . interwiki_token(q1('\\3'), q1('\\4')) . q1('\\6')",
+                         $text, 1);
+  }
+  return $text;
 }
 
 function interwiki_token($prefix, $ref)
@@ -170,7 +174,7 @@ function avoid_links($text)
 
   // disable wikinames
   $text = preg_replace("/(^|[^A-Za-z!])($LinkPtn)((\#[-A-Za-z0-9]+)?)(\"\")?/e",
-                       "q1('\\1') . '!' . q1('\\2') . '\\4'",
+                       "q1('\\1') . '!' . q1('\\2') . '\\7'",
                        $text, -1);
 
   return $text;
