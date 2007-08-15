@@ -111,7 +111,36 @@ class Macro_Attach
             }
             else if ($type == "img" || $type == "image")
             {
-                $out .= "<p><img src='$fullname' alt='$filename'>";
+                $out .= "<p>";
+
+                // html bits
+                $widthHeight = '';
+                $linkOpen = '';
+                $linkClose = '';
+
+                $browserWindowWidth =
+                    max(0, $_COOKIE["browserWindowWidth"]-100);
+
+                if (function_exists('getimagesize') && $browserWindowWidth) {
+                    $dimensions = getimagesize($fullname);
+                    $width = $dimensions[0];
+                    $height = $dimensions[1];
+
+                    if ($width > $browserWindowWidth) {
+                        $height = floor($browserWindowWidth*$height/$width);
+                        $width = $browserWindowWidth;
+
+                        $out .= "The image has been reduced for display, ".
+                                "click to enlarge.<br>";
+                        $widthHeight = "width=\"$width\" height=\"$height\"";
+                        $linkOpen = '<a href="'.$fullname.'">';
+                        $linkClose = '</a>';
+                    }
+                }
+
+                $out .= $linkOpen;
+                $out .= "<img src='$fullname' alt='$filename' $widthHeight>";
+                $out .= $linkClose;
             }
         }
         else

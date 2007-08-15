@@ -105,7 +105,7 @@ function template_common_prologue($args)
 <title><?php print $args['title'] . ' - ' . htmlspecialchars($WikiName); ?></title>
 </head>
 
-<body>
+<body onLoad="bodyOnLoad();">
 <NOINDEX>
 
 <?php

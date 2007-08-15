@@ -1,3 +1,9 @@
+function bodyOnLoad()
+{
+    // gets the browser window width
+    document.cookie = "browserWindowWidth="+document.body.offsetWidth;
+}
+
 function sizeLimitCheck()
 {
     if (arguments.length < 2) {
