@@ -582,6 +582,9 @@ class PageStore
         // cleanup for sql strings
         $text = addslashes($text);
         $text0 = addslashes($text0);
+        $score_words = array();
+        $with_words = array();
+        $without_words = array();
         foreach ($words as $word)
         {
             preg_match('/^([-\+]?)(.+)$/', $word, $matches);
