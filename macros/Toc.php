@@ -121,6 +121,8 @@ class Macro_Toc
                     $header = preg_replace('/<[^>]+>/', '', $header);
                     $header = preg_replace('/[\\[\\]]/', '', $header);
                     $header = preg_replace('/!(\S)/', '\\1', $header);
+                    // resolve parse elements from previous call to parseText
+                    $header = parseText($header, array('parse_elements'), $page);
 
                     // support for numbered headers
                     $header_num = '';

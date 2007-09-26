@@ -94,7 +94,7 @@ else
     template_common_epilogue(array(
         'twin'      => $args['page'],
         'edit'      => '',
-        'editver'   => 0,
+        'editver'   => $args['editver'],
         'history'   => $args['page'],
         'euser'     => $args['edituser'],
         'timestamp' => $args['timestamp'],

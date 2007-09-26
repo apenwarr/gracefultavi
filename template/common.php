@@ -354,7 +354,7 @@ if (isset($args['timestamp']))
     print '<i>Last edited ' . html_time($args['timestamp']);
     if ($args['timestamp'] != '')
     {
-        if (isset($args['euser']))
+        if (isset($args['euser']) && $args['euser'])
             print ' by ' . $args['euser'];
         else
             print ' anonymously';
