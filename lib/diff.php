@@ -26,7 +26,10 @@ function wdiff_compute($text1, $text2)
     if(!($h1 = fopen($temp1, 'w')) || !($h2 = fopen($temp2, 'w')))
         { die($ErrorCreatingTemp); }
 
-    if(fwrite($h1, $text1) < 1 || fwrite($h2, $text2) < 1)
+    $fw1 = fwrite($h1, $text1);
+    $fw2 = fwrite($h2, $text2);
+    if (($fw1 === false) || ((strlen($text1) > 0) && ($fw1 == 0)) ||
+        ($fw2 === false) || ((strlen($text2) > 0) && ($fw2 == 0)))
         { die($ErrorWritingTemp); }
 
     fclose($h1);
