@@ -2,8 +2,6 @@
 
 class Macro_OrphanedPages
 {
-   var $pagestore;
-
    function parse($args, $page)
    {
      global $pagestore, $LkTbl;

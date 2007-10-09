@@ -3,7 +3,6 @@
 class Macro_CategoryCmds
 {
     var $trigger = "!";
-    var $pagestore;
 
     function parse($args, $page)
     {

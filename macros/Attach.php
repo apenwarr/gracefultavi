@@ -2,12 +2,9 @@
 
 class Macro_Attach
 {
-    var $pagestore;
-
     function parse($args, $page)
     {
-        global $pagestore, $ParseEngine, $ParseObject, $WorkingDirectory;
-        global $UserName;
+        global $ParseEngine, $ParseObject, $UserName, $WorkingDirectory;
 
         if (!preg_match_all('/"[^"]*"|[^ \t]+/', $args, $words))
             return "regmatch failed!\n";

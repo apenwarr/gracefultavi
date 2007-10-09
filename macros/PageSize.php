@@ -2,8 +2,6 @@
 
 class Macro_PageSize
 {
-   var $pagestore;
-
    function parse($args, $page)
    {
      global $pagestore;

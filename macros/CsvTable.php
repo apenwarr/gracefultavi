@@ -2,8 +2,6 @@
 
 class Macro_CsvTable
 {
-    var $pagestore;
-
     function parse($args, $page)
     {
         global $EditCols, $EditRows, $FlgChr, $HTTP_POST_VARS, $page;

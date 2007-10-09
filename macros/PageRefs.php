@@ -2,8 +2,6 @@
 
 class Macro_PageRefs
 {
-   var $pagestore;
-
    function parse($args, $page)
    {
      global $pagestore, $LkTbl, $PgTbl;

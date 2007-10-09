@@ -2,7 +2,6 @@
 
 class Macro_HostoTron
 {
-    var $pagestore;
     var $describe = array();
     var $reserve = array();
 

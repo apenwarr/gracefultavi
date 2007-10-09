@@ -3,8 +3,6 @@
 // The most important wiki macro ever... The dancing smiley macro!
 class Macro_Dance {
 
-var $pagestore;
-
 // To create more dancing guys, just add them here
 var $dances=array(""=>array("=D/-<", "=D|-<", "=D\\\\-<", "=D|-<"),
                   "kirby"=>array("<(' <)", "<(' ')>", "(> ')>", "<(' ')>"),

@@ -2,8 +2,6 @@
 
 class Macro_Transclude
 {
-   var $pagestore;
-
    function parse($args, $page)
    {
      global $pagestore, $ParseEngine, $ParseObject;

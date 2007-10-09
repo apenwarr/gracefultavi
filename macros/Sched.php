@@ -32,19 +32,19 @@ $sch_javascript_functions = <<<JAVASCRIPT
 <!--
     // For each row in table id 'ixTable', if its class matches 'class', set
     // style property 'propname' to 'val'
-    function changeStyleInTableRows(ixTable, myclass, propname, val) 
+    function changeStyleInTableRows(ixTable, myclass, propname, val)
     {
         var t = document.getElementById(ixTable);
-        for (i = 0; i < t.rows.length; i++) 
+        for (i = 0; i < t.rows.length; i++)
         {
-            if (t.rows[i].className == myclass) 
+            if (t.rows[i].className == myclass)
             {
                 t.rows[i].style[propname] = val;
             }
         }
     }
 
-    function hideBugs(ixClass, ixTable) 
+    function hideBugs(ixClass, ixTable)
     {
         var hidelink = document.getElementById(ixClass + "_hidelink");
         var showlink = document.getElementById(ixClass + "_showlink");
@@ -70,7 +70,7 @@ $sch_javascript_functions = <<<JAVASCRIPT
 
 JAVASCRIPT;
 
-function js_make_hide_show_links($class_name, $ixTable, 
+function js_make_hide_show_links($class_name, $ixTable,
     $hide_style, $show_style, $suffix)
 {
     $hs = "";
@@ -81,12 +81,12 @@ function js_make_hide_show_links($class_name, $ixTable,
         $ss = "style='$show_style' ";
 
     $hidelink = "<span $hs id='".$class_name."_hidelink'>" .
-        "[ <a href=\"javascript:hideBugs('$class_name', '$ixTable');\">" . 
+        "[ <a href=\"javascript:hideBugs('$class_name', '$ixTable');\">" .
         "Hide$suffix</a> ]" .
         "</span>";
     $showlink = "<span $ss id='".$class_name."_showlink'>" .
-        "[ <a href=\"javascript:showBugs('$class_name', '$ixTable');\">" . 
-        "Show$suffix</a> ]" . 
+        "[ <a href=\"javascript:showBugs('$class_name', '$ixTable');\">" .
+        "Show$suffix</a> ]" .
         "</span>";
 
     return $hidelink . " " . $showlink;
@@ -106,7 +106,7 @@ function bug_init()
         mysql_select_db($SchedName, $bug_h);
     }
 }
-                    
+
 
 function bug_get($bugid)
 {
@@ -183,7 +183,7 @@ function bug_get_milestones($fixfor)
 }
 
 // Format of $t:
-//   task, subtask, hrsOrigEst, hrsCurrEst, hrsElapsed, dtDue, 
+//   task, subtask, hrsOrigEst, hrsCurrEst, hrsElapsed, dtDue,
 //   fDone, fResolved, ixPriority
 function bug_add_task($user, $fixfor, $t)
 {
@@ -202,7 +202,7 @@ function bug_add_task($user, $fixfor, $t)
              "      hrsOrigEst, hrsCurrEst, hrsElapsed, hrsRemain, " .
              "      dtDue, fDone, fResolved, ixPriority) " .
              "  values ('$u', '$ff', \"$task\", \"$subtask\", " .
-             "            $t[2], $t[3], $t[4], $remain, " . 
+             "            $t[2], $t[3], $t[4], $remain, " .
              "            '$t[5]', $done, '$t[7]', '$t[8]')";
 
     $result = mysql_query($query, $bug_h);
@@ -298,7 +298,7 @@ function sch_today()
 // Given a day in "yyyy/mm/dd" or "yyyy-mm-dd" format, return the next
 // Schedulator-day in days since the epoch.
 // FIXME: Actually returns working-days since the epoch, approximately equal
-// to days_since_epoch * 4/7. 
+// to days_since_epoch * 4/7.
 function sch_parse_day($day)
 {
     if ($day == '')
@@ -426,7 +426,7 @@ function sch_warning($text)
 }
 
 
-function sch_genline($pri, $task, $title, $orig, $curr, $elapsed, $left, $due, 
+function sch_genline($pri, $task, $title, $orig, $curr, $elapsed, $left, $due,
     $html_class)
 {
     $class = "";
@@ -463,13 +463,13 @@ function sch_genline($pri, $task, $title, $orig, $curr, $elapsed, $left, $due,
 }
 
 
-function sch_line($pri, $task, $title, $orig, $curr, $elapsed, $remain, $done, 
+function sch_line($pri, $task, $title, $orig, $curr, $elapsed, $remain, $done,
 		  $html_class, $allow_red)
 {
     global $sch_curday, $sch_elapsed_curday;
 
     //print "($task)($done)<br>\n";
-    
+
     $ret = "";
 
     if ($done)
@@ -510,7 +510,7 @@ function sch_bug($estimate)
     global $sch_got_bug, $sch_unknown_fixfor;
     $ret = "";
     static $old_load = -1;
-    
+
     if ($estimate->loadfactor != $old_load)
     {
         $ret .= sch_fullline("(Load factor = ".$estimate->loadfactor.")");
@@ -533,7 +533,7 @@ function sch_bug($estimate)
     if ($estimate->isdone())
     {
         $sch_curday = sch_add_hours($sch_curday, $curr, $estimate->loadfactor);
-        $sch_elapsed_curday = sch_add_hours($sch_elapsed_curday, $elapsed, 
+        $sch_elapsed_curday = sch_add_hours($sch_elapsed_curday, $elapsed,
                 $estimate->loadfactor);
 
         // Don't display the priority of completed bugs, nobody cares.
@@ -541,18 +541,18 @@ function sch_bug($estimate)
     }
     else
     {
-        $sch_curday = sch_add_hours($sch_curday, $curr - $elapsed, 
+        $sch_curday = sch_add_hours($sch_curday, $curr - $elapsed,
                 $estimate->loadfactor);
         //$ret .= sch_fullline("Ignoring $elapsed elapsed hours for bug $feat");
     }
 
-    $html_class = $estimate->isdone() ? 
+    $html_class = $estimate->isdone() ?
         "done_bug" : "fixfor" . $estimate->task->fixfor->ix;
 
     // FIXME: Estimate::isdone() only checks the Estimate's be_done flag;
     // maybe should make it also check its task's state
-    $ret .= sch_line($pri, $estimate->task->hyperlink(), 
-                     $title, $orig, $curr, $elapsed, $remain, 
+    $ret .= sch_line($pri, $estimate->task->hyperlink(),
+                     $title, $orig, $curr, $elapsed, $remain,
                      $estimate->isdone(), $html_class, true);
 
 
@@ -570,9 +570,9 @@ function sch_bug($estimate)
     $resolved = $estimate->isbug && $estimate->task->isresolved();
     $testcat = $estimate->isbug && $estimate->task->category == 4;
     $buga = array($task, $title, $orig, $curr, $elapsed,
-                  sch_format_day($sch_curday), $estimate->task->isdone(), 
+                  sch_format_day($sch_curday), $estimate->task->isdone(),
                   $resolved || $testcat, $estimate->task->get_priority());
-    if (!$estimate->isdone() && 
+    if (!$estimate->isdone() &&
 	isset($estimate->task->fixfor) && $estimate->task->fixfor != -1)
         bug_add_task($sch_user->username, $estimate->task->fixfor->name, $buga);
     else
@@ -594,7 +594,7 @@ function sch_milestone($ixFixFor, $descr, $name, $due, $load, $newline)
     {
         $ff_str = "fixfor$ixFixFor";
         $sch_table_id = "sch_".$sch_user->username;
-        $hideshow = js_make_hide_show_links($ff_str, $sch_table_id, 
+        $hideshow = js_make_hide_show_links($ff_str, $sch_table_id,
             "", "display:none", "");
     }
 
@@ -613,7 +613,7 @@ function sch_milestone($ixFixFor, $descr, $name, $due, $load, $newline)
     $done = $newday < $today;
     // FIXME: If current day is past the milestone's release date, don't show
     // the "current" column in red.  See sch_period().
-    $ret .= sch_genline(0, "<b>$descr</b>", "<b>$name ($xdue)</b> $hideshow", 
+    $ret .= sch_genline(0, "<b>$descr</b>", "<b>$name ($xdue)</b> $hideshow",
                         '', '', sch_period($slip), '',
                         $done ? "done" : sch_period($slip),
                         '');
@@ -647,11 +647,11 @@ function sch_release_line($old_fixfor, $estimate, $newline)
 {
     $a = bug_get_milestones($old_fixfor->name);
     foreach ($a as $b)
-	$ret .= sch_milestone("", "ZeroBugBounce", $old_fixfor->name, $b, 
-			      $estimate->loadfactor, false); 
-    
-    $ret .= sch_milestone($old_fixfor->ix, "RELEASE", $old_fixfor->name, 
-        $old_fixfor->release_date, $estimate->loadfactor, $newline); 
+	$ret .= sch_milestone("", "ZeroBugBounce", $old_fixfor->name, $b,
+			      $estimate->loadfactor, false);
+
+    $ret .= sch_milestone($old_fixfor->ix, "RELEASE", $old_fixfor->name,
+        $old_fixfor->release_date, $estimate->loadfactor, $newline);
     return $ret;
 }
 
@@ -663,18 +663,18 @@ function sch_make_magic_est($load)
     $magic = sch_elapsed_time_unfinished($user);
 
     $est = new Estimate(/* fake - not in database */ 1,
-			/*done*/true, 
-			"MAGIC", 
-			/*assignto*/ $sch_user->username, 
+			/*done*/true,
+			"MAGIC",
+			/*assignto*/ $sch_user->username,
 			/*isbug*/ 0,
-			/*task - filled in below*/ '', 
+			/*task - filled in below*/ '',
 			$magic, $magic, $magic,
 			/*resolvedate*/ "1970-01-01",
 			$sch_user->username, $load);
     $sch_db->xtask->max_ix++;
-    $est->task = new XTask(/*ix*/ $sch_db->xtask->max_ix, 
-			   "MAGIC", 
-                           "Time elapsed on unfinished bugs listed below", 
+    $est->task = new XTask(/*ix*/ $sch_db->xtask->max_ix,
+			   "MAGIC",
+                           "Time elapsed on unfinished bugs listed below",
 			   /*fixfor - set later*/ -1,
 			   /*ixPersonAssignedTo*/ $sch_user->ix,
 			   /*my_user*/ $sch_user->username,
@@ -691,7 +691,7 @@ function sch_create($user)
     global $sch_db;
     $ret = "";
     $sch_table_id = "sch_$user";
-    
+
     $ret .= "<table id='$sch_table_id' border=0 width='95%'>\n";
     $ret .= "<tr><th>" .
     join("</th><th>", array("Pri", "Task", "Subtask", "Orig", "Curr",
@@ -702,7 +702,7 @@ function sch_create($user)
         $ret .= sch_warning("START date is in the future!");
 
     // Hide done bugs by default
-    $hideshow = js_make_hide_show_links("done_bug", $sch_table_id, 
+    $hideshow = js_make_hide_show_links("done_bug", $sch_table_id,
         "display:none", "", " Completed Bugs");
     $ret .= sch_fullline($hideshow);
 
@@ -711,7 +711,7 @@ function sch_create($user)
     sch_merge_cur_bugs("-Undecided-");
 
     $sch_db->estimate->do_sort();
-    
+
     unset($old_fixfor);
     $did_magic = false;
     foreach ($sch_db->estimate->a as $e)
@@ -728,7 +728,7 @@ function sch_create($user)
         $f = $e->task->fixfor;
         if (!isset($old_fixfor) && !$e->isdone())
             $old_fixfor = $f;
-        else if ($old_fixfor->ix != $f->ix && !$e->isdone()) 
+        else if ($old_fixfor->ix != $f->ix && !$e->isdone())
         {
 	    $ret .= sch_release_line($old_fixfor, $e, true);
 	    $old_fixfor = $f;
@@ -753,9 +753,9 @@ function sch_merge_cur_bugs($fixfor)
     global $sch_cur_incomplete_bugs;
     global $sch_cur_complete_bugs;
     global $sch_db;
-    
+
     //print "sch_merge_cur_bugs: " . $fixfor . "<br>\n";
-   
+
     $f = $sch_db->fixfor->first("name", $fixfor);
     if (!$f)
         $f = $sch_db->fixfor->first_prefix("name", $fixfor);
@@ -784,12 +784,12 @@ function sch_change_loadfactor($load, $date)
     //print "LOADFACTOR $load <br>\n";
     foreach ($sch_db->estimate->a as $i=>$e)
     {
-	if (sch_parse_day($e->get_resolvedate()) >= $date 
+	if (sch_parse_day($e->get_resolvedate()) >= $date
 	    || sch_parse_day($e->get_resolvedate()) == 0)
         {
             $sch_db->estimate->a[$i]->loadfactor = $load;
         }
-	//print sch_parse_day($e->get_resolvedate()) . ">?$date -> " . 
+	//print sch_parse_day($e->get_resolvedate()) . ">?$date -> " .
 	//$sch_db->estimate->a[$i]->loadfactor . "<br>\n";
     }
 }
@@ -798,7 +798,7 @@ function sch_next_milestone($fixfor)
 {
     $ret = "";
     $ff = addslashes($fixfor);
-    $query = "select dtDue " . 
+    $query = "select dtDue " .
              "  from schedulator.Milestone " .
              "  where dtDue > now() and sMilestone='$ff' " .
              "  order by dtDue limit 1 ";
@@ -839,31 +839,31 @@ function sch_summary($fixfor, $unfixed_thres, $fixed_thres)
 {
     global $bug_h;
     bug_init();
-    
+
     if ($unfixed_thres=="") $unfixed_thres = 6;
     if ($fixed_thres=="")   $fixed_thres = 2;
-    
+
     $ret = "";
     $ff = addslashes($fixfor);
     $allpeople = array();
     $result = mysql_query("select distinct sPerson from schedulator.Task " .
-			  "  where fValid=1 and fDone=0 " . 
+			  "  where fValid=1 and fDone=0 " .
 			  "    and sPerson not like '-%-'" .
 			  "  order by sPerson ",
 			  $bug_h);
     while ($result && $row = mysql_fetch_row($result))
     {
         $person = $row[0];
-        $schedname = strtoupper(substr($person, 0, 1)) 
+        $schedname = strtoupper(substr($person, 0, 1))
           . substr($person, 1) . "Schedule";
-        
-        $allpeople[$person] = 
+
+        $allpeople[$person] =
             "<a href='index.php?$schedname' title=\"$person's schedulator\">" .
             "$person</a>";
     }
-    
+
     $query = "select dtDue, sPerson, sTask, sSubTask, " .
-             "    fResolved, ixPriority, hrsCurrEst " . 
+             "    fResolved, ixPriority, hrsCurrEst " .
              "  from schedulator.Task " .
              "  where fValid=1 and sFixFor='$ff' and fDone=0 " .
              "  order by dtDue, ixPriority, sTask, sSubTask ";
@@ -873,7 +873,7 @@ function sch_summary($fixfor, $unfixed_thres, $fixed_thres)
     $bugs = array();
     $skipped = array();
     $total_skipped = $total_unfixed = $total_fixed = 0;
-    
+
     while ($row = mysql_fetch_row($result))
     {
 	$due = $row[0];
@@ -883,10 +883,10 @@ function sch_summary($fixfor, $unfixed_thres, $fixed_thres)
 	$resolved = $row[4];
 	$priority = $row[5];
 	$currest = $row[6];
-	
+
 	# $nicedue = ereg_replace("-", " ", $due);
 	$nicedue = ereg_replace("(....)-(..)-(..)", "\\3", $due);
-	
+
 	$important_unfixed = !$resolved && $priority <= $unfixed_thres;
 	$important_fixed = $resolved && $priority <= $fixed_thres;
 	if ($important_unfixed || $important_fixed)
@@ -901,18 +901,18 @@ function sch_summary($fixfor, $unfixed_thres, $fixed_thres)
 	    $skipped[$person]++;
 	    continue;
 	}
-	
+
 	$dates[$due] = $nicedue;
-	
+
 	$bugs[$person][$due][] = array
-	  ("task" => $task, 
+	  ("task" => $task,
 	   "subtask" => $subtask,
 	   "resolved" => $resolved,
 	   "priority" => $priority,
 	   "currest" => $currest);
 	unset($allpeople[$person]);
     }
-    
+
     $nextbounce = sch_next_milestone($fixfor);
     if ($nextbounce)
     {
@@ -924,40 +924,40 @@ function sch_summary($fixfor, $unfixed_thres, $fixed_thres)
 	$next_str = " (No bounces scheduled)";
 	$daystobounce = 365;
     }
-    
+
     $ret .= "<h1>Schedulator Summary for '$fixfor'</h1>\n";
     $ret .= "<p>Predicted Bounce: $last_date$next_str<br>\n";
     $ret .= "&nbsp;&nbsp;(Bounce goals: " .
       "fix $total_unfixed bugs up to priority $unfixed_thres; " .
       "verify $total_fixed bugs up to priority $fixed_thres; " .
       "+$total_skipped more bugs not shown.)</p>\n";
-    
+
     $ret .= <<<EOF
-      
+
 <style type='text/css'>
     /* headings */
     table.schedsum th {
 	font-weight:normal; margin:0pt; text-align:left;
     }
-    
+
     /* headings except topleft corner */
     table.schedsum th.year,th.day,th.person {
 	background: lightgray
     }
-    
+
     /* typical font size */
     table.schedsum th.day,td.bugs {
 	font-size: 8pt;
     }
-    
+
     /* cell backgrounds */
-    table.schedsum td.superlate { 
+    table.schedsum td.superlate {
 	background: #ee9999;
     }
-    table.schedsum td.late { 
+    table.schedsum td.late {
 	background: #f0f0c0
     }
-    
+
     /* normal vs. late vs. super-late bugs */
     table.schedsum a {
 	text-decoration: none;
@@ -968,7 +968,7 @@ function sch_summary($fixfor, $unfixed_thres, $fixed_thres)
     table.schedsum span.late,a.late:link,a.late:visited {
 	color: red; background: yellow
     }
-    
+
     /* resolved vs. unresolved bugs */
     table.schedsum a.resolved:link,a.resolved:visited {
 	font-style: italic;
@@ -976,7 +976,7 @@ function sch_summary($fixfor, $unfixed_thres, $fixed_thres)
     table.schedsum a.unresolved:link,a.unresolved:visited {
 	border-style: solid; border-width: 1px;
     }
-    
+
     /* bug priorities */
     table.schedsum a.pri1,a.pri2 {
 	font-size: 150%;
@@ -987,23 +987,23 @@ function sch_summary($fixfor, $unfixed_thres, $fixed_thres)
     table.schedsum a.pri6,a.pri7 {
 	font-size: 80%;
     }
-    
+
     /* mouseovers on bugs */
     table.schedsum a:hover:link,a:hover:visited {
 	color: white; background: green;
     }
 </style>
 EOF;
-    
+
     $date_list = array_keys($dates);
     sort($date_list);
-    
+
     $person_list = array_keys($bugs);
     sort($person_list);
     $rowcount = 2 + count($person_list);
-    
+
     $ret .= "<table class='schedsum'>\n";
-	  
+
     $ret .= "<tr class='schedsum'><th></th>";
     $lastyear = 0;
     $yearcount = 0;
@@ -1021,7 +1021,7 @@ EOF;
     }
     $ret .= "<th class='year' colspan=$yearcount>$lastyear</th>";
     $ret .= "</tr>\n";
-	  
+
     $ret .= "<tr class='schedsum'><th></th>";
     $lastmonth = 0;
     $monthcount = 0;
@@ -1039,7 +1039,7 @@ EOF;
     }
     $ret .= sch_month_out($lastmonth, $monthcount);
     $ret .= "</tr>\n";
-	  
+
     $ret .= "<tr><th></th>";
     foreach ($date_list as $due)
     {
@@ -1050,12 +1050,12 @@ EOF;
 	  "</th>\n";
     }
     $ret .= "</tr>\n";
-    
+
     foreach ($person_list as $person)
     {
-	$schedname = strtoupper(substr($person, 0, 1)) 
+	$schedname = strtoupper(substr($person, 0, 1))
 	  . substr($person, 1) . "Schedule";
-	
+
 	$skippy = "";
 	if ($skipped[$person])
 	    $skippy = " (+$skipped[$person])";
@@ -1078,10 +1078,10 @@ EOF;
                     $pri = $bug["priority"];
 		    $priclass = "pri$pri";
 		    $isbug = (($task + 0)."" == $task);
-		    
+
 		    $resolved = ($bug["resolved"] || !$isbug);
 		    $resclass = $resolved ? "resolved" : "unresolved";
-		    
+
 		    $important = ($resolved && $pri <= $fixed_thres)
 		        || (!$resolved && $pri <= $unfixed_thres);
 		    if ($important)
@@ -1091,14 +1091,14 @@ EOF;
 		    }
 		    else
 		        $dateclass2 = "";
-		    
+
 		    if ($resolved)
 			$bugclass = "resolved $priclass $dateclass2";
 		    else
 			$bugclass = "unresolved $priclass $dateclass2";
 		    if ($isbug)
 		      $v .= "<a class='$bugclass' " .
-		            "href='http://fogbugz/?$task' " . 
+		            "href='http://fogbugz/?$task' " .
 		            "title='Bug $task: $subtask'>$pri</a>";
 		    else
 		      $v .= "<span class='bugclass' " .
@@ -1113,14 +1113,14 @@ EOF;
 	      $colclass = "";
 	    else
 	      $colclass = $dateclass;
-	    
+
 	    $ret .= "<td class='bugs $colclass'>$v</td>";
 	}
 	$ret .= "</tr>\n";
     }
-    
+
     $ret .= "</table>\n";
-    
+
     $allpeople_annotate = array();
     foreach ($allpeople as $person => $htmlperson)
     {
@@ -1129,18 +1129,17 @@ EOF;
 	else
 	    $allpeople_annotate[$person] = "$htmlperson";
     }
-    
+
     $ret .= "<p><b>Done for this bounce:</b> " .
       join(", ", array_values($allpeople_annotate)) .
       "</p>\n";
-    
+
     return $ret;
 }
 
 
 class Macro_Sched
 {
-    var $pagestore;
     var $include_count = 0;
 
     function parse($args, $page)
@@ -1197,10 +1196,10 @@ class Macro_Sched
             $sch_start = $sch_curday = $sch_elapsed_curday
                 = sch_parse_day($words[2]);
             $sch_unknown_fixfor = array();
-	    
+
 	    $sch_db = new FogTables($username, -1, sch_format_day($sch_start, "-"));
             $sch_user = $sch_db->person->first("username", $username);
-	    
+
             bug_start_user($sch_user->username);
 	    sch_change_loadfactor($current_load, $sch_start);
         }
@@ -1237,7 +1236,7 @@ class Macro_Sched
 
             // We now know where the current lists of bugs go
 	    sch_merge_cur_bugs($msname);
-            
+
             bug_set_release($msname, $msdue);
             bug_add_tasks($sch_user->username, $msname, $sch_unknown_fixfor);
             $sch_unknown_fixfor = array();
@@ -1254,7 +1253,7 @@ class Macro_Sched
 	{
 	    $fixfor = $words[1];
 	    $a = split("/", $words[2]);
-	    
+
 	    $unfixed_thres = $a[0];
 	    $fixed_thres = $a[1];
 	    $ret .= sch_summary($fixfor, $unfixed_thres, $fixed_thres);
@@ -1273,33 +1272,33 @@ class Macro_Sched
 	    $sch_manual_ix++;
 
             $estimate = new Estimate(/* fake - not in database */ 1,
-                $done, $bugid, 
-                /*assignto*/ $sch_user->username, 
+                $done, $bugid,
+                /*assignto*/ $sch_user->username,
                 /*isbug*/ 0,
-                /*task - filled in below*/ '', 
-                $orig, $currest, $elapsed, 
+                /*task - filled in below*/ '',
+                $orig, $currest, $elapsed,
                 /*resolvedate*/ "1970-01-01", // Want manual bugs to sort first
                 $sch_user->username, $current_load);
-	    
+
 	    //print "($bugid)($task)<br>\n";
             if (preg_match('/^[0-9]+$/', $bugid))
             {
                 $bug = bug_get($bugid);
 		$sch_db->estimate->remove_estimate($bugid);
-                
+
                 $estimate->task = $bug;
 		// Fill in manual info we have
 		if ($task != "") $estimate->task->name = $task;
 		if ($currest != "") $estimate->task->currest = $currest;
 		if ($elapsed != "") $estimate->task->elapsed = $elapsed;
-		
+
                 $estimate->isbug = 1;
 		$estimate->task->manual_ix = $sch_manual_ix;
                 $estimate->be_done = $done || $bug->isresolved();
                 $estimate->origest = $bug->origest;
-                if (!strcmp($estimate->currest,'')) 
+                if (!strcmp($estimate->currest,''))
                     $estimate->currest = $bug->currest;
-                if (!strcmp($estimate->elapsed,'')) 
+                if (!strcmp($estimate->elapsed,''))
                     $estimate->elapsed = $bug->elapsed;
 
                 if ((!$done && $currest != $elapsed) || $bug->isresolved())
@@ -1314,7 +1313,7 @@ class Macro_Sched
             {
                 $open = ($elapsed != $currest);
                 $sch_db->xtask->max_ix++;
-                $estimate->task = new XTask(/*ix*/ $sch_db->xtask->max_ix, 
+                $estimate->task = new XTask(/*ix*/ $sch_db->xtask->max_ix,
 					    $bugid, $task,
 					    /*fixfor - set later*/ -1,
 					    /*ixPersonAssignedTo*/ $sch_user->ix,

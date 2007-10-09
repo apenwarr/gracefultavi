@@ -3,8 +3,6 @@
 class Macro_GetTopLevel
 {
    // This macro gives the top level page.
-   var $pagestore;
-
    function parse($args, $page)
    {
       global $HomePage;

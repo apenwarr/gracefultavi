@@ -2,15 +2,13 @@
 
 class Macro_WantedPages
 {
-   var $pagestore;
-
    function parse($args, $page)
    {
      global $pagestore, $LkTbl, $PgTbl;
-   
+
      $text = '';
      $first = 1;
-   
+
      $q1 = $pagestore->dbh->query("SELECT link, SUM(count) AS ct FROM $LkTbl " .
                                   "GROUP BY link ORDER BY ct DESC, link");
      while(($result = $pagestore->dbh->result($q1)))
@@ -23,13 +21,13 @@ class Macro_WantedPages
            { $text = $text . "\n"; }
          else
            { $first = 0; }
-   
+
          $text = $text . '(' .
                  html_url(findURL($result[0]), $result[1]) .
                  ') ' . html_ref($result[0], $result[0]);
        }
      }
-   
+
      return html_code($text);
    }
 }

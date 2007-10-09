@@ -46,7 +46,6 @@ define('POLL_MULTIPLE', 1);
 
 class Macro_WikiPoll
 {
-    var $pagestore;
     var $barwidth = 200;
     var $barheight = 20;
 
