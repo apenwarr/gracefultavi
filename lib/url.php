@@ -38,6 +38,8 @@ if(!isset($SubscriptionsScript))
   { $SubscriptionsScript = $ScriptName . '?action=subscriptions'; }
 if(!isset($ChildrenBase))
   { $ChildrenBase = $ScriptName . '?action=children&amp;page='; }
+if(!isset($MacroBase))
+  { $MacroBase = $ScriptName . '?action=macro&amp;page='; }
 if(!isset($TableSortScript))
   { $TableSortScript = $ScriptName . '?action=js&amp;file=tablesort'; }
 if(!isset($CommonScript))
@@ -201,6 +203,17 @@ function captchaURL($md5)
   global $CaptchaScript;
 
   return $CaptchaScript . $md5;
+}
+}
+
+if(!function_exists('macroURL'))
+{
+function macroURL($page, $macro, $args)
+{
+  global $MacroBase;
+
+  return $MacroBase . urlencode($page) . '&amp;macro=' . urlencode($macro) .
+         '&amp;args=' . urlencode($args);
 }
 }
 ?>

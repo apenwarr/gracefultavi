@@ -36,6 +36,7 @@ $pagestore = new PageStore();
 $db = $pagestore->dbh;
 
 $Entity = array();                      // Global parser entity list.
+$macroToolbarButtons = array();
 
 // Strip slashes from incoming variables.
 if(get_magic_quotes_gpc())
@@ -94,21 +95,26 @@ if($dir=opendir("$WorkingDirectory/macros"))
     {
         if ($file != ".." && $file != ".")
         {
-           $pieces=explode(".", $file);
-           $name=$pieces[0];
-           if($pieces[count($pieces)-1]=="php")
-           {
-               require_once("macros/$file");
-               eval("\$ViewMacroEngine['$name']=new Macro_$name;");
-               if(isset($ViewMacroEngine[$name]->trigger))
-               {
-                  // Macro has an alternate trigger defined, use that
-                  // instead of the macro name.
-                  $ViewMacroEngine[$ViewMacroEngine[$name]->trigger]=$ViewMacroEngine[$pieces[0]];
-                  $name=$ViewMacroEngine[$name]->trigger;
-                  unset($ViewMacroEngine[$pieces[0]]);
-               }
-           }
+            $pieces=explode(".", $file);
+            $name=$pieces[0];
+            if($pieces[count($pieces)-1]=="php")
+            {
+                require_once("macros/$file");
+                eval("\$ViewMacroEngine['$name']=new Macro_$name;");
+                if(isset($ViewMacroEngine[$name]->toolbarButton) &&
+                   !empty($ViewMacroEngine[$name]->toolbarButton))
+                {
+                    $macroToolbarButtons[$name] = $ViewMacroEngine[$name]->toolbarButton;
+                }
+                if(isset($ViewMacroEngine[$name]->trigger))
+                {
+                    // Macro has an alternate trigger defined, use that
+                    // instead of the macro name.
+                    $ViewMacroEngine[$ViewMacroEngine[$name]->trigger]=$ViewMacroEngine[$pieces[0]];
+                    $name=$ViewMacroEngine[$name]->trigger;
+                    unset($ViewMacroEngine[$pieces[0]]);
+                }
+            }
         }
     }
     closedir($dir);

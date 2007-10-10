@@ -15,6 +15,13 @@ function toolbar_button($url, $label, $is_selected)
 
 function toolbar($page, $args)
 {
+    // toolbar buttons added by macros
+    global $macroToolbarButtons;
+    ksort($macroToolbarButtons);
+    foreach ($macroToolbarButtons as $macro => $label) {
+        toolbar_button(macroURL($page, $macro, ''), $label, false);
+    }
+
     // view
     toolbar_button($args['button_view'] ? viewURL($args['headlink']) : '',
         'View', $args['button_selected']=='view');

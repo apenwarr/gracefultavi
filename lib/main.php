@@ -13,12 +13,14 @@ if (!ini_get('register_globals'))
     if (isset($HTTP_SERVER_VARS['REMOTE_ADDR'])) $REMOTE_ADDR  = $HTTP_SERVER_VARS['REMOTE_ADDR'];
 
     if (isset($HTTP_GET_VARS['action'])) $action = $HTTP_GET_VARS['action'];
+    if (isset($HTTP_GET_VARS['args'])) $args = $HTTP_GET_VARS['args'];
     if (isset($HTTP_GET_VARS['branch_search'])) $branch_search = $HTTP_GET_VARS['branch_search'];
     if (isset($HTTP_GET_VARS['csstype'])) $csstype = $HTTP_GET_VARS['csstype'];
     if (isset($HTTP_GET_VARS['diff_mode'])) $diff_mode = $HTTP_GET_VARS['diff_mode'];
     if (isset($HTTP_GET_VARS['find'])) $find = $HTTP_GET_VARS['find'];
     if (isset($HTTP_GET_VARS['full'])) $full = $HTTP_GET_VARS['full'];
     if (isset($HTTP_GET_VARS['invalid_nick'])) $invalid_nick = $HTTP_GET_VARS['invalid_nick'];
+    if (isset($HTTP_GET_VARS['macro'])) $macro = $HTTP_GET_VARS['macro'];
     if (isset($HTTP_GET_VARS['md5'])) $md5 = $HTTP_GET_VARS['md5'];
     if (isset($HTTP_GET_VARS['no_redirect'])) $no_redirect = $HTTP_GET_VARS['no_redirect'];
     if (isset($HTTP_GET_VARS['page'])) $page = $HTTP_GET_VARS['page'];
