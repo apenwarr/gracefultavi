@@ -4,6 +4,9 @@
 // remember to update install/create-db.pl when changing this value
 define('DB_VERSION', 4);
 
+// GracefulTavi Version
+define('GRACEFULTAVI_VERSION', '1.08');
+
 // If register_globals is off, we need to harvest the script parameters
 // at this point.
 if (!ini_get('register_globals'))
