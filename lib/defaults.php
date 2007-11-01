@@ -248,6 +248,28 @@ $ShowCategoryBox = 0;
 $EnableCaptcha = 0;
 $CaptchaObfuscate = array(0, 0, 0, 0, 0);
 
+// If $EnableOpenOfficeMacro is set to 1, the "Save as OpenOffice" feature is
+//   enabled, otherwise it is disabled. To fully activate the OpenOffice macro,
+//   see also the OpenOffice zip commands below.
+//
+//   This is an important notice for the wiki administrator. Please note that
+//   this macro is highly experimental. It has gone through serious testing
+//   and should work properly. However, since it relies on external programs,
+//   and creates and removes files and directories, there are minor risks
+//   that it could result in file loss and other random unfortunate results.
+//   It is thus to the administrator discretion to review and test this macro
+//   and enable it intentionally.
+$EnableOpenOfficeMacro = 0;
+
+// To fully activate the OpenOffice macro, the following variables must be set
+//   to the full path of a "zip" and "unzip" command line application. This
+//   macro has been developped with standard zip and unzip applications
+//   available freely on the internet. You may want to review how they are used
+//   in the OpenOffice.php file and make sure the parameters options and syntax
+//   corresponds to the zip and unzip versions you are using.
+$OpenOfficeMacroZipCmd = '';
+$OpenOfficeMacroUnzipCmd = '';
+
 // $ParseEngine indicates what parsing rules will be run when displaying a
 //   wiki page. To disable a particular rule, you can place a comment at the
 //   beginning of its line. The order of this list is important.
