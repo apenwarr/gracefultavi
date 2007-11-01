@@ -150,26 +150,6 @@ function parse_odt_nowiki($text)
                         $text, -1);
 }
 
-// Ensures that links won't be created inside html <a> tags, i.e. between <a>
-// and </a>. It is used only by parse_htmlanchor. The 2 regular expression
-// pattern were taken/inspired from 'parse_hyperlink' and 'parse_wikiname'.
-function odt_avoid_links($text)
-{
-  global $LinkPtn, $UrlPtn;
-
-  // disable urls
-  $text = preg_replace("/(^|[^A-Za-z])($UrlPtn)(\$|[^\\/?=&~A-Za-z0-9])/e",
-                       "q1('\\1') . new_entity(array('raw', q1('\\2'))) . q1('\\5')",
-                       $text, -1);
-
-  // disable wikinames
-  $text = preg_replace("/(^|[^A-Za-z!])($LinkPtn)((\#[-A-Za-z0-9]+)?)(\"\")?/e",
-                       "q1('\\1') . '!' . q1('\\2') . '\\7'",
-                       $text, -1);
-
-  return $text;
-}
-
 function parse_odt_htmlanchor($text)
 {
     $text = preg_replace("/<a[^>]+?href=.*?([^\"\s>]+)[^>]*>([^<>]+)<\/a>/ei",
@@ -697,7 +677,7 @@ function odt_pre_spaces($s)
 }
 
 function odt_nowiki($text)
-  { return $text; }
+  { return htmlspecialchars($text); }
 
 function odt_img_trim_quotes($src)
 {
