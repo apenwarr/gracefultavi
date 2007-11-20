@@ -216,7 +216,24 @@ if (isset($args['quote']))
 ?>
 
 <tr>
-<td>
+<td class="printhide" valign="bottom" align="right" colspan="2">
+    <table cellspacing="0" cellpadding="0" border="0">
+    <tr valign="top" align="right">
+    <?php if ($args['spam_revert'] && $UseSpamRevert && $UserName) : ?>
+        <form name="revertForm" method="post" action="<?php print revertURL($page); ?>"></form>
+        <td>
+        <?php print toolbar_button('javascript:spamRevert();', 'Spam Revert', 0); ?>
+        </td>
+        <td><img src="spacer.png" alt="" width="40" height="1" border="0"></td>
+    <?php endif; ?>
+    <td><?php toolbar($page, $args); ?></td>
+    </tr>
+    </table>
+</td>
+</tr>
+
+<tr>
+<td colspan="2">
     <?php
     print '<h1>' . $args['heading'];
     if ($args['headlink'] != '')
@@ -245,21 +262,6 @@ if (isset($args['quote']))
         print '</a>)';
     }
     ?>
-</td>
-
-<td class="printhide" valign="bottom" align="right">
-    <table cellspacing="0" cellpadding="0" border="0">
-    <tr valign="top" align="right">
-    <?php if ($args['spam_revert'] && $UseSpamRevert && $UserName) : ?>
-        <form name="revertForm" method="post" action="<?php print revertURL($page); ?>"></form>
-        <td>
-        <?php print toolbar_button('javascript:spamRevert();', 'Spam Revert', 0); ?>
-        </td>
-        <td><img src="spacer.png" alt="" width="40" height="1" border="0"></td>
-    <?php endif; ?>
-    <td><?php toolbar($page, $args); ?></td>
-    </tr>
-    </table>
 </td>
 </tr>
 </table>
