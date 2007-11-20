@@ -169,9 +169,9 @@ class Macro_BugReport
         $this->out('</select>');
     }
 
-    function table()
+    function table($attr = '')
     {
-        $this->out('<table>');
+        $this->out('<table '.$attr.'>');
     }
 
     function table_end()
@@ -279,10 +279,11 @@ class Macro_BugReport
     function list_bugs($user, $datefrom, $dateto)
     {
         return db_query("select ixBugEvent, Project.sProject, Area.sArea, " .
+                        "Bug.fOpen, Bug.ixStatus, " .
                         "Bug.ixBug, Bug.sTitle " .
                         "from Bug, BugEvent, Project, Area " .
                         "where Bug.ixBug = BugEvent.ixBug " .
-                        "and Bug.ixProject = Project.ixProject ".
+                        "and Bug.ixProject = Project.ixProject " .
                         "and Bug.ixArea = Area.ixArea " .
                         "and BugEvent.ixPerson = $user " .
                         "and BugEvent.dt > '$datefrom' " .
@@ -313,21 +314,38 @@ class Macro_BugReport
         $this->out('<br><b>To:</b> ' . $dateto);
 
         $this->out('<p>');
-        $this->table();
+        $this->table('tablesort="1"');
 
-        $this->out('<tr><td><b>Project</b></td><td><b>Area</b></td><td><b>ID</b></td><td><b>Title</b></td></tr>');
+        $columns = array('Project', 'Area', 'Status', 'ID', 'Title');
+        $this->out('<tr><td><b>' . implode('</b></td><td><b>', $columns) .
+            '</b></td></tr>');
 
         $prev_bugid = '';
         foreach ($bugs as $bug)
         {
             if ($bug['ixBug'] == $prev_bugid) continue;
 
+            // status img and text
+            if ($bug['fOpen'] == 0) {
+                $status = 'Closed';
+                $img = 'bug_closed.gif';
+            } elseif ($bug['ixStatus'] != 1) {
+                $status = 'Resolved';
+                $img = 'bug_resolved.gif';
+            } else {
+                $status = 'Active';
+                $img = 'bug_active.gif';
+            }
+            $img = '<img src="images/'.$img.'" alt="('.$status.')" '.
+                   'hspace="1" width="14" height="14" border="0">';
+
             $this->out('<tr>');
             $this->out('<td>'.$bug['sProject'].'</td>');
             $this->out('<td>'.$bug['sArea'].'</td>');
+            $this->out('<td nowrap>'.$img.$status.'</td>');
             $this->out('<td><a href="http://fogbugz/?'.$bug['ixBug'].'">'.
                        $bug['ixBug'].'</a></td>');
-            $this->out('<td>'.$bug['sTitle'].'</td>');
+            $this->out('<td>'.htmlspecialchars($bug['sTitle']).'</td>');
             $this->out('</tr>');
 
             $prev_bugid = $bug['ixBug'];
