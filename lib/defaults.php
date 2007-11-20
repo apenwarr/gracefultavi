@@ -270,6 +270,11 @@ $EnableOpenOfficeMacro = 0;
 $OpenOfficeMacroZipCmd = '';
 $OpenOfficeMacroUnzipCmd = '';
 
+// This array is used to extend the possibilities of remote wiki links. It
+//   provides a way to specify a callback function to handle the rendering of
+//   remote wiki links. See INSTALL.txt for more details.
+$HtmlInterwikiExtension = array();
+
 // $ParseEngine indicates what parsing rules will be run when displaying a
 //   wiki page. To disable a particular rule, you can place a comment at the
 //   beginning of its line. The order of this list is important.

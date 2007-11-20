@@ -288,7 +288,22 @@ function html_ref($refPage, $appearance, $hover = '', $anchor = '', $anchor_appe
 
 function html_interwiki($url, $text)
 {
-  return '<a href="' . $url . '">' . $text . '</a>';
+    global $HtmlInterwikiExtension;
+
+    $link = '<a href="' . $url . '">' . $text . '</a>';
+
+    // look for a custom extension
+    list($prefix, $ref) = explode(':', $text);
+    if (is_array($HtmlInterwikiExtension) &&
+        isset($HtmlInterwikiExtension[$prefix]) &&
+        function_exists($HtmlInterwikiExtension[$prefix]))
+    {
+        if ($customLink = $HtmlInterwikiExtension[$prefix]($url, $text)) {
+            $link = $customLink;
+        }
+    }
+
+    return $link;
 }
 function html_twin($whichwiki, $ref)
 {
