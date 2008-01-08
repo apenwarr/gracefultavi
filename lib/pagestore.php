@@ -188,6 +188,8 @@ class PageStore
         $backlinksCount = 0;
         foreach($backlinks as $backlink)
         {
+            if ($backlink == $page) { continue; }
+
             $qid = $this->dbh->query("SELECT count(*) " .
                                      "FROM $LkTbl " .
                                      "WHERE link='$backlink'");
@@ -201,6 +203,28 @@ class PageStore
         }
 
         return $parent;
+    }
+
+    // Fixes orphan pages linked from this page.
+    function fixOrphanLinks($page)
+    {
+        global $LkTbl, $PaTbl, $PgTbl;
+
+        $dbname = addslashes($page);
+
+        $qid = $this->dbh->query("
+            SELECT $PgTbl.title
+            FROM $LkTbl
+            INNER JOIN $PgTbl ON $LkTbl.link = $PgTbl.title
+                AND $PgTbl.bodylength > 1
+            LEFT JOIN $PaTbl ON $LkTbl.link = $PaTbl.page
+            WHERE $LkTbl.page = '$dbname'
+            AND $PaTbl.page IS NULL");
+
+        while (($result = $this->dbh->result($qid)))
+        {
+            $this->reparent($result[0], $page);
+        }
     }
 
     // Reparent a page

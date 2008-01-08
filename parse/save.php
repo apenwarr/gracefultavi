@@ -47,6 +47,8 @@ function parse_define_links($text)
   if($transclude_index != -1)
     { $ParseEngine[$transclude_index] = 'parse_transclude'; }
 
+  $pagestore->fixOrphanLinks($page);
+
   return $text;
 }
 
