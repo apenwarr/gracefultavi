@@ -9,13 +9,13 @@ require('lib/captcha.php');
 // Commit an edit to the database.
 function action_save()
 {
-    global $Admin, $AllowAnonymousPosts, $archive, $captcha, $categories;
-    global $comment, $Diff3Cmd, $document, $EmailSuffix, $EnableCaptcha;
-    global $EnableDiff3, $EnableSubscriptions, $ErrorPageLocked;
-    global $HTTP_POST_VARS, $MaxPostLen, $merge, $minoredit, $nextver;
-    global $NickName, $page, $pagefrom, $pagestore, $REMOTE_ADDR, $Save;
-    global $SaveMacroEngine, $section, $template, $text_after, $text_before;
-    global $UserName, $validationcode, $WorkingDirectory;
+    global $Admin, $AllowAnonymousPosts, $AllowAnonymousPostsHtml, $archive;
+    global $captcha, $categories, $comment, $Diff3Cmd, $document, $EmailSuffix;
+    global $EnableCaptcha, $EnableDiff3, $EnableSubscriptions;
+    global $ErrorPageLocked, $HTTP_POST_VARS, $MaxPostLen, $merge, $minoredit;
+    global $nextver, $NickName, $page, $pagefrom, $pagestore, $REMOTE_ADDR;
+    global $Save, $SaveMacroEngine, $section, $template, $text_after;
+    global $text_before, $UserName, $validationcode, $WorkingDirectory;
 
     if (!($UserName) && !($AllowAnonymousPosts))
     {
@@ -52,8 +52,8 @@ function action_save()
         // prevent empty posts
         if (strlen(trim($quickadd)) <= 50)
         {
-            $ptrn = '/^<hr><b>.+?@\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3} '.
-                    '\(\d{4}\/\d{2}\/\d{2}\)<\/b>:$/';
+            $ptrn = '/^----\s+\'\'\'.+?@\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3} '.
+                    '\(\d{4}\/\d{2}\/\d{2}\)\'\'\':$/';
             if (preg_match($ptrn, trim($quickadd)))
             {
                 global $ErrorEmptyComment;
@@ -204,6 +204,11 @@ function action_save()
         $quickadd = str_replace("\\", "\\\\", $quickadd);
         $quickadd = str_replace("'", "\\'", $quickadd);
         $quickadd = str_replace("\r", "", $quickadd);
+
+        if (!$AllowAnonymousPostsHtml)
+        {
+            $quickadd = htmlspecialchars($quickadd);
+        }
 
         $document .= $quickadd;
     }

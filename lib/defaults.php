@@ -194,6 +194,9 @@ $TempDir = '/tmp';
 // Allow anonymous posts
 $AllowAnonymousPosts = 1;
 
+// Allow HTML in anonymous posts
+$AllowAnonymousPostsHtml = 0;
+
 // $MaxPostLen determines the size, in bytes, of the largest edit allowed. Along
 //   with $TooLongPostLen, used to control when pages are too long for the
 //   supporting database backend and prevent data from being lost. Currently,

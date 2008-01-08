@@ -461,7 +461,7 @@ if (!in_array($page, array($HomePage, 'RecentChanges')) &&
                 // Standard Add a Comment
                 print '<input type="hidden" name="comment" value="Comment">';
                 print '<textarea name="quickadd" rows="4" cols="20">';
-                print "<hr><b>";
+                print "----\n'''";
                 if ($UserName) {
                     print "[$UserName]";
                 } else if ($NickName) {
@@ -469,9 +469,8 @@ if (!in_array($page, array($HomePage, 'RecentChanges')) &&
                 } else {
                     print "Anonymous@" . $_SERVER["REMOTE_ADDR"];
                 }
-                print " (" . date('Y/m/d') . ")</b>: ";
-                print '</textarea>';
-                print "<br>\n";
+                print " (" . date('Y/m/d') . ")''': ";
+                print "</textarea>\n";
                 if (!$UserName) {
                     if ($EnableCaptcha) {
                         print_captcha_box();
