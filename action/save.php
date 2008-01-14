@@ -99,9 +99,11 @@ function action_save()
     // gets the hostname without the nickname
     $page_hostname = array_pop(explode('@', $pg->hostname));
 
-    if ($pg->exists()                   // Page already exists.
+    if ($UserName                       // User is logged in.
+        && $pg->exists()                // Page already exists.
         && $pg->version >= $nextver     // Someone has changed it.
-        && $page_hostname != gethostbyaddr($REMOTE_ADDR) // Wasn't us.
+        && ($page_hostname != gethostbyaddr($REMOTE_ADDR) ||  // Wasn't us.
+            $pg->username != $UserName)
         && !$archive)                   // Not editing an archive version.
     {
         $merge_conflict = 1;
