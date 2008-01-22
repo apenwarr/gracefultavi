@@ -50,7 +50,7 @@ function action_save()
         }
 
         // prevent empty posts
-        if (strlen(trim($quickadd)) <= 50)
+        if (strlen(trim($quickadd)) <= 75)
         {
             $ptrn = '/^----\s+\'\'\'.+?@\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3} '.
                     '\(\d{4}\/\d{2}\/\d{2}\)\'\'\':$/';
