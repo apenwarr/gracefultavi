@@ -15,27 +15,41 @@ function timestamp_mysql_to_unix($timestamp)
 
 function action_rss()
 {
-    global $days, $min, $pagestore;
+    global $days, $min, $page, $pagestore;
 
     $itemdesc = '';
 
-    if ($min == 0){ $min = 10; }
+    if ($min == 0) { $min = 10; }
     if ($days == 0) { $days = 2; }
 
-    $pages = $pagestore->allpages();
+    if (!isset($_GET['page']))
+    {
+        $page = 'RecentChanges';
+    }
+
+    if ($page == 'RecentChanges')
+    {
+        $pages = $pagestore->allpages();
+    }
+    else
+    {
+        $pages = $pagestore->givenpages(array($page));
+    }
 
     usort($pages, 'catSort');
     $now = time();
 
-    for ($i = 0; $i < count($pages); $i++) {
-        $editTime = mktime(substr($pages[$i][0], 8, 2),
-                           substr($pages[$i][0], 10, 2),
-                           substr($pages[$i][0], 12, 2),
-                           substr($pages[$i][0], 4, 2),
-                           substr($pages[$i][0], 6, 2),
-                           substr($pages[$i][0], 0, 4));
-        if ($days >= 0 && ($now - $editTime) > $days * 24 * 60 * 60 && $i >= $min) {
-            break;
+    for ($i = 0; $i < count($pages); $i++)
+    {
+        if ($page == 'RecentChanges')
+        {
+            $editTime = timestamp_mysql_to_unix($pages[$i][0]);
+            if (($days >= 0) &&
+                (($now - $editTime) > ($days * 24 * 60 * 60)) &&
+                ($i >= $min))
+            {
+                break;
+            }
         }
 
         // Gets the diff as it shows by default on History page.
@@ -50,13 +64,27 @@ function action_rss()
         $p2 = $pagestore->page($pages[$i][1]);
         $p2->version = $latest_ver;
 
-        if ($previous_ver == $latest_ver) {
+        if ($previous_ver == $latest_ver)
+        {
             $diff = $p1->read();
-        } else {
+            $diff = explode("\n", $diff);
+            foreach ($diff as $key => $value)
+            {
+                $diff[$key] = "+$value";
+            }
+            $diff = implode("\n", $diff);
+        }
+        else
+        {
             $diff = diff_compute($p1->read(), $p2->read());
         }
 
         $diff = diff_parse($diff);
+
+        $diff = str_replace('<td class="diff-added">',
+            '<td style="background-color:#ccffcc;color:#000000;">', $diff);
+        $diff = str_replace('<td class="diff-removed">',
+            '<td style="background-color:#ffaaaa;color:#000000;">', $diff);
 
         #$diff = preg_replace('/\n/', chr(13) . chr(10), $diff);
         #$diff = preg_replace('/\n/', "<br>\n", $diff);
@@ -70,7 +98,10 @@ function action_rss()
                     '</item>' . "\n\n";
     }
 
-    template_rss(array('itemdesc' => $itemdesc));
+    template_rss(array(
+        'itemdesc' => $itemdesc,
+        'page'     => $page
+    ));
 }
 
 ?>

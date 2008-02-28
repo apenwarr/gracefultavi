@@ -978,7 +978,8 @@ class PageStore
             $dbname = str_replace('\'', '\\\'', $dbname);
 
             $qid = $this->dbh->query("SELECT c.time, c.author, c.username, " .
-                                     "p.bodylength, c.comment " .
+                                     "p.bodylength, c.comment, p.attributes, " .
+                                     "c.version " .
                                      "FROM $PgTbl p, $CoTbl c " .
                                      "WHERE p.title='$dbname' " .
                                      "AND p.id=c.page " .
@@ -988,8 +989,9 @@ class PageStore
                 continue;
             }
 
+            $is_mutable = (($result[5] & MUTABLE_ATTR) == MUTABLE_ATTR ? 1 : 0);
             $list[] = array($result[0], $page, $result[1], $result[2],
-                            $result[3], $result[4]);
+                            $result[3], $result[4], $is_mutable, $result[6]);
         }
 
         return $list;

@@ -3,8 +3,8 @@
 // The RSS template is passed an associative array with the following
 // elements:
 //
-//   itemseq   => A string containing the rdf:li elements for the syndication.
 //   itemdesc  => A string containing the item elements for the syndication.
+//   page      => A string containing the wiki page name.
 
 function template_rss($args)
 {
@@ -25,13 +25,9 @@ in the output (the default is 10).
 
 <channel>
 
-<title><?php print htmlspecialchars($WikiName); ?></title>
+<title><?php print htmlspecialchars($WikiName); ?> - <?php print htmlspecialchars($args['page']); ?></title>
 <link><?php print htmlspecialchars($ScriptBase); ?></link>
 <description><?php print htmlspecialchars($MetaDescription); ?></description>
-<style type="text/css">
-td.diff-added { background-color: #ccffcc; }
-td.diff-removed { background-color: #ffaaaa; }
-</style>
 
 <?php print $args['itemdesc']; ?>
 </channel>

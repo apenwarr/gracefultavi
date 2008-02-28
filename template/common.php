@@ -108,7 +108,7 @@ function template_common_prologue($args)
 <?php if ($ShortcutIcon) : ?>
     <link rel="SHORTCUT ICON" href="<?=$ShortcutIcon?>">
 <?php endif; ?>
-<link rel="ALTERNATE" title="<?=htmlspecialchars($WikiName)?>" href="<?=$ScriptBase?>?action=rss" TYPE="application/rss+xml">
+<link rel="ALTERNATE" title="<?=htmlspecialchars($WikiName)?>" href="<?=$ScriptBase?>?action=rss&page=<?=htmlspecialchars($page)?>" TYPE="application/rss+xml">
 <title><?php print $args['title'] . ' - ' . htmlspecialchars($WikiName); ?></title>
 </head>
 
