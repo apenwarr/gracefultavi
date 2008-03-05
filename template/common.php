@@ -144,8 +144,17 @@ if ($AdditionalHeader) {
 
         <table cellspacing="0" cellpadding="0" border="0">
         <tr>
-        <td>Jump to:&nbsp;</td>
-        <td><input type="text" name="find" size="20" accesskey=","></td>
+        <td>Jump to / Search:&nbsp;</td>
+        <td>
+            <input type="text" name="find" size="20" accesskey=",">
+            <?php
+            $jumpSearchPage = $pagestore->page('JumpSearch');
+            if ($jumpSearchPage->exists())
+            {
+                print '&nbsp;<small><a href="'.viewURL('JumpSearch').'">JumpSearch&nbsp;Help</a></small>';
+            }
+            ?>
+        </td>
         </tr>
 
         <?php
@@ -156,7 +165,7 @@ if ($AdditionalHeader) {
         {
         ?>
         <tr>
-        <td></td>
+        <td>&nbsp;</td>
         <td>
         <input type="checkbox" name="branch_search" value="<?php print htmlspecialchars($args['headlink']) ?>">
         <small>Search only children of <b><?=$args['headlink']?></b></small>
