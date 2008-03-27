@@ -245,7 +245,7 @@ while($temp = pop @otb) {
   $qid->execute or die "Error creating initial tables\n";
 }
 
-for ($i=1; $i<=17; $i++) {
+for ($i=1; $i<=18; $i++) {
   $qry = "SELECT body FROM `" . $prefix . "content` WHERE page=" . $i;
   $qid = $dbh->prepare($qry);
   $qid->execute or die "Error creating initial tables\n";
