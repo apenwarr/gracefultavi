@@ -1,5 +1,24 @@
 <?php
 
+/**
+ * Displays a revision history table based on the wiki database content. The
+ * table shows columns for the date, version, description, and author of each
+ * modification. By default, it skips minor edits, edits with empty comments, or
+ * when the comment is "Comment". To show all edits, use the "ALL" parameter.
+ * The first edit is always displayed.
+ *
+ * Basic Syntax:
+ * [[RevisionHistory [ALL]]]
+ *
+ * In case some revisions would be missing, or have an unsatisfying description,
+ * the override syntax may be used to add these revisions to the table. There
+ * can be as many override lines as required, but they must all come before the
+ * last call to RevisionHistory with the optional ALL parameter.
+ *
+ * Override Syntax:
+ * [[RevisionHistory <revision number> <override description>]]
+*/
+
 class Macro_RevisionHistory
 {
 	function parse($args, $page)

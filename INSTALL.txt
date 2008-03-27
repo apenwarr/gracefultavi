@@ -254,7 +254,7 @@ Additionnal Features - For Advanced Users
       the SUID permission (chmod g+s).
 
 
--  Remote Pages, aka as Twin Pages, or SisterWiki
+-  Remote Pages, aka Twin Pages or SisterWiki
 
    This feature is useful when you want to link your wiki pages to pages with
    the same name on other wikis. When setted up, links to the remote pages
@@ -269,3 +269,42 @@ Additionnal Features - For Advanced Users
    The 6th parameter of the putwiki function, called RESTRICTED, is a boolean
    value (either 0 or 1). When set to 1, the remote pages links will be visible
    only to logged in users.
+
+
+-  Callback functions for remote wiki links
+
+   In your config.php file, define the callback function for each remote wiki
+   links like the following:
+
+       $HtmlInterwikiExtension['<remote wiki url>'] = '<callback function name>';
+
+       function <callback function name>($url, $text)
+       {
+           <your implementation>
+
+           return <html to be returned>;
+       }
+
+   The parameters passed to the callback function being:
+
+   - $url: url the remote wiki link ends up pointing to
+
+   - $text: the remote wiki link itself, consists of the local wiki page name
+            and the parameter separated by a colon
+
+   For instance, for the "OpenNit:GracefulTavi" remote wiki link, the parameters
+   would be:
+
+   - $url: http://open.nit.ca/wiki/?GracefulTavi
+
+   - $text: OpenNit:GracefulTavi
+
+   Here's an implementation example:
+
+       $HtmlInterwikiExtension['OpenNit'] = 'HtmlInterwikiOpenNit';
+
+       function HtmlInterwikiOpenNit($url, $text)
+       {
+           list($prefix, $ref) = explode(':', $text);
+           return "<a href=\"$url\"><img src=\"images/opennit.gif\">$ref</a>";
+       }

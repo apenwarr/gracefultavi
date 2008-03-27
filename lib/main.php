@@ -5,7 +5,7 @@
 define('DB_VERSION', 4);
 
 // GracefulTavi Version
-define('GRACEFULTAVI_VERSION', '1.08');
+define('GRACEFULTAVI_VERSION', '1.09');
 
 // If register_globals is off, we need to harvest the script parameters
 // at this point.

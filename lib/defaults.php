@@ -256,7 +256,7 @@ $CaptchaObfuscate = array(0, 0, 0, 0, 0);
 //   see also the OpenOffice zip commands below.
 //
 //   This is an important notice for the wiki administrator. Please note that
-//   this macro is highly experimental. It has gone through serious testing
+//   this macro is still experimental. It has gone through serious testing
 //   and should work properly. However, since it relies on external programs,
 //   and creates and removes files and directories, there are minor risks
 //   that it could result in file loss and other random unfortunate results.

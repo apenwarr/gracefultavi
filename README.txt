@@ -1,5 +1,5 @@
 GracefulTavi
-Version 1.08
+Version 1.09
 --------------
 
   GracefulTavi is free software; you can redistribute it and/or modify it under
