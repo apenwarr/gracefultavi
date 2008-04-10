@@ -10,9 +10,7 @@
 function gen_headers($timestamp)
 {
   /*
-  $time = mktime(substr($timestamp, 8, 2),  substr($timestamp, 10, 2),
-                 substr($timestamp, 12, 2), substr($timestamp, 4, 2),
-                 substr($timestamp, 6, 2),  substr($timestamp, 0, 4));
+  $time = strtotime($timestamp);
   $mod = gmdate("D, d M Y H:i:s", $time);
   */
 

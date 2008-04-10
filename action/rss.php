@@ -6,13 +6,6 @@ require('parse/macros.php');
 require('parse/html.php');
 require('lib/diff.php');
 
-function timestamp_mysql_to_unix($timestamp)
-{
-    return mktime(substr($timestamp, 8, 2),  substr($timestamp, 10, 2),
-                  substr($timestamp, 12, 2), substr($timestamp, 4, 2),
-                  substr($timestamp, 6, 2),  substr($timestamp, 0, 4));
-}
-
 function action_rss()
 {
     global $days, $min, $page, $pagestore;
@@ -43,9 +36,8 @@ function action_rss()
     {
         if ($page == 'RecentChanges')
         {
-            $editTime = timestamp_mysql_to_unix($pages[$i][0]);
             if (($days >= 0) &&
-                (($now - $editTime) > ($days * 24 * 60 * 60)) &&
+                (($now - $pages[$i][0]) > ($days * 24 * 60 * 60)) &&
                 ($i >= $min))
             {
                 break;
@@ -92,7 +84,7 @@ function action_rss()
         $itemdesc = $itemdesc .
                     '<item>' . "\n" .
                     '<title>' . $pages[$i][1] . '</title>' . "\n" .
-                    '<pubDate>' .  date('r', timestamp_mysql_to_unix($pages[$i][0])) . '</pubDate>' . "\n" .
+                    '<pubDate>' .  date('r', $pages[$i][0]) . '</pubDate>' . "\n" .
                     '<link>' . viewFullURL($pages[$i][1]) . '&amp;' . $pages[$i][7] . '</link>' . "\n" .
                     '<description>' . htmlspecialchars(($pages[$i][5] ? $pages[$i][5] . "<br>\n<br>\n" : '') . $diff) . '</description>' . "\n" .
                     '</item>' . "\n\n";

@@ -52,11 +52,8 @@ class Macro_CategoryCmds
                 }
             }
 
-            $editTime = mktime(substr($list[$i][0], 8, 2), substr($list[$i][0], 10, 2),
-                               substr($list[$i][0], 12, 2), substr($list[$i][0], 4, 2),
-                               substr($list[$i][0], 6, 2), substr($list[$i][0], 0, 4));
             if ($DayLimit && $i >= $MinEntries &&
-                !$full && ($now - $editTime) > ($DayLimit * 24 * 60 * 60))
+                !$full && ($now - $list[$i][0]) > ($DayLimit * 24 * 60 * 60))
             {
                 break;
             }

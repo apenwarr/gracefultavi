@@ -56,7 +56,8 @@ class WikiPage
         }
 
         // do not use table aliases here, as it doesn't work with table locks
-        $qry = "SELECT id, time, author, $CoTbl.body, attributes, " .
+        $qry = "SELECT id, date_format(time, '%Y-%m-%d %H:%i:%s') time, " .
+               "author, $CoTbl.body, attributes, " .
                "version, username, comment, createtime, updatetime " .
                "FROM $PgTbl, $CoTbl " .
                "WHERE title='$this->dbname' " .
@@ -69,7 +70,7 @@ class WikiPage
         }
 
         $this->page_id  = $result[0];
-        $this->time     = $result[1];
+        $this->time     = strtotime($result[1]);
         $this->hostname = $result[2];
         $this->exists   = 1;
         $this->version  = $result[5];
@@ -177,7 +178,8 @@ class WikiPage
         }
 
         if ($this->version > 1) {
-            $this->db->query("UPDATE $CoTbl SET time='$this->time', " .
+            $time = date('Y-m-d H:i:s', $this->time);
+            $this->db->query("UPDATE $CoTbl SET time='$time', " .
                              "supercede=NULL WHERE page=$page_id " .
                              "AND version=" . ($this->version - 1));
         }

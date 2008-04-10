@@ -139,37 +139,21 @@ function html_table_cell_start($span = 1)
 }
 function html_table_cell_end()
   { return '</td>'; }
-function html_time($timestamp)
+function html_time($time)
 {
   global $TimeZoneOff;
-  if($timestamp == '') { return 'never'; }
-  $time = mktime(substr($timestamp, 8, 2),  substr($timestamp, 10, 2),
-                 substr($timestamp, 12, 2), substr($timestamp, 4, 2),
-                 substr($timestamp, 6, 2),  substr($timestamp, 0, 4));
+  if($time == '') { return 'never'; }
   return date('D, M d, Y H:i:s', $time + $TimeZoneOff * 60);
 }
-function html_time2($timestamp)
+function html_time2($time)
 {
   global $TimeZoneOff;
-  if($timestamp == '') { return 'never'; }
-  $time = mktime(substr($timestamp, 8, 2),  substr($timestamp, 10, 2),
-                 substr($timestamp, 12, 2), substr($timestamp, 4, 2),
-                 substr($timestamp, 6, 2),  substr($timestamp, 0, 4));
+  if($time == '') { return 'never'; }
   return date('M d, Y H:i:s', $time + $TimeZoneOff * 60);
 }
-function html_gmtime($timestamp)
-{
-  $time = mktime(substr($timestamp, 8, 2),  substr($timestamp, 10, 2),
-                 substr($timestamp, 12, 2), substr($timestamp, 4, 2),
-                 substr($timestamp, 6, 2),  substr($timestamp, 0, 4));
-  return gmdate('Y-m-d', $time) . 'T' . gmdate('H:i:s', $time) . 'Z';
-}
-function html_timestamp($timestamp)
+function html_timestamp($time)
 {
   global $TimeZoneOff;
-  $time = mktime(substr($timestamp, 8, 2),  substr($timestamp, 10, 2),
-                 substr($timestamp, 12, 2), substr($timestamp, 4, 2),
-                 substr($timestamp, 6, 2),  substr($timestamp, 0, 4));
   return date('Y-m-d H:i:s', $time + $TimeZoneOff * 60);
 }
 function html_url($url, $text)

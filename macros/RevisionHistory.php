@@ -39,7 +39,8 @@ class Macro_RevisionHistory
         $filter = (trim(strtolower($args)) != 'all');
 
         $qry = "
-            SELECT version, time, minoredit, username, comment, lastversion
+            SELECT version, date_format(time, '%Y-%m-%d %H:%i:%s') time,
+            minoredit, username, comment, lastversion
             FROM $PgTbl
             INNER JOIN $CoTbl ON page = id
             WHERE title = '$dbName'
@@ -49,6 +50,7 @@ class Macro_RevisionHistory
 
         $history = array();
         while ($row = $pagestore->dbh->result($rs)) {
+            $row[1] = strtotime($row[1]);
             $history[$row[0]] = $row;
             if (isset($overrides[$row[0]])) {
                 $history[$row[0]][4] = $overrides[$row[0]];
@@ -67,8 +69,7 @@ class Macro_RevisionHistory
                 continue;
             }
 
-            $date = substr($row[1], 0, 4) . '-'. substr($row[1], 4, 2) . '-'.
-                    substr($row[1], 6, 2);
+            $date = date('Y-m-d', $row[1]);
 
             if ($row[0] > $minVer) {
                 $ver1 = $row[0]-1;
@@ -78,10 +79,10 @@ class Macro_RevisionHistory
                     // finds additional contiguous edits of the same author
                     // that are filtered out but within 24 hours later
                     $username = $history[$row[0]][3];
-                    $time = timestampToSeconds($history[$row[0]][1]);
+                    $time = $history[$row[0]][1];
 
                     while ($ver2 < $maxVer) {
-                        $nextTime = timestampToSeconds($history[$ver2+1][1]);
+                        $nextTime = $history[$ver2+1][1];
                         if (($history[$ver2+1][3] == $username) &&
                             $this->filterRow($history[$ver2+1]) &&
                             (($nextTime - $time) <= 86400)) {

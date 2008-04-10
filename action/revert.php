@@ -70,7 +70,7 @@ function do_revert(&$ver1, &$ver2)
                "lastversion_major=$last_major_version, " .
                "bodylength=$last_major_length, " .
                "createtime=createtime, " .
-               "updatetime=$last_major_time " .
+               "updatetime='$last_major_time' " .
                "WHERE id=$page_id");
 
     $pg->version = $use_version;

@@ -152,7 +152,7 @@ if (!$rs)
                           "bodylength, mutable, createtime, updatetime) " .
                           "VALUES ('$dbname', '$dbname', $last_version, " .
                           "$last_version_major, '$metaphone', $body_length, " .
-                          "'$mutable', $create_time, $update_time)");
+                          "'$mutable', '$create_time', '$update_time')");
 
         $page_ids[$page_name] = mysql_insert_id($db->handle);
     }
@@ -176,8 +176,8 @@ if (!$rs)
 
             $qid2 = $db->query("insert into $CoTbl (page, version, time, supercede, " .
                                "username, author, comment, body, minoredit) " .
-                               "values ($page_id, $result[0], $result[1], " .
-                               "$result[2], '$result[3]', " .
+                               "values ($page_id, $result[0], '$result[1]', " .
+                               "'$result[2]', '$result[3]', " .
                                "'$result[4]', '$comment', '$document', $result[7])");
         }
     }

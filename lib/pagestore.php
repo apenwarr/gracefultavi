@@ -687,17 +687,18 @@ class PageStore
     {
         global $CoTbl, $PgTbl;
 
-        $qid = $this->dbh->query("SELECT c.time, c.author, c.version, " .
-                                 "c.username, c.comment " .
-                                 "FROM $PgTbl p, $CoTbl c " .
-                                 "WHERE p.title='$page' " .
-                                 "AND p.id=c.page " .
-                                 "ORDER BY version DESC");
+        $qid = $this->dbh->query(
+            "SELECT date_format(c.time, '%Y-%m-%d %H:%i:%s') time, " .
+            "c.author, c.version, c.username, c.comment " .
+            "FROM $PgTbl p, $CoTbl c " .
+            "WHERE p.title='$page' " .
+            "AND p.id=c.page " .
+            "ORDER BY version DESC");
 
         $list = array();
         while ($result = $this->dbh->result($qid)) {
-            $list[] = array($result[0], $result[1], $result[2], $result[3],
-                            $result[4]);
+            $list[] = array(strtotime($result[0]), $result[1], $result[2],
+                            $result[3], $result[4]);
         }
 
         return $list;
@@ -898,29 +899,32 @@ class PageStore
         global $CoTbl, $PgTbl, $DayLimit, $MinEntries;
 
         if ($DayLimit) {
-            $from_time = date('YmdHis', time() - ($DayLimit * 24 * 60 * 60));
+            $from_time = date('Y-m-d H:i:s', time() - ($DayLimit * 24 * 60 * 60));
         } else {
             $from_time = 0;
         }
 
         $base_qry = "SELECT p.title, c.version, c.author, " .
-                    "c.time, c.username, p.bodylength, " .
-                    "c.comment, p.attributes, c.minoredit " .
+                    "date_format(c.time, '%Y-%m-%d %H:%i:%s') time, " .
+                    "c.username, p.bodylength, c.comment, p.attributes, " .
+                    "c.minoredit " .
                     "FROM $PgTbl p, $CoTbl c " .
                     "WHERE p.id=c.page " .
                     "AND p.bodylength>1 " .
                     "AND p.lastversion_major=c.version ";
 
-        $qid = $this->dbh->query($base_qry . "AND p.updatetime>$from_time");
+        $qid = $this->dbh->query($base_qry . "AND p.updatetime>'$from_time'");
         if (mysql_num_rows($qid) < $MinEntries) {
-            $qid = $this->dbh->query($base_qry . "ORDER BY c.time DESC LIMIT $MinEntries");
+            $qid = $this->dbh->query($base_qry .
+                   "ORDER BY c.time DESC LIMIT $MinEntries");
         }
 
         $list = array();
         while ($result = $this->dbh->result($qid)) {
             $is_mutable = (($result[7] & MUTABLE_ATTR) == MUTABLE_ATTR ? 1 : 0);
-            $list[] = array($result[3], $result[0], $result[2], $result[4], $result[5],
-                            $result[6], $is_mutable, $result[1]);
+            $list[] = array(strtotime($result[3]), $result[0], $result[2],
+                            $result[4], $result[5], $result[6], $is_mutable,
+                            $result[1]);
         }
 
         return $list;
@@ -931,17 +935,19 @@ class PageStore
     {
         global $CoTbl, $PgTbl;
 
-        $qid = $this->dbh->query("SELECT p.title, c.author, c.time, " .
-                                 "c.username, p.bodylength, c.comment " .
-                                 "FROM $PgTbl p, $CoTbl c " .
-                                 "WHERE p.id=c.page " .
-                                 "AND p.lastversion_major=1 " .
-                                 "AND c.version=1");
+        $qid = $this->dbh->query(
+            "SELECT p.title, c.author, " .
+            "date_format(c.time, '%Y-%m-%d %H:%i:%s') time, c.username, " .
+            "p.bodylength, c.comment " .
+            "FROM $PgTbl p, $CoTbl c " .
+            "WHERE p.id=c.page " .
+            "AND p.lastversion_major=1 " .
+            "AND c.version=1");
 
         $list = array();
         while ($result = $this->dbh->result($qid)) {
-            $list[] = array($result[2], $result[0], $result[1], $result[3],
-                            $result[4], $result[5]);
+            $list[] = array(strtotime($result[2]), $result[0], $result[1],
+                            $result[3], $result[4], $result[5]);
         }
 
         return $list;
@@ -952,15 +958,17 @@ class PageStore
     {
         global $CoTbl, $PgTbl;
 
-        $qid = $this->dbh->query("SELECT p.title, c.author, c.time, " .
-                                 "c.username, c.comment " .
-                                 "FROM $PgTbl p, $CoTbl c " .
-                                 "WHERE p.id=c.page " .
-                                 "AND p.bodylength<2 " .
-                                 "AND p.lastversion_major=c.version");
+        $qid = $this->dbh->query(
+            "SELECT p.title, c.author, " .
+            "date_format(c.time, '%Y-%m-%d %H:%i:%s') time, c.username, " .
+            "c.comment " .
+            "FROM $PgTbl p, $CoTbl c " .
+            "WHERE p.id=c.page " .
+            "AND p.bodylength<2 " .
+            "AND p.lastversion_major=c.version");
         $list = array();
         while ($result = $this->dbh->result($qid)) {
-            $list[] = array($result[2], $result[0], $result[1],
+            $list[] = array(strtotime($result[2]), $result[0], $result[1],
                             $result[3], 0, $result[4]);
         }
 
@@ -977,20 +985,21 @@ class PageStore
             $dbname = str_replace('\\', '\\\\', $page);
             $dbname = str_replace('\'', '\\\'', $dbname);
 
-            $qid = $this->dbh->query("SELECT c.time, c.author, c.username, " .
-                                     "p.bodylength, c.comment, p.attributes, " .
-                                     "c.version " .
-                                     "FROM $PgTbl p, $CoTbl c " .
-                                     "WHERE p.title='$dbname' " .
-                                     "AND p.id=c.page " .
-                                     "AND p.lastversion_major=c.version");
+            $qid = $this->dbh->query(
+                "SELECT date_format(c.time, '%Y-%m-%d %H:%i:%s') time, " .
+                "c.author, c.username, p.bodylength, c.comment, " .
+                "p.attributes, c.version " .
+                "FROM $PgTbl p, $CoTbl c " .
+                "WHERE p.title='$dbname' " .
+                "AND p.id=c.page " .
+                "AND p.lastversion_major=c.version");
 
             if (!($result = $this->dbh->result($qid))) {
                 continue;
             }
 
             $is_mutable = (($result[5] & MUTABLE_ATTR) == MUTABLE_ATTR ? 1 : 0);
-            $list[] = array($result[0], $page, $result[1], $result[2],
+            $list[] = array(strtotime($result[0]), $page, $result[1], $result[2],
                             $result[3], $result[4], $is_mutable, $result[6]);
         }
 
