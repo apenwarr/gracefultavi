@@ -306,9 +306,10 @@ function parse_bold($text)
 
 function highlight_pair_tokens($text)
 {
-    if (trim(strtolower($text)) == 'pass')
+    $tl = trim(strtolower($text));
+    if ($tl == 'pass' || $tl == 'ok' || $tl == 'done')
         return pair_tokens('highlightpass', $text);
-    else if (trim(strtolower($text)) == 'fail')
+    else if ($tl == 'fail')
         return pair_tokens('highlightfail', $text);
     else
         return pair_tokens('highlight', $text);
