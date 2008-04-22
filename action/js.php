@@ -1,9 +1,13 @@
 <?php
 
+require('lib/headers.php');
+
 // This function emits the current template's stylesheet.
 function action_js()
 {
     global $HTTP_GET_VARS;
+    
+    static_cache_headers();
 
     if ($HTTP_GET_VARS['file'] == "tabsort")
         require('js/tabsort.js');

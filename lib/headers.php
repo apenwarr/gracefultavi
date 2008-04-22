@@ -1,5 +1,13 @@
 <?php
 
+function static_cache_headers()
+{
+    $dtformat = "D, d M Y H:i:s";
+    header("Last-modified: " . gmdate($dtformat, time()));
+    header("Expires: " . gmdate($dtformat, time()+3600*24));
+    header("Cache-control: public, max-age=" . 3600*24);
+}
+
 // Generate headers saying not to assume this page won't change.
 //
 // The page's last-edited time stamp is currently not used. This caused problems
