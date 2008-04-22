@@ -15,13 +15,6 @@ function toolbar_button($url, $label, $is_selected)
 
 function toolbar($page, $args)
 {
-    // toolbar buttons added by macros
-    global $macroToolbarButtons;
-    ksort($macroToolbarButtons);
-    foreach ($macroToolbarButtons as $macro => $label) {
-        toolbar_button(macroURL($page, $macro, ''), $label, false);
-    }
-
     // view
     toolbar_button($args['button_view'] ? viewURL($args['headlink']) : '',
         'View', $args['button_selected']=='view');
@@ -50,6 +43,14 @@ function toolbar($page, $args)
                     backlinksURL($args['headlink']) : '';
     toolbar_button($backlinks_url, 'Backlinks',
         $args['button_selected']=='backlinks');
+
+    // toolbar buttons added by macros
+    global $macroToolbarButtons;
+    ksort($macroToolbarButtons);
+    foreach ($macroToolbarButtons as $macro => $label) {
+        toolbar_button(macroURL($page, $macro, ''), $label, false);
+    }
+
 }
 
 
