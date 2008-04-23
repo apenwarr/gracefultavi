@@ -776,7 +776,8 @@ function parse_heading($text)
 
   return new_entity(array('head_start', $level, $style_underline,
          trim($header_num), strlen($result[5]), $show_edit_link)) .
-         $header_num.trim($result[3]) . new_entity(array('head_end', $level)) .
+         $header_num.trim($result[3]) . 
+         new_entity(array('head_end', $level, $show_edit_link)) .
          (strlen($result[5]) ? '&nbsp;' : '') . $result[6];
 }
 

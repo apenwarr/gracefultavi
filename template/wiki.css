@@ -84,20 +84,17 @@ del {
     text-decoration:  none;
 }
 
-h1 {
+h1, h2, h3, h4, h5, h6, h7, h8, h9 {
     margin-bottom: 0px;
-}
-h2 {
-    margin-bottom: 0px;
+    margin-right: 0px;
+    font-weight: bold;
 }
 h1.underline,h2.underline,h3.underline,
-h4.underline,h5.underline,h6.underline {
+h4.underline,h5.underline,h6.underline,
+h7.underline,h8.underline,h9.underilne {
     padding-top: 0.5em;
     padding-bottom: 0.17em;
     border-bottom: 1px solid #aaaaaa;
-}
-h7 h8 h9 {
-    font-weight: bold;
 }
 
 hr {
@@ -186,4 +183,8 @@ span.buttonDisabled {
     border: 1px solid #808080;
     color: #c0c0c0;
     background: #f6f2f6;
+}
+
+.editicon {
+    padding-left: 0.3em;
 }

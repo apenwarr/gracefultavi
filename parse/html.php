@@ -82,26 +82,33 @@ function html_hr()
   { return "<hr>\n"; }
 function html_newline()
   { return "<br>\n"; }
+$head_section = 0;
 function html_head_start($level, $underline, $numbering, $style_inline,
                          $show_edit_link)
   {
     static $count = 0; $count++;
+    global $head_section;
+    $head_section++;
+    $anchor = $numbering ? "section$numbering" : "toc$count";
+    $class = $underline ? ' class="underline"' : '';
+    $style = $style_inline ? ' style="display:inline;"': '';
+    return "\n\n<a name=\"$anchor\"></a>\n<h$level$class$style>";
+  }
+function html_head_end($level, $show_edit_link)
+  {
     $edit_link = '';
     if ($show_edit_link)
     {
       global $page;
-      static $section = 0; $section++;
-      $edit_link = '<div style="float:right;margin-left:5px;" '.
-                   'class="printhide">[<a href="'.
-                   editSectionURL($page, $section).'">edit</a>]</div>';
+      global $head_section;
+      $edit_link = "\n".
+	           '<a class="printhide editicon" href="'.
+                   editSectionURL($page, $head_section).'">'.
+	           '<img src="images/page_white_edit.png" alt="Edit this section">'.
+	           '</a>';
     }
-    $anchor = $numbering ? "section$numbering" : "toc$count";
-    $class = $underline ? ' class="underline"' : '';
-    $style = $style_inline ? ' style="display:inline;"': '';
-    return $edit_link."<a name=\"$anchor\"></a><h$level$class$style>";
+    return "$edit_link</h$level>\n"; 
   }
-function html_head_end($level)
-  { return "</h$level>"; }
 function html_nowiki($text)
   { return $text; }
 function html_code($text)
