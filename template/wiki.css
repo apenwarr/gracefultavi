@@ -8,6 +8,7 @@ body {
     margin-top:       0px;
     margin-bottom:    0px;
 }
+
 a:link {
     color:      #0000ff;
     background: transparent;
@@ -23,6 +24,7 @@ a:active {
 a.title {
     /* text-decoration: none; */
 }
+
 span.highlight {
     background: #ffff00;
     font-weight: bold;
@@ -35,12 +37,15 @@ span.highlightfail {
     background: #ff7777;
     font-weight: bold;
 }
+
 img {
     border: 0px;
 }
+
 div.logo {
     float: left;
 }
+
 table.topbox {
     width:            98%;
     background-color: #eeeeee;
@@ -49,6 +54,7 @@ table.bottombox {
     width:            98%;
     background-color: #eeeeee;
 }
+
 div.diff {
     font-family: monospace;
 }
@@ -77,6 +83,7 @@ del {
     color:            #000000;
     text-decoration:  none;
 }
+
 h1 {
     margin-bottom: 0px;
 }
@@ -92,37 +99,41 @@ h4.underline,h5.underline,h6.underline {
 h7 h8 h9 {
     font-weight: bold;
 }
+
 hr {
     width: 80%;
 }
+
 textarea {
     width: 100%;
 }
 input.fullWidth {
     width: 100%;
 }
+
 dl, ul, ol {
     margin-top:    0px;
     margin-bottom: 0px;
 }
+
 form {
     margin-top: 0px;
 }
+
 p.warning {
     color:      #ff3f3f;
     background: transparent;
 }
+
 span.twin {
     font-size: smaller;
 }
-tt {
+
+tt, pre {
     background: transparent;
     color:      #383838;
 }
-pre {
-    background: transparent;
-    color:      #383838;
-}
+
 .content {
     margin-left: 1em;
 }
@@ -138,41 +149,22 @@ pre {
     text-align: left;
     background: #eeeeff;
 }
+
 .quote {
     font-size: small;
     font-style: italic;
 }
+
 .backlinksHeader { background: #eeeeff; }
 .notBacklinksHeader { background: #ffcfcf; }
+
 blockquote.cite {
     border-left: 1px solid blue;
     margin: 0px 0px 0px 0px;
     padding: 0px 0px 0px 15px;
 }
 
-a.button {
-    border: 1px solid black;
-    padding: 2px 4px 3px 4px;
-    text-align: center;
-    font-size: 10pt;
-    text-decoration: none;
-    color: blue;
-    font-weight: bold;
-    background: white;
-    line-height: 25px;
-}
-a.button:visited {
-    border: 1px solid black;
-    padding: 2px 4px 3px 4px;
-    text-align: center;
-    font-size: 10pt;
-    text-decoration: none;
-    color: blue;
-    font-weight: bold;
-    background: white;
-    line-height: 25px;
-}
-a.button:active {
+a.button, a.buttonSelected, span.buttonDisabled {
     border: 1px solid black;
     padding: 2px 4px 3px 4px;
     text-align: center;
@@ -184,68 +176,14 @@ a.button:active {
     line-height: 25px;
 }
 a.button:hover {
-    border: 1px solid black;
-    padding: 2px 4px 3px 4px;
-    text-align: center;
-    font-size: 10pt;
-    text-decoration: none;
-    color: blue;
-    font-weight: bold;
     background: #eaeaff;
-    line-height: 25px;
 }
 a.buttonSelected {
-    border: 1px solid black;
-    padding: 2px 4px 3px 4px;
-    text-align: center;
-    font-size: 10pt;
-    text-decoration: none;
     color: white;
-    font-weight: bold;
     background: blue;
-    line-height: 25px;
-}
-a.buttonSelected:visited {
-    border: 1px solid black;
-    padding: 2px 4px 3px 4px;
-    text-align: center;
-    font-size: 10pt;
-    text-decoration: none;
-    color: white;
-    font-weight: bold;
-    background: blue;
-    line-height: 25px;
-}
-a.buttonSelected:active {
-    border: 1px solid black;
-    padding: 2px 4px 3px 4px;
-    text-align: center;
-    font-size: 10pt;
-    text-decoration: none;
-    color: white;
-    font-weight: bold;
-    background: blue;
-    line-height: 25px;
-}
-a.buttonSelected:hover {
-    border: 1px solid black;
-    padding: 2px 4px 3px 4px;
-    text-align: center;
-    font-size: 10pt;
-    text-decoration: none;
-    color: white;
-    font-weight: bold;
-    background: blue;
-    line-height: 25px;
 }
 span.buttonDisabled {
     border: 1px solid #808080;
-    padding: 2px 4px 3px 4px;
-    text-align: center;
-    font-size: 10pt;
-    text-decoration: none;
     color: #c0c0c0;
-    font-weight: bold;
     background: #f6f2f6;
-    line-height: 25px;
 }
