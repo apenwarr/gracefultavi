@@ -8,6 +8,14 @@ body {
     display: none;
 }
 
+.toolbar {
+    display: none;
+}
+
+div.content {
+    border: 0px;
+}
+
 span.quote {
     display: none;
 }

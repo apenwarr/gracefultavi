@@ -126,19 +126,49 @@ if ($AdditionalHeader) {
 
 <div id="header">
 
-<table align="center" class="topbox" border="0">
-<tr valign="top">
-<td>
-    <table cellspacing="2" cellpadding="1" border="0">
-    <tr valign="top">
-    <td class="printhide">
-        <div class="logo">
-        <a href="<?php print viewURL($HomePage); ?>"><img src="<?php print $WikiLogo; ?>" alt="[Home]"></a>
-        </div>
-    </td>
-    <td class="printhide">
+<div id="toprightbox" class="printhide">
     <?php
-    print '<h1>' . $args['heading'];
+    if (isset($args['tree']))
+    {
+        $tree = $pagestore->getTreeFromLeaves($HomePage, $args['headlink']);
+        drawTree($tree, true, $args['headlink']);
+    }
+    ?>
+
+    <div class="jumpsearch">
+        <form method="get" action="<?php print $FindScript; ?>">
+        <input type="hidden" name="action" value="find">
+
+        Jump to / Search:&nbsp;<input 
+	type="text" name="find" size="20" accesskey=","><?php
+            $jumpSearchPage = $pagestore->page('JumpSearch');
+            if ($jumpSearchPage->exists())
+                print '&nbsp;<a href="'.viewURL('JumpSearch').'">JumpSearch&nbsp;Help</a>';
+            ?>
+
+        <?php
+        if ( $args['headlink']
+             && $args['headlink'] != $HomePage
+             && $args['headlink'] != 'RecentChanges'
+             && $pagestore->getChildren($args['headlink']) )
+        {
+        ?>
+        <br><input type="checkbox" name="branch_search" value="<?php print htmlspecialchars($args['headlink']) ?>">
+        <label name="branch_search">Search only children of <b><?=$args['headlink']?></b></label>
+        <?php } ?>
+	
+        </form>
+    </div>
+</div>
+
+<div id="topleftbox">
+    <div class="logo printhide">
+    <a href="<?php print viewURL($HomePage); ?>"><img src="<?php print $WikiLogo; ?>" alt="[Home]"></a>
+    </div>
+    <h1>
+	
+    <?php
+    print $args['heading'];
     if ($args['headlink'] != '')
     {
         if ($SeparateHeaderWords)
@@ -154,7 +184,7 @@ if ($AdditionalHeader) {
             print " " . html_twin($site[0], $site[1]);
         print '</sup>';
     }
-    print $args['headsufx'] . '</h1>';
+    print $args['headsufx'] . "</h1>\n";
 
     if (isset($args['redirect_from']) && $args['redirect_from']) {
         print '(Redirected from <a href="' . viewURL($args['redirect_from']) . '&no_redirect=1">';
@@ -162,113 +192,43 @@ if ($AdditionalHeader) {
             print htmlspecialchars(html_split_name($args['redirect_from']));
         else
             print htmlspecialchars($args['redirect_from']);
-        print '</a>)';
+        print "</a>)\n";
     }
-    ?>
-
-        <form method="get" action="<?php print $FindScript; ?>">
-        <div class="form">
-        <input type="hidden" name="action" value="find">
-
-        <table cellspacing="0" cellpadding="0" border="0">
-        <tr>
-        <td>Jump to / Search:&nbsp;</td>
-        <td>
-            <input type="text" name="find" size="20" accesskey=",">
-            <?php
-            $jumpSearchPage = $pagestore->page('JumpSearch');
-            if ($jumpSearchPage->exists())
-                print '&nbsp;<small><a href="'.viewURL('JumpSearch').'">JumpSearch&nbsp;Help</a></small>';
-            ?>
-        </td>
-        </tr>
-
-        <?php
-        if ( $args['headlink']
-             && $args['headlink'] != $HomePage
-             && $args['headlink'] != 'RecentChanges'
-             && $pagestore->getChildren($args['headlink']) )
-        {
-        ?>
-        <tr>
-        <td>&nbsp;</td>
-        <td>
-        <input type="checkbox" name="branch_search" value="<?php print htmlspecialchars($args['headlink']) ?>">
-        <small>Search only children of <b><?=$args['headlink']?></b></small>
-        </td>
-        </tr>
-        <?php } ?>
-        </table>
-
-        </div>
-        </form>
-    </td>
-    </tr>
-    </table>
-</td>
-
-    <?php
-    if (isset($args['tree']))
-    {
-        $tree = $pagestore->getTreeFromLeaves($HomePage, $args['headlink']);
-        drawTree($tree, true, $args['headlink']);
-    }
+    
     ?>
 	
-</tr>
-
-<?php
-if (isset($args['quote']))
-{
-    $quotepage = $pagestore->page('AnnoyingQuote');
-    $quote = $quotepage->read();
-    if ($quotepage->exists())
+    <div class="quote printhide">
+    <?php
+    if (isset($args['quote']))
     {
-        global $ParseEngine;
-        $paragraphs = explode("\n\n", $quotepage->text);
-        $last_paragraph = parseText(trim(array_pop($paragraphs)), $ParseEngine, $page);
-        print '<tr><td colspan="2" align="center">'."\n";
-        print '<table cellspacing="0" cellpadding="0" border="0"><tr><td>';
-        print '<div align="right"><span class="quote">';
-        print $last_paragraph;
-        print '</span></div>';
-        print '</td></tr></table>'."\n";
-        print '</td></tr>';
+	$quotepage = $pagestore->page('AnnoyingQuote');
+	$quote = $quotepage->read();
+	if ($quotepage->exists())
+	{
+	    global $ParseEngine;
+	    $paragraphs = explode("\n\n", $quotepage->text);
+	    $last_paragraph = parseText(trim(array_pop($paragraphs)), $ParseEngine, $page);
+	    print $last_paragraph;
+	}
     }
-}
-?>
+    ?>
+    </div>
+</div>
 
-<tr>
-<td class="printhide" valign="bottom" align="right" colspan="2">
-    <table cellspacing="0" cellpadding="0" border="0">
-    <tr valign="top" align="right">
+</div>
+	
+<div id="content">
+	
+<div class="toolbar">
     <?php if ($args['spam_revert'] && $UseSpamRevert && $UserName) : ?>
         <form name="revertForm" method="post" action="<?php print revertURL($page); ?>"></form>
-        <td>
         <?php print toolbar_button('javascript:spamRevert();', 'Spam Revert', 0); ?>
-        </td>
-        <td><img src="spacer.png" alt="" width="40" height="1" border="0"></td>
     <?php endif; ?>
-    <td><?php toolbar($page, $args); ?></td>
-    </tr>
-    </table>
-</td>
-</tr>
-
-<tr>
-<td colspan="2">
-</td>
-</tr>
-</table>
-
+    <td><?php toolbar($page, $args); ?>
 </div>
 
 </NOINDEX>
 
-<table class="maintable" width="98%" align="center" cellspacing="0"
-    cellpadding="10" border="1" bordercolor="black" bgcolor="white">
-<tr>
-<td>
 <?php
 }
 
@@ -304,54 +264,14 @@ function template_common_epilogue($args)
   $pg = $pagestore->page($page);
   $pagetext = $pg->text;
 ?>
-</td>
-</tr>
-</table>
+<div class="toolbar"><?php toolbar($page, $args); ?></div>
+</div>
+	
+	
 <NOINDEX>
-<div class="printhide">
-<div id="footer">
-<table align="center" class="bottombox" border="0">
-<tr>
-<td>
-<small><?php
-if ($UserName)
-    print("Logged in as " . html_ref($UserName, $UserName));
-else
-    print("Not <a href=\"login/?$page\">logged in</a>");
-?></small>
-<?php
-if ($EnableSubscriptions && isset($EmailSuffix) && $UserName != ''
-    && isset($args['subscribe']) && !empty($args['subscribe'])) {
-    if ($pg->isSubscribed($UserName))
-        $caption = 'Unsubscribe';
-    else
-        $caption = 'Subscribe';
+<div id="footer" class="printhide">
 
-    print ' | <small><a href="' . pageSubscribeURL($args['subscribe']) . '">' .
-          $caption . '</a></small>';
-}
-?>
-<?php
-if (!$UserName) {
-    print ' | <small><a href="' . viewURL($page) . '&view_source=1">View source</a></small>';
-}
-?>
-</td>
-<td colspan="2" align="right"><?php toolbar($page, $args); ?></td>
-</tr>
-
-<tr><td colspan="3">
-<?php
-print html_ref('RecentChanges', 'RecentChanges') . ', ' .
-      '<a href="' . $PrefsScript . '">UserOptions</a>';
-$help_page = $pagestore->page('HelpPage');
-if ($help_page->exists()) {
-    print ', ' . html_ref('HelpPage', 'HelpPage');
-}
-?>
-</td></tr>
-
-<tr><td align="center" colspan="3">
+<div align=center>
 <?php
 if (isset($args['timestamp']))
 {
@@ -377,8 +297,39 @@ if (isset($args['twin']) && $args['twin'] != '')
     }
 }
 ?>
-</td></tr>
+</div>
 
+<?php
+if ($UserName)
+    print("Logged in as " . html_ref($UserName, $UserName));
+else
+    print("Not <a href=\"login/?$page\">logged in</a>");
+?>
+<?php
+if ($EnableSubscriptions && isset($EmailSuffix) && $UserName != ''
+    && isset($args['subscribe']) && !empty($args['subscribe'])) {
+    if ($pg->isSubscribed($UserName))
+        $caption = 'Unsubscribe';
+    else
+        $caption = 'Subscribe';
+
+    print ' | <a href="' . pageSubscribeURL($args['subscribe']) . '">' .
+          $caption . '</a>';
+}
+?>
+<?php
+if (!$UserName) {
+    print ' | <a href="' . viewURL($page) . '&view_source=1">View source</a>';
+}
+print "<br>";
+print html_ref('RecentChanges', 'RecentChanges') . ', ' .
+      '<a href="' . $PrefsScript . '">UserOptions</a>';
+$help_page = $pagestore->page('HelpPage');
+if ($help_page->exists()) {
+    print ', ' . html_ref('HelpPage', 'HelpPage');
+}
+?>
+	
 <?php
 if (!in_array($page, array($HomePage, 'RecentChanges')) &&
     ($UserName || $AllowAnonymousPosts))
@@ -471,7 +422,7 @@ if (!in_array($page, array($HomePage, 'RecentChanges')) &&
                         print_captcha_box();
                     }
                     if (!$NickName) {
-                        print '<small>(Anonymous users, see <a href="'.$PrefsScript.'">UserOptions</a> to set a nickname.)</small>&nbsp;'   ;
+                        print '(Anonymous users, see <a href="'.$PrefsScript.'">UserOptions</a> to set a nickname.)&nbsp;'   ;
                     }
                 }
                 print '<input type="submit" name="append" value="Add a Comment" onClick="return epilogue_quickadd_validate(this.form)">';
@@ -484,15 +435,9 @@ if (!in_array($page, array($HomePage, 'RecentChanges')) &&
     }
     ?>
 
-    </td>
-    </tr>
-    </table>
-
-    </td></tr>
 <?php
 }
 ?>
-</table>
 
 </div>
 

@@ -44,22 +44,41 @@ img {
     border: 0px;
 }
 
-div.logo {
-    float: left;
+div#topleftbox {
+    align: left;
+}
+div#toprightbox {
+    float: right;
+    margin-right: 0.1em;
+    margin-left: 2em;
+    margin-bottom: 2em;
 }
 
-table.topbox {
-    width:            98%;
-    background-color: #eeeeee;
-}
-table.bottombox {
-    width:            98%;
-    background-color: #eeeeee;
+div.logo {
+    float: left;
+    margin-left: 1em;
+    margin-right: 1em;
 }
 
 div.tree {
     font-size: small;
-    float: right;
+    text-align: right;
+}
+div.jumpsearch {
+    padding-top: 1em;
+    font-size: small;
+    text-align: right;
+}
+
+.quote {
+    text-align: center;
+    padding-left: 10em;
+    padding-right: 3em;
+    padding-top: 1em;
+    margin-bottom: 1em;
+    font-size: small;
+    font-style: italic;
+    max-width: 50%;
 }
 
 div.diff {
@@ -146,17 +165,21 @@ tt, pre {
 .content h7, .content h8, .content h9 {
     margin-left: -0.5em;
 }
-.content table {
+div.content {
     background: #ffffff;
+    border: solid black 2px;
+    padding: 2em;
+    padding-top: 1em;
+    line-height: 150%;
 }
 .content td {
     text-align: left;
     background: #eeeeff;
 }
 
-.quote {
+div#footer {
     font-size: small;
-    font-style: italic;
+    padding: 1em;
 }
 
 .backlinksHeader { background: #eeeeff; }
@@ -168,6 +191,12 @@ blockquote.cite {
     padding: 0px 0px 0px 15px;
 }
 
+.toolbar {
+    text-align: right;
+    padding-right: 2em;
+    padding-top: 0.1em;
+    padding-bottom: 0.1em;
+}
 a.button, a.buttonSelected, span.buttonDisabled {
     border: 1px solid black;
     padding: 2px 4px 3px 4px;
