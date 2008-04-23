@@ -137,7 +137,34 @@ if ($AdditionalHeader) {
         </div>
     </td>
     <td class="printhide">
-        <h2><?php print htmlspecialchars($WikiName); ?></h2>
+    <?php
+    print '<h1>' . $args['heading'];
+    if ($args['headlink'] != '')
+    {
+        if ($SeparateHeaderWords)
+            print html_split_name($args['headlink']);
+        else
+            print $args['headlink'];
+    }
+    if (count($twin = $pagestore->twinpages($args['headlink'])))
+    {
+        // point at the sisterwiki's version
+        print '<sup class="printhide">';
+        foreach ($twin as $site)
+            print " " . html_twin($site[0], $site[1]);
+        print '</sup>';
+    }
+    print $args['headsufx'] . '</h1>';
+
+    if (isset($args['redirect_from']) && $args['redirect_from']) {
+        print '(Redirected from <a href="' . viewURL($args['redirect_from']) . '&no_redirect=1">';
+        if ($SeparateHeaderWords)
+            print htmlspecialchars(html_split_name($args['redirect_from']));
+        else
+            print htmlspecialchars($args['redirect_from']);
+        print '</a>)';
+    }
+    ?>
 
         <form method="get" action="<?php print $FindScript; ?>">
         <div class="form">
@@ -151,9 +178,7 @@ if ($AdditionalHeader) {
             <?php
             $jumpSearchPage = $pagestore->page('JumpSearch');
             if ($jumpSearchPage->exists())
-            {
                 print '&nbsp;<small><a href="'.viewURL('JumpSearch').'">JumpSearch&nbsp;Help</a></small>';
-            }
             ?>
         </td>
         </tr>
@@ -233,34 +258,6 @@ if (isset($args['quote']))
 
 <tr>
 <td colspan="2">
-    <?php
-    print '<h1>' . $args['heading'];
-    if ($args['headlink'] != '')
-    {
-        if ($SeparateHeaderWords)
-            print html_split_name($args['headlink']);
-        else
-            print $args['headlink'];
-    }
-    if (count($twin = $pagestore->twinpages($args['headlink'])))
-    {
-        // point at the sisterwiki's version
-        print '<sup class="printhide">';
-        foreach ($twin as $site)
-            print " " . html_twin($site[0], $site[1]);
-        print '</sup>';
-    }
-    print $args['headsufx'] . '</h1>';
-
-    if (isset($args['redirect_from']) && $args['redirect_from']) {
-        print '(Redirected from <a href="' . viewURL($args['redirect_from']) . '&no_redirect=1">';
-        if ($SeparateHeaderWords)
-            print htmlspecialchars(html_split_name($args['redirect_from']));
-        else
-            print htmlspecialchars($args['redirect_from']);
-        print '</a>)';
-    }
-    ?>
 </td>
 </tr>
 </table>
