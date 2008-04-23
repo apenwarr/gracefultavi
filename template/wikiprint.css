@@ -1,5 +1,9 @@
 /* GracefulTavi default print overrides style sheet. */
 
+body {
+    font-family: times, times new roman, serif;
+}
+
 .printhide {
     display: none;
 }

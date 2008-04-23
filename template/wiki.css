@@ -7,6 +7,8 @@ body {
     margin-left:      0px;
     margin-top:       0px;
     margin-bottom:    0px;
+    xfont-family: helvetica, arial, verdana, sans-serif;
+    font-family: verdana, sans-serif;
 }
 
 a:link {
@@ -53,6 +55,11 @@ table.topbox {
 table.bottombox {
     width:            98%;
     background-color: #eeeeee;
+}
+
+div.tree {
+    font-size: small;
+    float: right;
 }
 
 div.diff {

@@ -182,26 +182,15 @@ if ($AdditionalHeader) {
     </table>
 </td>
 
-<td class="printhide" valign="top" align="right">
-
-    <table cellspacing="2" cellpadding="1" border="0">
-    <tr>
-    <td>
-
     <?php
     if (isset($args['tree']))
     {
         $tree = $pagestore->getTreeFromLeaves($HomePage, $args['headlink']);
         if (isset($tree[$HomePage]) && count($tree[$HomePage]) > 0)
-        {
             drawTree($tree, true, $args['headlink']);
-        }
     }
     ?>
-
-    </td></tr></table>
-
-</td>
+	
 </tr>
 
 <?php
