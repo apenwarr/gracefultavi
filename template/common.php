@@ -211,8 +211,7 @@ if ($AdditionalHeader) {
     if (isset($args['tree']))
     {
         $tree = $pagestore->getTreeFromLeaves($HomePage, $args['headlink']);
-        if (isset($tree[$HomePage]) && count($tree[$HomePage]) > 0)
-            drawTree($tree, true, $args['headlink']);
+        drawTree($tree, true, $args['headlink']);
     }
     ?>
 	

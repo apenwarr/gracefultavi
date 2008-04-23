@@ -9,7 +9,7 @@ function _drawTree($path, $tree, $page)
 	foreach ($tree as $name => $node)
 	{
 	    if ($name == $page)
-	        $path[] = $name;
+	        $path[] = "<b>$name</b>";
 	    else
 	        $path[] = html_ref($name, $name);
 	    $out .= _drawTree($path, $node, $page);
@@ -17,7 +17,7 @@ function _drawTree($path, $tree, $page)
     }
     else
     {
-	return join(" :: ", $path) . "<br>";
+	return join(" &lt; ", array_reverse($path)) . "<br>";
     }
 
     return $out;
