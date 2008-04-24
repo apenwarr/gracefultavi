@@ -26,10 +26,6 @@ table.maintable {
     width: 100%;
 }
 
-table.maintable td {
-    padding: 0px;
-}
-
 table.toc {
     border-left: 0px;
 }

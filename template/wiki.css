@@ -180,6 +180,9 @@ div#contentbox {
     padding: 2em;
     padding-top: 1em;
     line-height: 150%;
+    position: relative;
+    top: -0.2em;
+    z-index: 1;
 }
 .content h1, .content h2, .content h3,
 .content h4, .content h5, .content h6,
@@ -225,35 +228,49 @@ blockquote.cite {
 .toolbar {
     text-align: right;
     padding-right: 2em;
-    padding-top: 0.1em;
-    padding-bottom: 0.1em;
 }
-a.button, a.button:visited, a.button:hover, a.button:active,
-a.buttonSelected, span.buttonDisabled {
+#toolbar-top {
+    padding-top: 0em;
+    padding-bottom: 0.4em;
+}
+#toolbar-bottom {
+    padding-top: 0em;
+    padding-bottom: 0em;
+    position: relative;
+    top: -0.3em;
+    z-index: 0;
+}
+#toolbar-top .button a,
+#toolbar-top .button a:visited,
+#toolbar-top .button a:hover,
+#toolbar-top .button a:active,
+#toolbar-top .button a.selected, 
+#toolbar-top .button.disabled {
+    padding-bottom: 0.5ex;
+}
+.button a, .button a:visited, .button a:hover, .button a:active,
+.button a:visited, .button a.selected {
     border: 1px solid black;
     padding: 2px 4px 3px 4px;
-    text-align: center;
     font-size: 10pt;
     text-decoration: none;
     color: blue;
+    background: white;
     font-weight: bold;
-    background: white;
-    line-height: 25px;
 }
-a.button:visited {
-    background: white;
-}
-a.button:hover {
+.button a:hover {
     background: #eaeaff;
 }
-a.buttonSelected, a.buttonSelected:visited {
+.button a.selected, .button a.selected:visited {
     color: white;
     background: blue;
 }
-span.buttonDisabled {
+.button.disabled {
     border: 1px solid #808080;
     color: #c0c0c0;
     background: #f6f2f6;
+    padding: 2px 4px 3px 4px;
+    font-size: 10pt;
 }
 
 .editicon {

@@ -6,10 +6,10 @@ function toolbar_button($url, $label, $is_selected)
 {
     $label = str_replace(' ', '&nbsp;', $label);
     if ($url) {
-        $class = $is_selected ? 'buttonSelected' : 'button';
-        print '<a class="'.$class.'" href="'.$url.'">'.$label.'</a> ';
+        $class = $is_selected ? ' class="selected"' : '';
+        print '<span class="button"><a' . $class . ' href="'.$url.'">'.$label.'</a></span> ';
     } else {
-        print '<span class="buttonDisabled">'.$label.'</span> ';
+        print '<span class="button disabled">'.$label.'</span> ';
     }
 }
 
@@ -220,7 +220,7 @@ if ($AdditionalHeader) {
 	
 <div id="contentbox">
 	
-  <div class="toolbar">
+  <div class="toolbar" id="toolbar-top">
     <?php if ($args['spam_revert'] && $UseSpamRevert && $UserName) : ?>
         <form name="revertForm" method="post" action="<?php print revertURL($page); ?>"></form>
         <?php print toolbar_button('javascript:spamRevert();', 'Spam Revert', 0); ?>
@@ -264,7 +264,7 @@ function template_common_epilogue($args)
   $pg = $pagestore->page($page);
   $pagetext = $pg->text;
 ?>
-<div class="toolbar"><?php toolbar($page, $args); ?></div>
+<div class="toolbar" id="toolbar-bottom"><?php toolbar($page, $args); ?></div>
 </div>
 	
 	
