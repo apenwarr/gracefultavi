@@ -126,19 +126,11 @@ if ($AdditionalHeader) {
 <div id="header">
 
   <div id="toprightbox" class="printhide">
-    <?php
-    if (isset($args['tree']))
-    {
-        $tree = $pagestore->getTreeFromLeaves($HomePage, $args['headlink']);
-        drawTree($tree, true, $args['headlink']);
-    }
-    ?>
-
     <div class="jumpsearch">
         <form method="get" action="<?php print $FindScript; ?>">
         <input type="hidden" name="action" value="find">
 
-        Jump to / Search:&nbsp;<input 
+        Search:&nbsp;<input 
 	type="text" name="find" size="20" accesskey=","><?php
             $jumpSearchPage = $pagestore->page('JumpSearch');
             if ($jumpSearchPage->exists())
@@ -158,6 +150,15 @@ if ($AdditionalHeader) {
 	
         </form>
     </div>
+	
+    <?php
+    if (isset($args['tree']))
+    {
+        $tree = $pagestore->getTreeFromLeaves($HomePage, $args['headlink']);
+        drawTree($tree, true, $args['headlink']);
+    }
+    ?>
+
   </div>
 
   <div id="topleftbox">

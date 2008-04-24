@@ -9,6 +9,8 @@ function _drawEdges($edges)
 
 function _drawTree($tree, $smallFont, $page, $previousEdges)
 {
+    global $HomePage, $WikiName;
+    
     if (count($tree))
     {
         // adjust the pictures of the previous edges
@@ -25,8 +27,9 @@ function _drawTree($tree, $smallFont, $page, $previousEdges)
                 $currentEdges = $previousEdges . '3';  // above the last node of the branch
 
 	    $drawEdges = _drawEdges($currentEdges);
-            $output = html_ref($name, $name);
-            if ($name == $page) $output = "<a name=\"$name\"></a><b>$name</b>";
+	    $title = $name==$HomePage ? "<b>$WikiName</b>" : $name;
+            $output = html_ref($name, $title);
+            if ($name == $page) $output = "<a name=\"$name\"></a><b>$title</b>";
             if ($smallFont) $output = "<small>$output</small>";
             $output = "<tr><td nowrap>$drawEdges$output</td></tr>\n";
             print $output;
@@ -39,9 +42,9 @@ function _drawTree($tree, $smallFont, $page, $previousEdges)
 
 function drawTree($tree, $smallFont = 0, $page = '')
 {
-    print '<table cellspacing="0" cellpadding="0" border="0">' . "\n";
+    print '<div class="tree" align=center><table>' . "\n";
     _drawTree($tree, $smallFont, $page, '');
-    print "</table>\n";
+    print "</table></div>\n";
 }
 
 ?>

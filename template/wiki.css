@@ -7,6 +7,7 @@ body {
     margin-left:      0px;
     margin-top:       0px;
     margin-bottom:    0px;
+    padding: 0px;
     xfont-family: helvetica, arial, verdana, sans-serif;
     font-family: verdana, sans-serif;
 }
@@ -45,26 +46,38 @@ img {
 }
 
 div#topleftbox {
-    align: left;
+    padding-top: 1em;
 }
-div#toprightbox {
-    float: right;
-    margin: 0.1em;
-    margin-left: 2em;
-}
-
 div.logo {
     float: left;
     margin-left: 1em;
     margin-right: 1em;
 }
 
-div.tree {
-    font-size: small;
-    text-align: right;
+div#toprightbox {
+    float: right;
+    margin: 0.1em;
+    margin-left: 2em;
+    content: "x";
+}
+div#toprightbox div.tree {
+    padding-bottom: 1em;
+}
+div.tree table {
+    xfont-size: small;
+    margin: 0px;
+    border: 0px;
+    padding: 0px;
+    border-spacing: 0px;
+}
+div.tree table tr td {
+    margin: 0px;
+    border: 0px;
+    padding: 0px;
+    text-align: left;
 }
 div.jumpsearch {
-    padding-top: 1em;
+    padding-bottom: 1em;
     font-size: small;
     text-align: right;
 }
@@ -111,8 +124,7 @@ del {
 }
 
 h1, h2, h3, h4, h5, h6, h7, h8, h9 {
-    margin-bottom: 0px;
-    margin-right: 0px;
+    margin: 0px;
     font-weight: bold;
 }
 h1.underline,h2.underline,h3.underline,
@@ -211,7 +223,8 @@ blockquote.cite {
     padding-top: 0.1em;
     padding-bottom: 0.1em;
 }
-a.button, a.buttonSelected, span.buttonDisabled {
+a.button, a.button:visited, a.button:hover, a.button:active,
+a.buttonSelected, span.buttonDisabled {
     border: 1px solid black;
     padding: 2px 4px 3px 4px;
     text-align: center;
@@ -222,10 +235,13 @@ a.button, a.buttonSelected, span.buttonDisabled {
     background: white;
     line-height: 25px;
 }
+a.button:visited {
+    background: white;
+}
 a.button:hover {
     background: #eaeaff;
 }
-a.buttonSelected {
+a.buttonSelected, a.buttonSelected:visited {
     color: white;
     background: blue;
 }
