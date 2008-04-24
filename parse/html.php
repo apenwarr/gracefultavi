@@ -130,7 +130,7 @@ function html_diff_change()
 function html_diff_delete()
   { return html_bold_start() . 'Deleted:' . html_bold_end(); }
 function html_table_start()
-  { return '<table>'; }
+  { return '<table class="wikitable">'; }
 function html_table_end()
   { return '</table>'; }
 function html_table_row_start()

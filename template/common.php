@@ -93,8 +93,7 @@ function template_common_prologue($args)
     global $WikiName;
 
     if ($SeparateTitleWords) { $args['title'] = html_split_name($args['title']); }
-?>
-
+?><!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
 <html>
 <head>
 <meta name="KEYWORDS" content="<?php print $MetaKeywords; ?>">
@@ -126,7 +125,7 @@ if ($AdditionalHeader) {
 
 <div id="header">
 
-<div id="toprightbox" class="printhide">
+  <div id="toprightbox" class="printhide">
     <?php
     if (isset($args['tree']))
     {
@@ -159,9 +158,9 @@ if ($AdditionalHeader) {
 	
         </form>
     </div>
-</div>
+  </div>
 
-<div id="topleftbox">
+  <div id="topleftbox">
     <div class="logo printhide">
     <a href="<?php print viewURL($HomePage); ?>"><img src="<?php print $WikiLogo; ?>" alt="[Home]"></a>
     </div>
@@ -213,21 +212,21 @@ if ($AdditionalHeader) {
     }
     ?>
     </div>
-</div>
+  </div>
 
 </div>
+</NOINDEX>
 	
-<div id="content">
+<div id="contentbox">
 	
-<div class="toolbar">
+  <div class="toolbar">
     <?php if ($args['spam_revert'] && $UseSpamRevert && $UserName) : ?>
         <form name="revertForm" method="post" action="<?php print revertURL($page); ?>"></form>
         <?php print toolbar_button('javascript:spamRevert();', 'Spam Revert', 0); ?>
     <?php endif; ?>
     <td><?php toolbar($page, $args); ?>
-</div>
+  </div>
 
-</NOINDEX>
 
 <?php
 }
@@ -335,8 +334,6 @@ if (!in_array($page, array($HomePage, 'RecentChanges')) &&
     ($UserName || $AllowAnonymousPosts))
 {
 ?>
-    <tr><td colspan="3">
-
     <script language="javascript">
     <!--
     function epilogue_quickadd_validate(form)
@@ -438,10 +435,6 @@ if (!in_array($page, array($HomePage, 'RecentChanges')) &&
 <?php
 }
 ?>
-
-</div>
-
-<p>
 
 <?php
 if ($AdditionalFooter)

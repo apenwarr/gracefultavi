@@ -49,9 +49,8 @@ div#topleftbox {
 }
 div#toprightbox {
     float: right;
-    margin-right: 0.1em;
+    margin: 0.1em;
     margin-left: 2em;
-    margin-bottom: 2em;
 }
 
 div.logo {
@@ -76,6 +75,7 @@ div.jumpsearch {
     padding-right: 3em;
     padding-top: 1em;
     margin-bottom: 1em;
+    margin-right: 2em;
     font-size: small;
     font-style: italic;
     max-width: 50%;
@@ -157,24 +157,38 @@ tt, pre {
     color:      #383838;
 }
 
-.content {
+div#contentbox {
     margin-left: 1em;
+    margin-right: 1em;
+    clear: both;
 }
-.content h1, .content h2, .content h3,
-.content h4, .content h5, .content h6,
-.content h7, .content h8, .content h9 {
-    margin-left: -0.5em;
-}
-div.content {
+.content {
     background: #ffffff;
     border: solid black 2px;
     padding: 2em;
     padding-top: 1em;
     line-height: 150%;
 }
-.content td {
+.content h1, .content h2, .content h3,
+.content h4, .content h5, .content h6,
+.content h7, .content h8, .content h9 {
+    margin-left: -0.5em;
+}
+table.wikitable {
+    padding-left: 1em;
+    padding-top: 0.5em;
+    padding-bottom: 0.5em;
+    //background: #eeeeff;
+    border-left: solid blue 1px;
+}
+table.wikitable tr:first-child td {
+    text-decoration: underline;
+    font-weight: bold;
+}
+table.wikitable tr td {
+    padding-left: 0.3em;
+    padding-right: 0.3em;
     text-align: left;
-    background: #eeeeff;
 }
 
 div#footer {
