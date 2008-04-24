@@ -101,7 +101,7 @@ function template_common_prologue($args)
 <?php if ($args['norobots']) {?>
     <meta name="ROBOTS" content="NOINDEX, NOFOLLOW">
 <?php } ?>
-<link type="text/css" rel="stylesheet" media="screen" href="<?php print $StyleScript; ?>">
+<link type="text/css" rel="stylesheet" href="<?php print $StyleScript; ?>">
 <link type="text/css" rel="stylesheet" media="print" href="<?php print $StyleScript; ?>&amp;csstype=print">
 <script src="<?php print $TableSortScript; ?>" type="text/javascript"></script>
 <script src="<?php print $CommonScript; ?>" type="text/javascript"></script>

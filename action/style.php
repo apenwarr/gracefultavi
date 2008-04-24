@@ -10,10 +10,10 @@ function action_style()
     header("Content-type: text/css");
     static_cache_headers();
 
-    require('template/wiki.css');
-
     if ($csstype == 'print') {
         require('template/wikiprint.css');
+    } else {
+	require('template/wiki.css');
     }
 
     if ($StyleSheetOverride) {
