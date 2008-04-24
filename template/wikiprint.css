@@ -29,3 +29,7 @@ table.maintable {
 table.maintable td {
     padding: 0px;
 }
+
+table.toc {
+    border-left: 0px;
+}

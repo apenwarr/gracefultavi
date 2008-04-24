@@ -159,11 +159,11 @@ class Macro_Toc
 
         $toc = implode("\n", $toc);
 
-        $return_value = '<table cellspacing="0" cellpadding="3" border=0">' .
-                        '<tr id="showtoc' . $this->i . '" style="display: none;">' .
+        $return_value = '<table class="toc">' .
+                        '<tr class="printhide" id="showtoc' . $this->i . '" style="display: none;">' .
                         '<td><b>Table of contents</b> [ <a href="javascript:showToc(' . $this->i . ');">show</a> ]</td></tr>' .
                         '<tr id="thetoc' . $this->i . '"><td><b>Table of contents</b> ' .
-                        '[ <a href="javascript:hideToc(' . $this->i . ');">hide</a> ]' . $toc . '</td></tr></table>';
+                        '<span class="printhide">[ <a href="javascript:hideToc(' . $this->i . ');">hide</a> ]</span>' . $toc . '</td></tr></table>';
 
         return "$TocJavascriptFunctions\n\n$return_value";
     }

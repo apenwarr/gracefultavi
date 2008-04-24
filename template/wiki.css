@@ -190,7 +190,6 @@ table.wikitable {
     padding-left: 1em;
     padding-top: 0.5em;
     padding-bottom: 0.5em;
-    //background: #eeeeff;
     border-left: solid blue 1px;
 }
 table.wikitable tr:first-child td {
@@ -201,6 +200,12 @@ table.wikitable tr td {
     padding-left: 0.3em;
     padding-right: 0.3em;
     text-align: left;
+}
+table.toc {
+    padding-left: 1em;
+    padding-top: 0.5em;
+    padding-bottom: 0.5em;
+    border-left: solid green 1px;
 }
 
 div#footer {
