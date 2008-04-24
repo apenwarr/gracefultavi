@@ -1,31 +1,17 @@
 <?php
 
-function drawTreeOld($tree)
+function _drawEdges($edges)
 {
-    if (count($tree))
-    {
-        print "<ul>";
-        foreach ($tree as $name => $node)
-        {
-            print "<li>";
-            print "<small>" . html_ref($name, $name) . "</small>";
-            drawTreeOld($node);
-            print "</li>";
-        }
-        print "</ul>";
-    }
+    return preg_replace("/([0-3])/",
+      "<img src=\"images/tree-edge\\1.png\" alt=\"\" align=\"top\" width=\"19\" height=\"17\" border=\"0\">",
+      substr($edges, 1));
 }
 
-function drawTree($tree, $smallFont = 0, $page = '', $i = 0, $previousEdges = '')
+function _drawTree($tree, $smallFont, $page, $previousEdges)
 {
-    $i++;
-
     if (count($tree))
     {
-        if ($i == 1)
-            print '<table cellspacing="0" cellpadding="0" border="0">' . "\n";
-
-        // ajust the pictures of the previous edges
+        // adjust the pictures of the previous edges
         $previousEdges = preg_replace("/2/", "0", $previousEdges);
         $previousEdges = preg_replace("/3/", "1", $previousEdges);
 
@@ -38,20 +24,24 @@ function drawTree($tree, $smallFont = 0, $page = '', $i = 0, $previousEdges = ''
             else
                 $currentEdges = $previousEdges . '3';  // above the last node of the branch
 
-            $drawEdges = substr($currentEdges, 1);
-            $drawEdges = preg_replace("/([0-3])/", "<img src=\"images/tree-edge\\1.png\" alt=\"\" align=\"top\" width=\"19\" height=\"17\" border=\"0\">", $drawEdges);
-
+	    $drawEdges = _drawEdges($currentEdges);
             $output = html_ref($name, $name);
-            if ($name == $page) $output = "<a name=\"$name\"></a><b>$output</b>";
+            if ($name == $page) $output = "<a name=\"$name\"></a><b>$name</b>";
             if ($smallFont) $output = "<small>$output</small>";
             $output = "<tr><td nowrap>$drawEdges$output</td></tr>\n";
             print $output;
 
-            drawTree($node, $smallFont, $page, $i+1, $currentEdges);
+            _drawTree($node, $smallFont, $page, $currentEdges);
         }
 
-        if ($i == 1)
-            print "</table>\n";
     }
 }
+
+function drawTree($tree, $smallFont = 0, $page = '')
+{
+    print '<table cellspacing="0" cellpadding="0" border="0">' . "\n";
+    _drawTree($tree, $smallFont, $page, '');
+    print "</table>\n";
+}
+
 ?>
