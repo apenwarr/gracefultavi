@@ -20,6 +20,7 @@ function template_history($args)
         'headlink' => $args['page'],
         'headsufx' => '',
         'toolbar'  => 1,
+        'tree'     => 1,
         'spam_revert' => 1,
 
         'button_selected'  => 'diff',
@@ -41,7 +42,7 @@ function template_history($args)
     }
 ?>
 
-<div id="body">
+<div class="content">
 
 <form method="get" action="<?php print $DiffScript; ?>">
 <input type="hidden" name="action" value="history">
@@ -90,6 +91,8 @@ else
     print 'There were no differences between the selected versions.';
 ?>
 
+</div>
+
 <?php
     template_common_epilogue(array(
         'twin'      => $args['page'],
@@ -98,6 +101,7 @@ else
         'history'   => $args['page'],
         'euser'     => $args['edituser'],
         'timestamp' => $args['timestamp'],
+        'toolbar'  => 1,
 
         'headlink'         => $args['page'],
         'button_selected'  => 'diff',

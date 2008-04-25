@@ -37,7 +37,7 @@ function template_view($args)
     ));
 ?>
 
-<div id="body" class="content">
+<div class="content">
 <?php
 print $args['html'];
 // Aligns the browser with an HTML anchor, showing the last added comment (or
@@ -57,6 +57,7 @@ print $args['html'];
         'euser'     => $args['edituser'],
         'timestamp' => $args['timestamp'],
         'page_length' => $args['page_length'],
+        'toolbar'  => 1,
 
         'headlink'         => $args['page'],
         'button_selected'  => $args['view_source'] ? '' : 'view',

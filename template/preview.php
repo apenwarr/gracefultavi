@@ -53,24 +53,9 @@ function template_preview($args)
     }
 ?>
 
-<div class="form">
+<div class="editform">
 <form method="post" action="<?php print saveURL($args['page']); ?>">
 <input type="hidden" name="pagesizelimit" value="<?=$MaxPostLen?>">
-<input type="submit" name="Save" value="Save"
-    onClick="return sizeLimitCheck(this.form, 'document', 'text_before', 'text_after');">
-<input type="submit" name="Preview" value="Preview"
-    onClick="return sizeLimitCheck(this.form, 'document', 'text_before', 'text_after');">
-<?php
-  if($UserName != '')
-    { print 'Your user name is ' . html_ref($UserName, $UserName); }
-  else
-  {
-?>  Visit <a href="<?php print $PrefsScript; ?>">Preferences</a> to set your
-user name<?php
-  }
-?>
- | <a href="#changes">View changes in this edit</a>
-  <br />
   <input type="hidden" name="nextver" value="<?php print $args['nextver']; ?>">
   <input type="hidden" name="pagefrom" value="<?php print $args['pagefrom']; ?>">
 
@@ -86,7 +71,8 @@ user name<?php
     print $EditRows; ?>" cols="<?php
     print $EditCols; ?>" wrap="virtual"><?php
   print str_replace('<', '&lt;', str_replace('&', '&amp;', $args['text']));
-?></textarea><br />
+?></textarea>
+<p>
 <?php
 print '<input id="minoredit" type="checkbox" name="minoredit" value="1"';
 if ($args['minoredit']) print ' CHECKED';
@@ -96,7 +82,7 @@ print '<input id="template" type="checkbox" name="template" value="1"';
 if ($args['template']) print ' CHECKED';
 print '><label for="template">This page is a template</label> ';
 ?>
-<br>
+<p>
   Summary of change:
   <input type="text" name="comment" size="40" maxlength="80" value="<?php
     print htmlspecialchars($comment); ?>" /><br />
@@ -105,6 +91,7 @@ print '><label for="template">This page is a template</label> ';
   <input type="text" name="categories" size="40" value="<?php
     print htmlspecialchars($categories); ?>" /><br />
 <?php endif; ?>
+  <p>
   <input type="submit" name="Save" value="Save"
     onClick="return sizeLimitCheck(this.form, 'document', 'text_before', 'text_after');">
   <input type="submit" name="Preview" value="Preview"
@@ -118,31 +105,32 @@ print '><label for="template">This page is a template</label> ';
 user name<?php
   }
 ?>
- | <a href="#changes">View changes in this edit</a>
+<?php if ($args['diff']) : ?>
+	 | <a href="#changes">View changes in this edit</a>
+<?php endif; ?>
 
-<div id="body" class="content">
+<div class="content">
 <h1>Preview</h1>
 <hr />
 <?php print $args['html']; ?>
 </div>
-<hr />
+<br>
 <strong>Confirm changes to above document?</strong><br>
 <input type="submit" name="Save" value="Save" onClick="return sizeLimitCheck(this.form.document);">
 <input type="submit" name="Preview" value="Preview" onClick="return sizeLimitCheck(this.form.document);">
 
-<hr />
+<p>
 
+<?php if ($args['diff']) : ?>
 <a name="changes"></a>
-<h1>Changes in this edit</h1>
+<div class="content">
+<h1>Changes in this edit</h1><p>
 
 <?php if ($EnableWordDiff) : ?>
-<br>
 Diff method:
 <input type="radio" id="regular_diff" name="diff_mode" value="0"<?=$regular_diff_checked?>><label for="regular_diff">Regular diff</label>
 <input type="radio" id="word_diff" name="diff_mode" value="1"<?=$word_diff_checked?>><label for="word_diff">Word diff</label>
 <?php endif; ?>
-
-<hr />
 
 <?php
 if ($args['diff'])
@@ -150,6 +138,8 @@ if ($args['diff'])
 else
     print 'There were no changes made in this edit.';
 ?>
+</div>
+<?php endif; ?>
 
 </div>
 </form>

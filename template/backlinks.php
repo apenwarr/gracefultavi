@@ -18,6 +18,7 @@ function template_backlinks($args)
         'headlink' => $args['page'],
         'headsufx' => '',
         'toolbar'  => 1,
+        'tree'     => 1,
 
         'button_selected'  => 'backlinks',
         'button_view'      => 1,
@@ -33,11 +34,11 @@ function template_backlinks($args)
     $parents = $args['parents'];
     $form_action = $UserName ? reparentURL($page) : '?';
 ?>
-
-<h2>Backlinks and Nesting Information</h2>
+	
+<div class="content">
 
 <?php if ($args['haschildren']) : ?>
-    <p>See <a href="<?=childrenURL($page)?>">children</a> of <?=$page?>.
+    <p>See <a href="<?=childrenURL($page)?>">children of <?=$page?></a>.
 <?php else : ?>
     <p>No children exist for <?=$page?>.
 <?php endif; ?>
@@ -122,6 +123,8 @@ if ($tempText)
 
 </form>
 
+</div>
+
 <?php
     template_common_epilogue(array(
         'twin'      => '',
@@ -130,6 +133,7 @@ if ($tempText)
         'history'   => '',
         'euser'     => $args['edituser'],
         'timestamp' => $args['timestamp'],
+        'toolbar'  => 1,
 
         'headlink'         => $args['page'],
         'button_selected'  => 'backlinks',

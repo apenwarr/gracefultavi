@@ -219,7 +219,8 @@ if ($AdditionalHeader) {
 </NOINDEX>
 	
 <div id="contentbox">
-	
+
+ <?php if (isset($args["toolbar"])) : ?>
   <div class="toolbar" id="toolbar-top">
     <?php if ($args['spam_revert'] && $UseSpamRevert && $UserName) : ?>
         <form name="revertForm" method="post" action="<?php print revertURL($page); ?>"></form>
@@ -227,7 +228,7 @@ if ($AdditionalHeader) {
     <?php endif; ?>
     <td><?php toolbar($page, $args); ?>
   </div>
-
+ <? endif; ?>
 
 <?php
 }
@@ -263,8 +264,11 @@ function template_common_epilogue($args)
 
   $pg = $pagestore->page($page);
   $pagetext = $pg->text;
+    
+  if (isset($args["toolbar"])) :
 ?>
-<div class="toolbar" id="toolbar-bottom"><?php toolbar($page, $args); ?></div>
+   <div class="toolbar" id="toolbar-bottom"><?php toolbar($page, $args); ?></div>
+  <?php endif; ?>
 </div>
 	
 	

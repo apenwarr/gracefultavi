@@ -29,7 +29,6 @@ function template_diff($args)
     ));
 ?>
 
-<div id="body">
 <strong>Difference between versions:</strong><br><br>
 <div class="diff">
 <?php print $args['diff_html']; ?>
@@ -40,7 +39,7 @@ function template_diff($args)
 <?php
 print $args['html'];
 ?>
-
+	
 <?php
     template_common_epilogue(array(
         'twin'      => $args['page'],

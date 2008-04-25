@@ -41,7 +41,7 @@ function template_edit($args)
     ));
 ?>
 
-<div id="body">
+<div class="editform">
 
 <form method="post" action="<?php print saveURL($args['page']); ?>">
 <input type="hidden" name="pagesizelimit" value="<?=$MaxPostLen?>">
@@ -62,19 +62,20 @@ if($args['archive'])
 <table width="100%" cellspacing="0" cellpadding="0" border="0">
 <tr>
 <td>
-<input type="submit" name="Save" value="Save"
-    onClick="return sizeLimitCheck(this.form, 'document', 'text_before', 'text_after');">
-<input type="submit" name="Preview" value="Preview"
-    onClick="return sizeLimitCheck(this.form, 'document', 'text_before', 'text_after');">
-
-<?php
-if($UserName != '')
-    print 'Your user name is ' . html_ref($UserName, $UserName);
-else
-    print "Visit <a href=\"$PrefsScript\">Preferences</a> to set your user name";
-?>
 </td>
 <td align="right">
+</td>
+</tr>
+</table>
+
+<?php
+print "<textarea name=\"document\" rows=\"$EditRows\" cols=\"$EditCols\" wrap=\"virtual\">";
+print htmlspecialchars($args['text']);
+print '</textarea>';
+?>
+<br>
+
+<div align=right>
 <?php
 if ($args['templates'] && !$args['section'])
 {
@@ -94,16 +95,7 @@ if ($args['templates'] && !$args['section'])
           'onClick="useTemplate(this.form.templateName, '."'$js_page'".')">'."\n";
 }
 ?>
-</td>
-</tr>
-</table>
-
-<?php
-print "<textarea name=\"document\" rows=\"$EditRows\" cols=\"$EditCols\" wrap=\"virtual\">";
-print htmlspecialchars($args['text']);
-print '</textarea>';
-?>
-<br>
+</div>
 
 <?php
 $minorEditChecked = (substr($args['page'], -8) == 'Schedule') ? ' checked' : '';
@@ -114,8 +106,8 @@ print '<input id="template" type="checkbox" name="template" value="1"'.
       ($args['template'] ? ' checked' : '') . '>'.
       '<label for="template">This page is a template</label> ';
 ?>
-<br>
 
+<p>
 Summary of change:
 <input type="text" name="comment" size="40" maxlength="80" value=""><br>
 
@@ -123,6 +115,8 @@ Summary of change:
 Add document to category:
 <input type="text" name="categories" size="40" value=""><br>
 <?php endif; ?>
+	
+<p>
 
 <input type="submit" name="Save" value="Save"
     onClick="return sizeLimitCheck(this.form, 'document', 'text_before', 'text_after');">
