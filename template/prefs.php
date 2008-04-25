@@ -29,7 +29,7 @@ function template_prefs()
 
 ?>
 
-<div id="body">
+<div class="content">
 <form action="<?php print $PrefsScript; ?>" method="post">
 <div class="form">
   <input type="hidden" name="referrer" value="<?=htmlspecialchars($referrer)?>">
