@@ -29,7 +29,7 @@ function template_find($args)
     ));
 ?>
 
-<div id="body">
+<div class="content">
 
 <?php
 $find = $args['find'];
@@ -45,17 +45,19 @@ else
 
 if ($args['pages'])
 {
-    print '<br><hr align=left><br>';
-
-    print 'Search results for "' . htmlentities($find) . '"<br>';
+    print '<p>Search results for "' . htmlentities($find) . '":<ul>';
 
     if ($args['branch_search'])
     {
         print 'Restricted to children of ' . $args['branch_search'] . '<br>';
     }
 
-    print $args['pages'];
+    print $args['pages'] . "</ul>";
 }
+
+global $HomePage;
+print "<p>(Back to " . html_ref($HomePage, $HomePage) . ".)";
+    
 ?>
 
 </div>
