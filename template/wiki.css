@@ -218,9 +218,24 @@ table.toc {
     border-left: solid green 1px;
 }
 
-div#footer {
-    font-size: small;
+#footer {
     padding: 1em;
+    font-size: small;
+}
+#footer #logininfo {
+    float: left;
+    text-align: left;
+    padding-right: 1em;
+    margin-bottom: 10em;
+}
+#footer #timestamp {
+    text-align: center;
+}
+#footer #comment {
+    float: right;
+    text-align: right;
+    width: 50%;
+    padding-left: 1em;
 }
 
 .backlinksHeader { background: #eeeeff; }

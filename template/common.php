@@ -270,35 +270,8 @@ function template_common_epilogue($args)
 	
 <NOINDEX>
 <div id="footer" class="printhide">
-
-<div align=center>
-<?php
-if (isset($args['timestamp']))
-{
-    print '<i>Last edited ' . html_time($args['timestamp']);
-    if ($args['timestamp'] != '')
-    {
-        if (isset($args['euser']) && $args['euser'])
-            print ' by ' . $args['euser'];
-        else
-            print ' anonymously';
-    }
-}
-
-if (isset($args['twin']) && $args['twin'] != '')
-{
-    if (count($twin = $pagestore->twinpages($args['twin'])))
-    {
-        print '<br>See twins of this page: ';
-        for ($i = 0; $i < count($twin); $i++)
-        {
-            print html_twin($twin[$i][0], $twin[$i][1]) . ' ';
-        }
-    }
-}
-?>
-</div>
-
+	
+<div id="logininfo">
 <?php
 if ($UserName)
     print("Logged in as " . html_ref($UserName, $UserName));
@@ -329,7 +302,9 @@ if ($help_page->exists()) {
     print ', ' . html_ref('HelpPage', 'HelpPage');
 }
 ?>
+</div>
 	
+<div id="comment">
 <?php
 if (!in_array($page, array($HomePage, 'RecentChanges')) &&
     ($UserName || $AllowAnonymousPosts))
@@ -351,11 +326,6 @@ if (!in_array($page, array($HomePage, 'RecentChanges')) &&
     }
     //-->
     </script>
-
-    <table width="100%" cellspacing="0" cellpadding="0" border="0">
-    <tr>
-    <td width="50%">&nbsp;</td>
-    <td width="50%" align="right">
 
     <?php
     if ($args['edit'])
@@ -436,6 +406,36 @@ if (!in_array($page, array($HomePage, 'RecentChanges')) &&
 <?php
 }
 ?>
+	
+</div>
+	
+<div id="timestamp">
+<?php
+if (isset($args['timestamp']))
+{
+    print '<i>Last edited ' . html_time($args['timestamp']);
+    if ($args['timestamp'] != '')
+    {
+        if (isset($args['euser']) && $args['euser'])
+            print ' by ' . $args['euser'];
+        else
+            print ' anonymously';
+    }
+}
+
+if (isset($args['twin']) && $args['twin'] != '')
+{
+    if (count($twin = $pagestore->twinpages($args['twin'])))
+    {
+        print '<br>See twins of this page: ';
+        for ($i = 0; $i < count($twin); $i++)
+        {
+            print html_twin($twin[$i][0], $twin[$i][1]) . ' ';
+        }
+    }
+}
+?>
+</div>
 
 <?php
 if ($AdditionalFooter)
