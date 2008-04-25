@@ -356,10 +356,10 @@ if (!in_array($page, array($HomePage, 'RecentChanges')) &&
                 ?>
                 <input type="hidden" name="comment" value="Add a Quote">
                 <input type="hidden" name="appendingQuote" value="1">
-                <table width="100%" cellspacing="2" cellpadding="0" border="0">
+                <table width="100%">
                 <tr valign="bottom">
-                <td width="1%" align="right">Quote:&nbsp;</td>
-                <td width="99%" nowrap><textarea name="quickadd" rows="2" cols="20" wrap="virtual"></textarea></td>
+                <td align="right">Quote:&nbsp;</td>
+                <td nowrap><textarea name="quickadd" rows="2" wrap="virtual"></textarea></td>
                 </tr>
                 <tr valign="bottom">
                 <td width="1%" align="right">Author:&nbsp;</td>
