@@ -33,7 +33,7 @@ function template_children($args)
     $children = $args['children'];
 ?>
 
-<h2>Children Tree</h2>
+<div class="content childtree">
 
 <p>
 <table cellspacing="0" cellpadding="0" border="0">
@@ -57,6 +57,7 @@ if ($children) {
 </td>
 </tr>
 </table>
+</div>
 
 <?php
     template_common_epilogue(array(
