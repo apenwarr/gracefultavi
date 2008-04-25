@@ -167,6 +167,13 @@ span.twin {
 tt, pre {
     background: transparent;
     color:      #383838;
+    font-family: Andale Mono, Courier New, Courier, monospace;
+}
+
+pre {
+    line-height: 120%;
+    padding-left: 1em;
+    border-left: dotted blue 1px;
 }
 
 div#contentbox {
