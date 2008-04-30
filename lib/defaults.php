@@ -19,7 +19,7 @@
 $UpperPtn = "[A-Z\xc0-\xde]";
 $UpperPtn2 = "()[A-Z\xc0-\xde]";
 $LowerPtn = "[a-z\xdf-\xff]";
-$AlphaPtn = "()[A-Za-z\xc0-\xff]";
+$AlphaPtn = "()[A-Za-z0-9_\xc0-\xff]";
 $LinkPtn = $UpperPtn . $AlphaPtn . '*' . $LowerPtn . '+' .
            $UpperPtn2 . $AlphaPtn . '*()';
 
