@@ -56,6 +56,8 @@ if(isset($_SERVER["PHP_AUTH_USER"]))
     $UserName = $_SERVER["PHP_AUTH_USER"];
 else if(isset($_SERVER["REMOTE_USER"]))
     $UserName = $_SERVER["REMOTE_USER"];
+else if(isset($_SERVER["REDIRECT_REMOTE_USER"]))
+    $UserName = $_SERVER["REDIRECT_REMOTE_USER"];
 
 // Read user preferences from cookie.
 $prefstr = isset($HTTP_COOKIE_VARS[$CookieName]) ?
